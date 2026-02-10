@@ -1,0 +1,62 @@
+# Docker build context exclusions
+# Backend
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Logs and databases
+*.log
+logs/
+db.sqlite3
+*.sqlite3
+
+# Documentation (not needed in containers)
+README.md
+DEPLOYMENT.md
+QUICKSTART.md
+PROJECT_SUMMARY.md
+*.md
+
+# Tests
+tests/
+test_*.py
+*_test.py
+
+# Development files
+.env.example
+*.bak
+*.tmp
+
+# Media files (mount as volume)
+media/
+staticfiles/
+
+# Node modules (frontend has its own build)
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Model weights (mount as volume)
+*.pth
+*.save
+*.h5
+*.pkl

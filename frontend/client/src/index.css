@@ -1,0 +1,213 @@
+/*@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+@import "leaflet/dist/leaflet.css";
+ @import "leaflet-draw/dist/leaflet.draw.css";
+@import "leaflet-control-geocoder/dist/Control.Geocoder.css";*/
+/*@import url("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
+@import url("https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css");
+@import url("https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css");*/
+
+@import url("https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css");
+@import url("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
+@import url("https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css");
+
+
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Stitch Design System - Light Mode */
+  --background: hsl(140, 20%, 98%);
+  --foreground: hsl(150, 20%, 10%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(150, 20%, 10%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(150, 20%, 10%);
+  --primary: hsl(146, 95%, 52%);
+  /* #0df259 - Stitch emerald */
+  --primary-foreground: hsl(150, 30%, 10%);
+  --secondary: hsl(152, 76%, 45%);
+  /* #17cf73 - Stitch accent */
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(140, 10%, 95%);
+  --muted-foreground: hsl(140, 10%, 45%);
+  --accent: hsl(45, 93%, 55%);
+  /* Warm amber for alerts */
+  --accent-foreground: hsl(40, 30%, 15%);
+  --destructive: hsl(0, 72%, 51%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(140, 15%, 90%);
+  --input: hsl(140, 10%, 96%);
+  --ring: hsl(146, 95%, 52%);
+  --chart-1: hsl(146, 95%, 52%);
+  --chart-2: hsl(45, 93%, 55%);
+  --chart-3: hsl(0, 72%, 51%);
+  --chart-4: hsl(200, 80%, 55%);
+  --chart-5: hsl(280, 70%, 55%);
+  --sidebar-background: hsl(0, 0%, 100%);
+  --sidebar-foreground: hsl(150, 20%, 25%);
+  --sidebar-primary: hsl(146, 95%, 52%);
+  --sidebar-primary-foreground: hsl(150, 30%, 10%);
+  --sidebar-accent: hsl(146, 95%, 52%);
+  --sidebar-accent-foreground: hsl(0, 0%, 100%);
+  --sidebar-border: hsl(140, 15%, 90%);
+  --sidebar-ring: hsl(146, 95%, 52%);
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-mono: "SF Mono", Menlo, monospace;
+  --radius: 0.5rem;
+  /* Stitch uses ROUND_EIGHT = 8px */
+}
+
+
+.dark {
+  /* Stitch Design System - Dark Mode */
+  --background: hsl(150, 25%, 5%);
+  --foreground: hsl(140, 10%, 92%);
+  --card: hsl(150, 20%, 10%);
+  --card-foreground: hsl(140, 10%, 92%);
+  --popover: hsl(150, 20%, 10%);
+  --popover-foreground: hsl(140, 10%, 92%);
+  --primary: hsl(146, 95%, 52%);
+  /* #0df259 */
+  --primary-foreground: hsl(150, 30%, 5%);
+  --secondary: hsl(152, 76%, 45%);
+  /* #17cf73 */
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(150, 15%, 15%);
+  --muted-foreground: hsl(140, 10%, 55%);
+  --accent: hsl(45, 93%, 55%);
+  --accent-foreground: hsl(40, 30%, 10%);
+  --destructive: hsl(0, 72%, 51%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(150, 15%, 18%);
+  --input: hsl(150, 15%, 12%);
+  --ring: hsl(146, 95%, 52%);
+  --sidebar-background: hsl(150, 25%, 8%);
+  --sidebar-foreground: hsl(140, 10%, 85%);
+  --sidebar-primary: hsl(146, 95%, 52%);
+  --sidebar-primary-foreground: hsl(150, 30%, 5%);
+  --sidebar-accent: hsl(152, 76%, 45%);
+  --sidebar-accent-foreground: hsl(0, 0%, 100%);
+  --sidebar-border: hsl(150, 15%, 18%);
+  --sidebar-ring: hsl(146, 95%, 52%);
+}
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, hsl(142, 76%, 36%) 0%, hsl(142, 60%, 25%) 100%);
+}
+
+.leaflet-container {
+  height: 100%;
+  border-radius: var(--radius);
+  z-index: 1;
+}
+
+.chat-bounce {
+  animation: chatBounce 2s infinite;
+}
+
+@keyframes chatBounce {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-10px);
+  }
+
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+.voice-recording {
+  animation: voicePulse 1.5s infinite;
+}
+
+@keyframes voicePulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 3fr 1fr;
+    /* 2-column on small desktop */
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-grid {
+    grid-template-columns: 2fr 1fr 1fr;
+    /* 3-column on large desktop */
+  }
+}
+
+
+.ndvi-chart {
+  background: linear-gradient(135deg, hsl(120, 40%, 95%) 0%, hsl(120, 30%, 90%) 100%);
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+
+  /* Support for all WebKit browsers. */
+  -webkit-font-smoothing: antialiased;
+  /* Support for Safari and Chrome. */
+  text-rendering: optimizeLegibility;
+
+  /* Support for Firefox. */
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Support for IE. */
+  font-feature-settings: 'liga';
+}

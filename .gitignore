@@ -1,0 +1,109 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+venv/
+.venv/
+**/venv/
+env/
+ENV/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/media
+/staticfiles
+/static
+
+# Media files (keep structure)
+backend/media/pest/*
+!backend/media/pest/.gitkeep
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Node
+node_modules/
+/frontend/node_modules/
+/frontend/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp
+.pnp.js
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+coverage/
+*.cover
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb
+
+# ML Models (track via Git LFS if needed)
+*.pth
+*.pkl
+*.h5
+*.save
+
+# OS
+Thumbs.db
+.DS_Store
+*.bak
+*.tmp
+
+# Logs
+logs/
+*.log
+
+# Backups
+backups/
+backup-*/
+*.zip
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Docker
+docker-compose.override.yml
+
+# Security
+*.pem
+*.key
+*.crt
+service-account.json

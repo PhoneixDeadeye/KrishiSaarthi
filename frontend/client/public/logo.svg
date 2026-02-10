@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#16a34a" rx="64"/>
+  <g fill="#ffffff">
+    <!-- Leaf/Plant icon -->
+    <path d="M256 96c-64 0-96 48-96 96 0 32 16 64 48 80-16 8-32 24-32 48 0 32 32 64 80 64s80-32 80-64c0-24-16-40-32-48 32-16 48-48 48-80 0-48-32-96-96-96zm0 32c48 0 64 32 64 64 0 24-16 48-40 56l-12 4 8 12c12 12 20 24 20 36 0 20-20 32-48 32s-48-12-48-32c0-12 8-24 20-36l8-12-12-4c-24-8-40-32-40-56 0-32 16-64 64-64z"/>
+    <!-- Wheat/Grain elements -->
+    <circle cx="200" cy="240" r="8"/>
+    <circle cx="220" cy="260" r="8"/>
+    <circle cx="240" cy="280" r="8"/>
+    <circle cx="272" cy="280" r="8"/>
+    <circle cx="292" cy="260" r="8"/>
+    <circle cx="312" cy="240" r="8"/>
+  </g>
+  <text x="256" y="440" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#ffffff" text-anchor="middle">KS</text>
+</svg>
