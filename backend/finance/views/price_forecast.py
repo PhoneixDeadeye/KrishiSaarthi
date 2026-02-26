@@ -2,15 +2,15 @@
 Price Forecast view for KrishiSaarthi.
 Predicts crop prices for the next 30 days using trend analysis.
 """
+import hashlib
+import logging
+import math
+from datetime import timedelta
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
-from datetime import timedelta
-import logging
-import random
-import math
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,6 @@ class PriceForecastView(APIView):
     """
     GET: Returns 30-day price forecast for a crop
     """
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
@@ -86,28 +85,34 @@ class PriceForecastView(APIView):
             'recommendation': recommendation,
         })
     
+    def _seed_from(self, *parts):
+        """Deterministic seed from string parts."""
+        key = '-'.join(str(p) for p in parts)
+        return int(hashlib.md5(key.encode()).hexdigest(), 16) % (10**8)
+
     def _generate_forecast(self, crop, base_price, seasonal, days, start_date):
-        """Generate price forecast using random walk with drift"""
+        """Generate deterministic price forecast using seeded daily changes"""
         forecast = []
+        
+        # Deterministic initial variation
+        init_seed = self._seed_from(crop, start_date.isoformat(), 'init')
         current_price = base_price * seasonal
+        current_price *= (0.95 + (init_seed % 100) / 1000)  # 0.95 to 1.05
         
-        # Add some initial randomness
-        current_price *= random.uniform(0.95, 1.05)
-        
-        # Trend direction (slight upward bias for most crops)
-        drift = random.uniform(-0.001, 0.003)
+        # Deterministic drift
+        drift_seed = self._seed_from(crop, start_date.isoformat(), 'drift')
+        drift = ((drift_seed % 40) - 10) / 10000  # -0.001 to 0.003
         
         for i in range(days):
             date = start_date + timedelta(days=i)
             
-            # Random daily change (-2% to +2%)
-            daily_change = random.gauss(drift, 0.015)
+            # Deterministic daily change
+            day_seed = self._seed_from(crop, date.isoformat(), 'day', i)
+            daily_change = drift + ((day_seed % 300) - 150) / 10000  # drift ± 0.015
             current_price *= (1 + daily_change)
             
-            # Keep price within reasonable bounds
             current_price = max(base_price * 0.7, min(base_price * 1.4, current_price))
             
-            # Calculate confidence (decreases with time)
             confidence = max(50, 95 - (i * 1.5))
             
             forecast.append({

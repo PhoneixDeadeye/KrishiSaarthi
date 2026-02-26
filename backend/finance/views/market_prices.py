@@ -2,15 +2,15 @@
 Market Prices views for KrishiSaarthi.
 Mandi price tracking and market intelligence.
 """
+import hashlib
+import logging
+from datetime import timedelta
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.utils import timezone
-from datetime import timedelta
-import logging
-import random
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,6 @@ class MarketPricesView(APIView):
     """
     GET: Returns market prices for crops
     """
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
@@ -78,25 +77,29 @@ class MarketPricesView(APIView):
             'market_tips': self._get_market_tips(crop)
         })
     
+    def _seed_from(self, *parts):
+        """Create deterministic seed from string parts (stable within same day)."""
+        key = '-'.join(str(p) for p in parts) + '-' + timezone.now().date().isoformat()
+        return int(hashlib.md5(key.encode()).hexdigest(), 16) % (10**8)
+
     def _generate_mandi_prices(self, crop, mandi):
-        """Generate prices for a specific mandi"""
+        """Generate deterministic prices for a specific mandi"""
         if crop and crop in BASE_PRICES:
             crops = [crop]
         else:
-            crops = list(BASE_PRICES.keys())[:5]  # Top 5 crops
+            crops = list(BASE_PRICES.keys())[:5]
         
         prices = []
         for c in crops:
             base = BASE_PRICES.get(c, {'min': 1000, 'max': 2000, 'msp': None})
+            seed = self._seed_from(mandi, c)
             
-            # Add variation for different mandis
-            variation = random.uniform(-0.1, 0.1)
+            variation = ((seed % 200) - 100) / 1000  # -0.1 to 0.1
             min_price = int(base['min'] * (1 + variation))
             max_price = int(base['max'] * (1 + variation))
             modal_price = int((min_price + max_price) / 2)
             
-            # Determine trend
-            trend_val = random.choice([-1, 0, 1])
+            trend_val = (seed % 3) - 1  # -1, 0, or 1
             trend = 'up' if trend_val > 0 else ('down' if trend_val < 0 else 'stable')
             
             prices.append({
@@ -113,12 +116,12 @@ class MarketPricesView(APIView):
         return {
             'mandi': mandi,
             'prices': prices,
-            'arrivals': random.randint(100, 5000),  # quintals
+            'arrivals': 500 + (self._seed_from(mandi, 'arrivals') % 4500),
             'last_updated': timezone.now().isoformat()
         }
     
     def _generate_price_trends(self, crop):
-        """Generate 7-day price trend data"""
+        """Generate deterministic 7-day price trend data"""
         target_crop = crop or 'Rice'
         base = BASE_PRICES.get(target_crop, {'min': 1500, 'max': 2500})
         
@@ -128,8 +131,8 @@ class MarketPricesView(APIView):
         
         for i in range(7, 0, -1):
             date = today - timedelta(days=i)
-            # Generate random walk
-            change = random.uniform(-0.02, 0.02)
+            seed = self._seed_from(target_crop, date.isoformat(), 'trend')
+            change = ((seed % 40) - 20) / 1000  # -0.02 to 0.02
             base_price = base_price * (1 + change)
             
             trends.append({
@@ -138,10 +141,11 @@ class MarketPricesView(APIView):
                 'day': date.strftime('%a')
             })
         
-        # Today's price
+        seed_today = self._seed_from(target_crop, today.isoformat(), 'trend')
+        change_today = ((seed_today % 20) - 10) / 1000
         trends.append({
             'date': today.isoformat(),
-            'price': round(base_price * (1 + random.uniform(-0.01, 0.01))),
+            'price': round(base_price * (1 + change_today)),
             'day': 'Today'
         })
         
@@ -152,18 +156,20 @@ class MarketPricesView(APIView):
         }
     
     def _get_all_crops_summary(self):
-        """Get summary of all crop prices"""
+        """Get deterministic summary of all crop prices"""
         summary = []
-        for crop, base in BASE_PRICES.items():
-            variation = random.uniform(-0.05, 0.05)
+        for crop_name, base in BASE_PRICES.items():
+            seed = self._seed_from(crop_name, 'summary')
+            variation = ((seed % 100) - 50) / 1000  # -0.05 to 0.05
             modal = int((base['min'] + base['max']) / 2 * (1 + variation))
             
+            trend_options = ['up', 'down', 'stable']
             summary.append({
-                'crop': crop,
+                'crop': crop_name,
                 'modal_price': modal,
                 'msp': base['msp'],
-                'trend': random.choice(['up', 'down', 'stable']),
-                'change': round(random.uniform(-5, 5), 1)
+                'trend': trend_options[seed % 3],
+                'change': round(((seed % 100) - 50) / 10, 1)
             })
         
         return sorted(summary, key=lambda x: x['modal_price'], reverse=True)

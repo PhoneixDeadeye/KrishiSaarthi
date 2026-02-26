@@ -124,8 +124,12 @@ def get_health_score(
             }
     else:
         # No image provided - use NDVI as proxy
-        p_cnn_healthy = max(0.0, min(1.0, ndvi_latest))
-        breakdown["cnn"] = {"value": p_cnn_healthy, "status": "estimated_from_ndvi"}
+        if ndvi_latest is not None:
+            p_cnn_healthy = max(0.0, min(1.0, ndvi_latest))
+            breakdown["cnn"] = {"value": p_cnn_healthy, "status": "estimated_from_ndvi"}
+        else:
+            p_cnn_healthy = 0.5
+            breakdown["cnn"] = {"value": 0.5, "status": "unavailable"}
     
     # NDVI Score
     ndvi_clamped = max(0.0, min(1.0, ndvi_latest)) if ndvi_latest else 0.5

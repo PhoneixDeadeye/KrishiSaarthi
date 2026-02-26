@@ -4,7 +4,6 @@ Manages crop insurance claims under PMFBY.
 """
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -22,7 +21,6 @@ class InsuranceClaimView(APIView):
     GET: List user's insurance claims
     POST: Create new claim
     """
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
@@ -154,7 +152,6 @@ class InsuranceClaimDetailView(APIView):
     PATCH: Update claim
     DELETE: Delete draft claim
     """
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
     def get(self, request, claim_id):

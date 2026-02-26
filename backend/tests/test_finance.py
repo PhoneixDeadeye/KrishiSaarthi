@@ -26,7 +26,7 @@ class FinanceAPITestCase(TestCase):
     def test_price_forecast_success(self):
         """Test price forecast returns valid data"""
         response = self.client.get(
-            '/api/finance/price-forecast?crop=Rice&days=30',
+            '/finance/price-forecast?crop=Rice&days=30',
             **self.auth_headers
         )
         self.assertEqual(response.status_code, 200)
@@ -48,7 +48,7 @@ class FinanceAPITestCase(TestCase):
         crops = ['Rice', 'Wheat', 'Cotton', 'Sugarcane']
         for crop in crops:
             response = self.client.get(
-                f'/api/finance/price-forecast?crop={crop}',
+                f'/finance/price-forecast?crop={crop}',
                 **self.auth_headers
             )
             self.assertEqual(response.status_code, 200)
@@ -56,7 +56,7 @@ class FinanceAPITestCase(TestCase):
     
     def test_price_forecast_requires_auth(self):
         """Test endpoint requires authentication"""
-        response = self.client.get('/api/finance/price-forecast?crop=Rice')
+        response = self.client.get('/finance/price-forecast?crop=Rice')
         self.assertEqual(response.status_code, 401)
     
     # ========== Government Schemes Tests ==========
@@ -64,7 +64,7 @@ class FinanceAPITestCase(TestCase):
     def test_schemes_list_success(self):
         """Test schemes list returns data"""
         response = self.client.get(
-            '/api/finance/schemes?state=Punjab',
+            '/finance/schemes?state=Punjab',
             **self.auth_headers
         )
         self.assertEqual(response.status_code, 200)
@@ -79,14 +79,14 @@ class FinanceAPITestCase(TestCase):
         """Test filtering schemes by type"""
         for scheme_type in ['subsidy', 'loan', 'insurance']:
             response = self.client.get(
-                f'/api/finance/schemes?type={scheme_type}',
+                f'/finance/schemes?type={scheme_type}',
                 **self.auth_headers
             )
             self.assertEqual(response.status_code, 200)
     
     def test_schemes_requires_auth(self):
         """Test endpoint requires authentication"""
-        response = self.client.get('/api/finance/schemes')
+        response = self.client.get('/finance/schemes')
         self.assertEqual(response.status_code, 401)
     
     # ========== Insurance Claims Tests ==========
@@ -94,7 +94,7 @@ class FinanceAPITestCase(TestCase):
     def test_insurance_list_empty(self):
         """Test insurance list returns empty for new user"""
         response = self.client.get(
-            '/api/finance/insurance',
+            '/finance/insurance',
             **self.auth_headers
         )
         self.assertEqual(response.status_code, 200)
@@ -106,7 +106,7 @@ class FinanceAPITestCase(TestCase):
     
     def test_insurance_requires_auth(self):
         """Test endpoint requires authentication"""
-        response = self.client.get('/api/finance/insurance')
+        response = self.client.get('/finance/insurance')
         self.assertEqual(response.status_code, 401)
 
 
@@ -125,19 +125,19 @@ class MarketPricesTestCase(TestCase):
     def test_market_prices_success(self):
         """Test market prices returns mandi data"""
         response = self.client.get(
-            '/api/finance/market-prices?crop=Rice&state=Punjab',
+            '/finance/market-prices?crop=Rice&state=Punjab',
             **self.auth_headers
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
         
         self.assertIn('crop', data)
-        self.assertIn('mandis', data)
-        self.assertIn('tips', data)
+        self.assertIn('mandi_prices', data)
+        self.assertIn('market_tips', data)
     
     def test_market_prices_requires_auth(self):
         """Test endpoint requires authentication"""
-        response = self.client.get('/api/finance/market-prices?crop=Rice')
+        response = self.client.get('/finance/market-prices?crop=Rice')
         self.assertEqual(response.status_code, 401)
 
 
@@ -156,7 +156,7 @@ class PlanningAPITestCase(TestCase):
     def test_rotation_planner_success(self):
         """Test rotation planner returns recommendations"""
         response = self.client.get(
-            '/api/planning/rotation?field_id=1',
+            '/planning/rotation?field_id=1',
             **self.auth_headers
         )
         # May return 200 or 404 depending on if field exists
@@ -165,7 +165,7 @@ class PlanningAPITestCase(TestCase):
     def test_inventory_list(self):
         """Test inventory list endpoint"""
         response = self.client.get(
-            '/api/planning/inventory',
+            '/planning/inventory',
             **self.auth_headers
         )
         self.assertEqual(response.status_code, 200)
@@ -173,7 +173,7 @@ class PlanningAPITestCase(TestCase):
     def test_labor_list(self):
         """Test labor list endpoint"""
         response = self.client.get(
-            '/api/planning/labor',
+            '/planning/labor',
             **self.auth_headers
         )
         self.assertEqual(response.status_code, 200)
@@ -181,7 +181,7 @@ class PlanningAPITestCase(TestCase):
     def test_equipment_list(self):
         """Test equipment list endpoint"""
         response = self.client.get(
-            '/api/planning/equipment',
+            '/planning/equipment',
             **self.auth_headers
         )
         self.assertEqual(response.status_code, 200)

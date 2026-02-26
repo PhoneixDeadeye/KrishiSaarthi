@@ -2,15 +2,16 @@
 Smart Irrigation Scheduler views for KrishiSaarthi.
 AI-powered irrigation recommendations based on weather and soil data.
 """
+import os
+import logging
+from datetime import datetime, timedelta
+
+import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.utils import timezone
-from datetime import datetime, timedelta
-import requests
-import logging
 
 from field.models import FieldData, IrrigationLog, IrrigationSource
 from field.serializers import IrrigationLogSerializer
@@ -22,7 +23,6 @@ class IrrigationScheduleView(APIView):
     """
     GET: Returns 7-day irrigation schedule with AI recommendations
     """
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
@@ -103,29 +103,35 @@ class IrrigationScheduleView(APIView):
     def _get_weather_forecast(self, field):
         """Fetch 7-day weather forecast using OpenWeatherMap"""
         try:
-            # Get field centroid from polygon
+            # Get field centroid from GeoJSON polygon {coordinates: [[[lon, lat], ...]]}
             polygon = field.polygon
-            if isinstance(polygon, list) and len(polygon) > 0:
-                lats = [p.get('lat', 0) for p in polygon if isinstance(p, dict)]
-                lngs = [p.get('lng', 0) for p in polygon if isinstance(p, dict)]
-                lat = sum(lats) / len(lats) if lats else 0
-                lng = sum(lngs) / len(lngs) if lngs else 0
-            else:
-                lat, lng = 10.0, 76.0  # Default to Kerala
-            
-            # Try to get weather from OpenWeatherMap
-            api_key = "b6c8f9e4f2a7d3b1c5a9e7f4d2b8c6a1"  # Demo key - replace in production
+            lat, lng = 10.0, 76.0  # Default fallback
+
+            if isinstance(polygon, dict) and 'coordinates' in polygon:
+                coords = polygon['coordinates']
+                if coords and coords[0]:
+                    ring = coords[0]
+                    lons = [p[0] for p in ring if isinstance(p, (list, tuple)) and len(p) >= 2]
+                    lats = [p[1] for p in ring if isinstance(p, (list, tuple)) and len(p) >= 2]
+                    if lons and lats:
+                        lng = sum(lons) / len(lons)
+                        lat = sum(lats) / len(lats)
+
+            api_key = os.environ.get('OPENWEATHER_API_KEY')
+            if not api_key:
+                logger.warning("OPENWEATHER_API_KEY not set. Using fallback weather.")
+                return self._get_fallback_weather()
+
             url = f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lng}&appid={api_key}&units=metric"
-            
+
             response = requests.get(url, timeout=5)
             if response.status_code == 200:
                 data = response.json()
                 return self._parse_weather_data(data)
         except Exception as e:
             logger.warning(f"Weather API error: {e}")
-        
-        # Return mock data if API fails
-        return self._get_mock_weather()
+
+        return self._get_fallback_weather()
     
     def _parse_weather_data(self, data):
         """Parse OpenWeatherMap forecast response"""
@@ -149,18 +155,25 @@ class IrrigationScheduleView(APIView):
         
         return weather
     
-    def _get_mock_weather(self):
-        """Return mock weather for testing"""
-        import random
+    def _get_fallback_weather(self):
+        """Return deterministic fallback weather when API is unavailable."""
+        import hashlib
+        today = timezone.now().date()
         weather = {}
         for i in range(7):
+            day = today + timedelta(days=i)
+            # Deterministic seed from date so values are stable within the same day
+            seed = int(hashlib.md5(day.isoformat().encode()).hexdigest(), 16) % (10**8)
+            temp_base = 28 + (seed % 8)
+            humidity_base = 60 + (seed % 26)
+            rain_chance = (seed % 101)
             weather[i] = {
-                'temp_max': random.randint(28, 35),
-                'temp_min': random.randint(22, 26),
-                'humidity': random.randint(60, 85),
-                'rain_chance': random.randint(0, 100),
-                'rain_mm': random.randint(0, 20) if random.random() > 0.6 else 0,
-                'description': random.choice(['Clear', 'Partly Cloudy', 'Light Rain', 'Cloudy']),
+                'temp_max': temp_base,
+                'temp_min': temp_base - 6,
+                'humidity': humidity_base,
+                'rain_chance': rain_chance,
+                'rain_mm': ((seed % 20) if rain_chance > 60 else 0),
+                'description': ['Clear', 'Partly Cloudy', 'Light Rain', 'Cloudy'][seed % 4],
                 'icon': '01d'
             }
         return weather
@@ -256,7 +269,6 @@ class IrrigationLogView(APIView):
     POST: Log an irrigation event
     GET: Get irrigation history for a field
     """
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
     def get(self, request):

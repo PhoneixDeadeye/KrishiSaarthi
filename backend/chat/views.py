@@ -12,12 +12,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Configure Gemini
-genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
 
 class ChatView(APIView):
     permission_classes = [permissions.AllowAny] 
 
     def post(self, request):
+        genai.configure(api_key=os.environ.get('GEMINI_API_KEY')) # Moved here
         question = request.data.get('question')
         session_id = request.data.get('sessionId')
         clear_history = request.data.get('clearHistory', False)

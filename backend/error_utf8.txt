@@ -1,0 +1,210 @@
+python : INFO 2026-02-26 12:40:48,663 Attempting to initialize Earth Engine with project: crop-capstone
+At line:1 char:1
++ python manage.py test tests.test_finance -v2 > error.txt 2>&1 ; pytho ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO 2026-02-26...: crop-capstone:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO 2026-02-26 12:40:51,873 Earth Engine initialized successfully with project: crop-capstone
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+
+Found 14 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: corsheaders, messages, rest_framework, staticfiles
+  Apply all migrations: admin, auth, authtoken, chat, contenttypes, field, finance, planning, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying auth.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying authtoken.0001_initial... OK
+  Applying authtoken.0002_auto_20160226_1747... OK
+  Applying authtoken.0003_tokenproxy... OK
+  Applying authtoken.0004_alter_tokenproxy_options... OK
+  Applying chat.0001_initial... OK
+  Applying field.0001_initial... OK
+  Applying field.0002_irrigationlog... OK
+  Applying finance.0001_initial... OK
+  Applying planning.0001_initial... OK
+test_insurance_list_empty (tests.test_finance.FinanceAPITestCase.test_insurance_list_empty)
+Test insurance list returns empty for new user ... INFO 2026-02-26 12:41:01,838 Request: {"request_id": 
+"ab66a170-1b0a-49eb-afca-15f8ebe688c1", "method": "GET", "path": "/finance/insurance", "user": "AnonymousUser", "ip": 
+"127.0.0.1"}
+INFO 2026-02-26 12:41:01,847 Response: {"request_id": "ab66a170-1b0a-49eb-afca-15f8ebe688c1", "method": "GET", "path": 
+"/finance/insurance", "status": 200, "duration_ms": 8.55, "user": "testfarmer"}
+ok
+test_insurance_requires_auth (tests.test_finance.FinanceAPITestCase.test_insurance_requires_auth)
+Test endpoint requires authentication ... INFO 2026-02-26 12:41:02,603 Request: {"request_id": 
+"13600e17-11f9-4213-aa48-3b684443caa7", "method": "GET", "path": "/finance/insurance", "user": "AnonymousUser", "ip": 
+"127.0.0.1"}
+WARNING 2026-02-26 12:41:02,605 Client Error 401 at GET /finance/insurance: Authentication credentials were not 
+provided.
+WARNING 2026-02-26 12:41:02,606 Response: {"request_id": "13600e17-11f9-4213-aa48-3b684443caa7", "method": "GET", 
+"path": "/finance/insurance", "status": 401, "duration_ms": 2.55, "user": "AnonymousUser"}
+ok
+test_price_forecast_different_crops (tests.test_finance.FinanceAPITestCase.test_price_forecast_different_crops)
+Test forecast works for different crops ... INFO 2026-02-26 12:41:03,315 Request: {"request_id": 
+"fe8a937a-e428-4609-ad18-35011fc4fe78", "method": "GET", "path": "/finance/price-forecast", "user": "AnonymousUser", 
+"ip": "127.0.0.1", "query_params": {"crop": ["Rice"]}}
+INFO 2026-02-26 12:41:03,318 Response: {"request_id": "fe8a937a-e428-4609-ad18-35011fc4fe78", "method": "GET", "path": 
+"/finance/price-forecast", "status": 200, "duration_ms": 3.38, "user": "testfarmer"}
+INFO 2026-02-26 12:41:03,320 Request: {"request_id": "f975a9ef-9609-4ba1-96c4-71fe5297c74d", "method": "GET", "path": 
+"/finance/price-forecast", "user": "AnonymousUser", "ip": "127.0.0.1", "query_params": {"crop": ["Wheat"]}}
+INFO 2026-02-26 12:41:03,323 Response: {"request_id": "f975a9ef-9609-4ba1-96c4-71fe5297c74d", "method": "GET", "path": 
+"/finance/price-forecast", "status": 200, "duration_ms": 3.15, "user": "testfarmer"}
+INFO 2026-02-26 12:41:03,324 Request: {"request_id": "5f29fefe-7a05-4f2f-a258-0d07c80efe8a", "method": "GET", "path": 
+"/finance/price-forecast", "user": "AnonymousUser", "ip": "127.0.0.1", "query_params": {"crop": ["Cotton"]}}
+INFO 2026-02-26 12:41:03,326 Response: {"request_id": "5f29fefe-7a05-4f2f-a258-0d07c80efe8a", "method": "GET", "path": 
+"/finance/price-forecast", "status": 200, "duration_ms": 2.08, "user": "testfarmer"}
+INFO 2026-02-26 12:41:03,326 Request: {"request_id": "d8514993-95d7-4949-8749-3ae9fc5db71a", "method": "GET", "path": 
+"/finance/price-forecast", "user": "AnonymousUser", "ip": "127.0.0.1", "query_params": {"crop": ["Sugarcane"]}}
+INFO 2026-02-26 12:41:03,326 Response: {"request_id": "d8514993-95d7-4949-8749-3ae9fc5db71a", "method": "GET", "path": 
+"/finance/price-forecast", "status": 200, "duration_ms": 0.0, "user": "testfarmer"}
+ok
+test_price_forecast_requires_auth (tests.test_finance.FinanceAPITestCase.test_price_forecast_requires_auth)
+Test endpoint requires authentication ... INFO 2026-02-26 12:41:03,948 Request: {"request_id": 
+"b4e57778-2ae8-4b3e-8ed0-0960e814304e", "method": "GET", "path": "/finance/price-forecast", "user": "AnonymousUser", 
+"ip": "127.0.0.1", "query_params": {"crop": ["Rice"]}}
+WARNING 2026-02-26 12:41:03,949 Client Error 401 at GET /finance/price-forecast: Authentication credentials were not 
+provided.
+WARNING 2026-02-26 12:41:03,949 Response: {"request_id": "b4e57778-2ae8-4b3e-8ed0-0960e814304e", "method": "GET", 
+"path": "/finance/price-forecast", "status": 401, "duration_ms": 1.1, "user": "AnonymousUser"}
+ok
+test_price_forecast_success (tests.test_finance.FinanceAPITestCase.test_price_forecast_success)
+Test price forecast returns valid data ... INFO 2026-02-26 12:41:04,613 Request: {"request_id": 
+"017c8533-80e9-4f57-9b3e-97c34a403ec0", "method": "GET", "path": "/finance/price-forecast", "user": "AnonymousUser", 
+"ip": "127.0.0.1", "query_params": {"crop": ["Rice"], "days": ["30"]}}
+INFO 2026-02-26 12:41:04,615 Response: {"request_id": "017c8533-80e9-4f57-9b3e-97c34a403ec0", "method": "GET", "path": 
+"/finance/price-forecast", "status": 200, "duration_ms": 2.48, "user": "testfarmer"}
+ok
+test_schemes_filter_by_type (tests.test_finance.FinanceAPITestCase.test_schemes_filter_by_type)
+Test filtering schemes by type ... INFO 2026-02-26 12:41:05,621 Request: {"request_id": 
+"a2030e08-902e-49d4-90d9-680b02ada68e", "method": "GET", "path": "/finance/schemes", "user": "AnonymousUser", "ip": 
+"127.0.0.1", "query_params": {"type": ["subsidy"]}}
+INFO 2026-02-26 12:41:05,628 Seeded 7 government schemes into DB
+INFO 2026-02-26 12:41:05,634 Response: {"request_id": "a2030e08-902e-49d4-90d9-680b02ada68e", "method": "GET", "path": 
+"/finance/schemes", "status": 200, "duration_ms": 12.95, "user": "testfarmer"}
+INFO 2026-02-26 12:41:05,635 Request: {"request_id": "d20504d0-5548-4096-96c9-6c20b617c2e9", "method": "GET", "path": 
+"/finance/schemes", "user": "AnonymousUser", "ip": "127.0.0.1", "query_params": {"type": ["loan"]}}
+INFO 2026-02-26 12:41:05,640 Response: {"request_id": "d20504d0-5548-4096-96c9-6c20b617c2e9", "method": "GET", "path": 
+"/finance/schemes", "status": 200, "duration_ms": 5.61, "user": "testfarmer"}
+INFO 2026-02-26 12:41:05,641 Request: {"request_id": "b1b1aebd-fe40-4b13-99e0-8705451d4bc3", "method": "GET", "path": 
+"/finance/schemes", "user": "AnonymousUser", "ip": "127.0.0.1", "query_params": {"type": ["insurance"]}}
+INFO 2026-02-26 12:41:05,646 Response: {"request_id": "b1b1aebd-fe40-4b13-99e0-8705451d4bc3", "method": "GET", "path": 
+"/finance/schemes", "status": 200, "duration_ms": 5.08, "user": "testfarmer"}
+ok
+test_schemes_list_success (tests.test_finance.FinanceAPITestCase.test_schemes_list_success)
+Test schemes list returns data ... INFO 2026-02-26 12:41:06,543 Request: {"request_id": 
+"38d0c4c5-f2ad-4f52-b6fa-026321f463af", "method": "GET", "path": "/finance/schemes", "user": "AnonymousUser", "ip": 
+"127.0.0.1", "query_params": {"state": ["Punjab"]}}
+INFO 2026-02-26 12:41:06,549 Seeded 7 government schemes into DB
+INFO 2026-02-26 12:41:06,552 Response: {"request_id": "38d0c4c5-f2ad-4f52-b6fa-026321f463af", "method": "GET", "path": 
+"/finance/schemes", "status": 200, "duration_ms": 9.78, "user": "testfarmer"}
+ok
+test_schemes_requires_auth (tests.test_finance.FinanceAPITestCase.test_schemes_requires_auth)
+Test endpoint requires authentication ... INFO 2026-02-26 12:41:07,472 Request: {"request_id": 
+"f61c6e8e-f789-4f56-ae01-2ef116ed31fa", "method": "GET", "path": "/finance/schemes", "user": "AnonymousUser", "ip": 
+"127.0.0.1"}
+WARNING 2026-02-26 12:41:07,476 Client Error 401 at GET /finance/schemes: Authentication credentials were not provided.
+WARNING 2026-02-26 12:41:07,476 Response: {"request_id": "f61c6e8e-f789-4f56-ae01-2ef116ed31fa", "method": "GET", 
+"path": "/finance/schemes", "status": 401, "duration_ms": 3.57, "user": "AnonymousUser"}
+ok
+test_market_prices_requires_auth (tests.test_finance.MarketPricesTestCase.test_market_prices_requires_auth)
+Test endpoint requires authentication ... INFO 2026-02-26 12:41:08,376 Request: {"request_id": 
+"d6dcc15e-59dd-4672-a7ce-b6f7dafce43e", "method": "GET", "path": "/finance/market-prices", "user": "AnonymousUser", 
+"ip": "127.0.0.1", "query_params": {"crop": ["Rice"]}}
+WARNING 2026-02-26 12:41:08,376 Client Error 401 at GET /finance/market-prices: Authentication credentials were not 
+provided.
+WARNING 2026-02-26 12:41:08,377 Response: {"request_id": "d6dcc15e-59dd-4672-a7ce-b6f7dafce43e", "method": "GET", 
+"path": "/finance/market-prices", "status": 401, "duration_ms": 0.83, "user": "AnonymousUser"}
+ok
+test_market_prices_success (tests.test_finance.MarketPricesTestCase.test_market_prices_success)
+Test market prices returns mandi data ... INFO 2026-02-26 12:41:09,302 Request: {"request_id": 
+"df912e29-a5fc-4235-be44-0393b3be56b8", "method": "GET", "path": "/finance/market-prices", "user": "AnonymousUser", 
+"ip": "127.0.0.1", "query_params": {"crop": ["Rice"], "state": ["Punjab"]}}
+INFO 2026-02-26 12:41:09,304 Response: {"request_id": "df912e29-a5fc-4235-be44-0393b3be56b8", "method": "GET", "path": 
+"/finance/market-prices", "status": 200, "duration_ms": 2.7, "user": "marketuser"}
+FAIL
+test_equipment_list (tests.test_finance.PlanningAPITestCase.test_equipment_list)
+Test equipment list endpoint ... INFO 2026-02-26 12:41:10,240 Request: {"request_id": 
+"f1a5b35b-d01c-4efc-9ff9-daafd1330a50", "method": "GET", "path": "/planning/equipment", "user": "AnonymousUser", "ip": 
+"127.0.0.1"}
+INFO 2026-02-26 12:41:10,244 Response: {"request_id": "f1a5b35b-d01c-4efc-9ff9-daafd1330a50", "method": "GET", "path": 
+"/planning/equipment", "status": 200, "duration_ms": 4.45, "user": "planuser"}
+ok
+test_inventory_list (tests.test_finance.PlanningAPITestCase.test_inventory_list)
+Test inventory list endpoint ... INFO 2026-02-26 12:41:11,169 Request: {"request_id": 
+"393712c2-6677-4f22-b306-93393373599f", "method": "GET", "path": "/planning/inventory", "user": "AnonymousUser", "ip": 
+"127.0.0.1"}
+INFO 2026-02-26 12:41:11,172 Response: {"request_id": "393712c2-6677-4f22-b306-93393373599f", "method": "GET", "path": 
+"/planning/inventory", "status": 200, "duration_ms": 2.98, "user": "planuser"}
+ok
+test_labor_list (tests.test_finance.PlanningAPITestCase.test_labor_list)
+Test labor list endpoint ... INFO 2026-02-26 12:41:11,978 Request: {"request_id": 
+"f6362ecc-efaf-463d-995c-c76d38e8d1ba", "method": "GET", "path": "/planning/labor", "user": "AnonymousUser", "ip": 
+"127.0.0.1"}
+INFO 2026-02-26 12:41:11,981 Response: {"request_id": "f6362ecc-efaf-463d-995c-c76d38e8d1ba", "method": "GET", "path": 
+"/planning/labor", "status": 200, "duration_ms": 3.61, "user": "planuser"}
+ok
+test_rotation_planner_success (tests.test_finance.PlanningAPITestCase.test_rotation_planner_success)
+Test rotation planner returns recommendations ... INFO 2026-02-26 12:41:12,766 Request: {"request_id": 
+"e618686c-eb46-4422-ade6-6e6216e3532f", "method": "GET", "path": "/planning/rotation", "user": "AnonymousUser", "ip": 
+"127.0.0.1", "query_params": {"field_id": ["1"]}}
+WARNING 2026-02-26 12:41:12,769 Response: {"request_id": "e618686c-eb46-4422-ade6-6e6216e3532f", "method": "GET", 
+"path": "/planning/rotation", "status": 404, "duration_ms": 3.04, "user": "planuser"}
+ok
+
+======================================================================
+FAIL: test_market_prices_success (tests.test_finance.MarketPricesTestCase.test_market_prices_success)
+Test market prices returns mandi data
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\backend\tests\test_finance.py", line 136, in 
+test_market_prices_success
+    self.assertIn('tips', data)
+AssertionError: 'tips' not found in {'state': 'Punjab', 'crop': 'Rice', 'date': '2026-02-26', 'mandi_prices': 
+[{'mandi': 'Ludhiana', 'prices': [{'crop': 'Rice', 'min_price': 2305, 'max_price': 3074, 'modal_price': 2689, 'msp': 
+2183, 'vs_msp': 23.2, 'trend': 'up', 'unit': 'quintal'}], 'arrivals': 3020, 'last_updated': 
+'2026-02-26T07:11:09.303788+00:00'}, {'mandi': 'Amritsar', 'prices': [{'crop': 'Rice', 'min_price': 2192, 'max_price': 
+2923, 'modal_price': 2557, 'msp': 2183, 'vs_msp': 17.1, 'trend': 'up', 'unit': 'quintal'}], 'arrivals': 2370, 
+'last_updated': '2026-02-26T07:11:09.303788+00:00'}, {'mandi': 'Jalandhar', 'prices': [{'crop': 'Rice', 'min_price': 
+2150, 'max_price': 2867, 'modal_price': 2508, 'msp': 2183, 'vs_msp': 14.9, 'trend': 'down', 'unit': 'quintal'}], 
+'arrivals': 3040, 'last_updated': '2026-02-26T07:11:09.303788+00:00'}, {'mandi': 'Patiala', 'prices': [{'crop': 
+'Rice', 'min_price': 2217, 'max_price': 2956, 'modal_price': 2586, 'msp': 2183, 'vs_msp': 18.5, 'trend': 'down', 
+'unit': 'quintal'}], 'arrivals': 4338, 'last_updated': '2026-02-26T07:11:09.303788+00:00'}, {'mandi': 'Bathinda', 
+'prices': [{'crop': 'Rice', 'min_price': 2131, 'max_price': 2841, 'modal_price': 2486, 'msp': 2183, 'vs_msp': 13.9, 
+'trend': 'stable', 'unit': 'quintal'}], 'arrivals': 1807, 'last_updated': '2026-02-26T07:11:09.303788+00:00'}], 
+'price_trends': {'crop': 'Rice', 'data': [{'date': '2026-02-19', 'price': 2450, 'day': 'Thu'}, {'date': '2026-02-20', 
+'price': 2452, 'day': 'Fri'}, {'date': '2026-02-21', 'price': 2430, 'day': 'Sat'}, {'date': '2026-02-22', 'price': 
+2464, 'day': 'Sun'}, {'date': '2026-02-23', 'price': 2447, 'day': 'Mon'}, {'date': '2026-02-24', 'price': 2437, 'day': 
+'Tue'}, {'date': '2026-02-25', 'price': 2479, 'day': 'Wed'}, {'date': '2026-02-26', 'price': 2489, 'day': 'Today'}], 
+'change_7d': 1.6}, 'crops_summary': None, 'market_tips': [{'type': 'info', 'icon': '\U0001f4c8', 'text': 'Check prices 
+at multiple mandis before selling for best rates.'}, {'type': 'tip', 'icon': '\U0001f4a1', 'text': 'Government 
+procurement centers often offer MSP - check local APMC.'}, {'type': 'msp', 'icon': '\U0001f3db\ufe0f', 'text': 'MSP 
+for Rice: \u20b92183/quintal. Sell at government centers if market price is lower.'}, {'type': 'timing', 'icon': 
+'\u23f0', 'text': 'Prices typically peak 2-3 months after harvest when supply reduces.'}]}
+
+----------------------------------------------------------------------
+Ran 14 tests in 11.723s
+
+FAILED (failures=1)
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+
+  Applying sessions.0001_initial... OK
+System check identified no issues (0 silenced).

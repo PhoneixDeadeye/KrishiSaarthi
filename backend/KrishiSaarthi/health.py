@@ -56,6 +56,7 @@ class ReadinessCheckView(APIView):
         checks["ml_models"] = os.path.exists(model_path) and os.path.exists(lstm_path)
         if not checks["ml_models"]:
             logger.warning("ML models not found")
+            all_ready = False
         
         # Check Earth Engine
         try:
@@ -65,6 +66,7 @@ class ReadinessCheckView(APIView):
         except Exception as e:
             logger.warning(f"Earth Engine check failed: {e}")
             checks["earth_engine"] = False
+            all_ready = False
         
         response_status = status.HTTP_200_OK if all_ready else status.HTTP_503_SERVICE_UNAVAILABLE
         

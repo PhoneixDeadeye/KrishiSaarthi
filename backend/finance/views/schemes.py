@@ -4,7 +4,6 @@ Matches farmers with eligible government schemes based on their profile.
 """
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -126,135 +125,156 @@ SAMPLE_SCHEMES = [
 
 class SchemesView(APIView):
     """
-    GET: Returns eligible government schemes for the farmer
+    GET: Returns eligible government schemes for the farmer.
+    Queries from the GovernmentScheme database table.
     """
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
-        # Get filter parameters
         state = request.query_params.get('state', None)
         crop = request.query_params.get('crop', None)
         scheme_type = request.query_params.get('type', None)
         land_acres = request.query_params.get('land_acres', None)
-        
-        # Get user's fields for automatic matching
+
+        # Auto-seed DB with sample data on first access if empty
+        if not GovernmentScheme.objects.exists():
+            self._seed_schemes()
+
+        # Build queryset
+        qs = GovernmentScheme.objects.filter(is_active=True)
+
+        if scheme_type:
+            qs = qs.filter(scheme_type=scheme_type)
+
         user_fields = FieldData.objects.filter(user=request.user)
         user_crops = list(set(f.cropType for f in user_fields if f.cropType))
-        
-        # Filter schemes
+
         eligible_schemes = []
-        for scheme in SAMPLE_SCHEMES:
-            if not scheme['is_active']:
-                continue
-            
+        for scheme in qs:
             # Filter by state
-            if state and scheme['eligible_states'] and state not in scheme['eligible_states']:
+            if state and scheme.eligible_states and state not in scheme.eligible_states:
                 continue
-            
+
             # Filter by crop
-            if crop and scheme['eligible_crops'] and crop not in scheme['eligible_crops']:
+            if crop and scheme.eligible_crops and crop not in scheme.eligible_crops:
                 continue
-            
-            # Filter by type
-            if scheme_type and scheme['scheme_type'] != scheme_type:
-                continue
-            
+
             # Filter by land size
             if land_acres:
                 land_acres_float = float(land_acres)
-                if land_acres_float < scheme['min_land_acres']:
+                if land_acres_float < float(scheme.min_land_acres):
                     continue
-            
-            # Calculate match score based on user's profile
-            match_score = self._calculate_match_score(scheme, user_crops, state)
-            scheme_copy = scheme.copy()
-            scheme_copy['match_score'] = match_score
-            eligible_schemes.append(scheme_copy)
-        
-        # Sort by match score
+
+            scheme_data = {
+                'id': scheme.id,
+                'name': scheme.name,
+                'scheme_type': scheme.scheme_type,
+                'description': scheme.description,
+                'benefits': scheme.benefits,
+                'eligible_crops': scheme.eligible_crops,
+                'eligible_states': scheme.eligible_states,
+                'min_land_acres': float(scheme.min_land_acres),
+                'max_subsidy_amount': float(scheme.max_subsidy_amount) if scheme.max_subsidy_amount else None,
+                'subsidy_percentage': scheme.subsidy_percentage,
+                'documents_required': scheme.documents_required,
+                'link': scheme.link,
+                'is_active': scheme.is_active,
+                'application_deadline': scheme.application_deadline.isoformat() if scheme.application_deadline else None,
+            }
+
+            match_score = self._calculate_match_score(scheme_data, user_crops, state)
+            scheme_data['match_score'] = match_score
+            eligible_schemes.append(scheme_data)
+
         eligible_schemes.sort(key=lambda x: x['match_score'], reverse=True)
-        
-        # Group by type
+
         grouped = {
-            'subsidy': [],
-            'loan': [],
-            'insurance': [],
-            'grant': [],
-            'training': [],
+            'subsidy': [], 'loan': [], 'insurance': [], 'grant': [], 'training': [],
         }
-        for scheme in eligible_schemes:
-            scheme_type_key = scheme['scheme_type']
-            if scheme_type_key in grouped:
-                grouped[scheme_type_key].append(scheme)
-        
+        for s in eligible_schemes:
+            key = s['scheme_type']
+            if key in grouped:
+                grouped[key].append(s)
+
         return Response({
             'total_schemes': len(eligible_schemes),
             'user_crops': user_crops,
             'schemes': eligible_schemes,
             'grouped': grouped,
             'tips': [
-                {
-                    'icon': '📅',
-                    'text': 'Check application deadlines. Apply at least 2 weeks before the deadline.',
-                },
-                {
-                    'icon': '📄',
-                    'text': 'Keep digital copies of all documents ready. Most schemes now accept online applications.',
-                },
-                {
-                    'icon': '🏦',
-                    'text': 'Ensure your bank account is linked to Aadhaar for direct benefit transfers.',
-                },
+                {'icon': '📅', 'text': 'Check application deadlines. Apply at least 2 weeks before the deadline.'},
+                {'icon': '📄', 'text': 'Keep digital copies of all documents ready. Most schemes now accept online applications.'},
+                {'icon': '🏦', 'text': 'Ensure your bank account is linked to Aadhaar for direct benefit transfers.'},
             ]
         })
-    
+
     def _calculate_match_score(self, scheme, user_crops, state):
         """Calculate how well a scheme matches the user's profile"""
-        score = 50  # Base score
-        
-        # Bonus for matching crops
+        score = 50
+
         if scheme['eligible_crops']:
             matching_crops = set(user_crops) & set(scheme['eligible_crops'])
             if matching_crops:
                 score += 30
         else:
-            score += 20  # Universal schemes get bonus
-        
-        # Bonus for matching state
+            score += 20
+
         if scheme['eligible_states']:
             if state in scheme['eligible_states']:
                 score += 20
         else:
-            score += 10  # National schemes
-        
-        # Penalty for approaching deadline
-        if 'application_deadline' in scheme and scheme['application_deadline']:
-            # Would calculate days remaining here
-            score += 10  # Bonus for having active deadline
-        
+            score += 10
+
+        if scheme.get('application_deadline'):
+            score += 10
+
         return min(100, score)
+
+    def _seed_schemes(self):
+        """Seed the database with initial government scheme data."""
+        for data in SAMPLE_SCHEMES:
+            GovernmentScheme.objects.create(
+                name=data['name'],
+                scheme_type=data['scheme_type'],
+                description=data['description'],
+                benefits=data.get('benefits', ''),
+                eligible_crops=data.get('eligible_crops', []),
+                eligible_states=data.get('eligible_states', []),
+                min_land_acres=data.get('min_land_acres', 0),
+                max_subsidy_amount=data.get('max_subsidy_amount'),
+                subsidy_percentage=data.get('subsidy_percentage'),
+                documents_required=data.get('documents_required', []),
+                link=data.get('link', ''),
+                is_active=data.get('is_active', True),
+            )
+        logger.info(f"Seeded {len(SAMPLE_SCHEMES)} government schemes into DB")
 
 
 class SchemeDetailView(APIView):
     """
-    GET: Returns details of a specific scheme
+    GET: Returns details of a specific scheme from DB
     """
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request, scheme_id):
-        # Find scheme by ID
-        scheme = None
-        for s in SAMPLE_SCHEMES:
-            if s['id'] == scheme_id:
-                scheme = s
-                break
-        
-        if not scheme:
-            return Response(
-                {'error': 'Scheme not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
-        return Response(scheme)
+        scheme = get_object_or_404(GovernmentScheme, id=scheme_id)
+
+        return Response({
+            'id': scheme.id,
+            'name': scheme.name,
+            'scheme_type': scheme.scheme_type,
+            'description': scheme.description,
+            'benefits': scheme.benefits,
+            'eligible_crops': scheme.eligible_crops,
+            'eligible_states': scheme.eligible_states,
+            'min_land_acres': float(scheme.min_land_acres),
+            'max_land_acres': float(scheme.max_land_acres) if scheme.max_land_acres else None,
+            'max_subsidy_amount': float(scheme.max_subsidy_amount) if scheme.max_subsidy_amount else None,
+            'subsidy_percentage': scheme.subsidy_percentage,
+            'application_deadline': scheme.application_deadline.isoformat() if scheme.application_deadline else None,
+            'valid_from': scheme.valid_from.isoformat() if scheme.valid_from else None,
+            'valid_until': scheme.valid_until.isoformat() if scheme.valid_until else None,
+            'documents_required': scheme.documents_required,
+            'link': scheme.link,
+            'is_active': scheme.is_active,
+        })

@@ -29,11 +29,11 @@ class MLEngineTestCase(TestCase):
             {"date": "2023-01-10", "NDWI": 0.4}
         ]
         report = detect_awd_from_ndwi(ndwi_series)
-        self.assertIn("status", report)
+        self.assertIn("awd_detected", report)
         
     def test_health_score_integration(self):
         """Test health score fusion"""
         # Test with empty data
         score = get_health_score(image_path=None, ndvi_latest=None, sequence={})
         self.assertIn("score", score)
-        self.assertEqual(score["score"], 0) # Expect 0 for no data
+        self.assertEqual(score["score"], 0.5) # Expect 0.5 (neutral) for no data

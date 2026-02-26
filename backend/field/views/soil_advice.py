@@ -3,6 +3,7 @@ Soil Advice API - AI-powered fertilizer and soil management recommendations.
 Uses Gemini to provide personalized advice based on soil test values.
 """
 import os
+import json
 import logging
 import google.generativeai as genai
 from rest_framework.views import APIView
@@ -10,9 +11,6 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 
 logger = logging.getLogger(__name__)
-
-# Configure Gemini
-genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
 
 
 class SoilAdviceView(APIView):
@@ -66,6 +64,14 @@ Provide your response in the following JSON format:
 Be practical and region-agnostic. Focus on actionable steps the farmer can take."""
 
         try:
+            api_key = os.environ.get('GEMINI_API_KEY')
+            if not api_key:
+                return Response(
+                    {'error': 'GEMINI_API_KEY not configured'},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+            genai.configure(api_key=api_key)
+
             model = genai.GenerativeModel(
                 model_name="gemini-2.5-flash",
                 generation_config={
@@ -75,8 +81,6 @@ Be practical and region-agnostic. Focus on actionable steps the farmer can take.
             
             response = model.generate_content(prompt)
             
-            # Parse the JSON response
-            import json
             advice_data = json.loads(response.text)
             
             return Response({
