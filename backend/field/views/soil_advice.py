@@ -118,6 +118,6 @@ Be practical and region-agnostic. Focus on actionable steps the farmer can take.
         except Exception as e:
             logger.error(f"Gemini Soil Advice Error: {e}", exc_info=True)
             return Response(
-                {'error': f'AI service error: {str(e)}'},
+                {'error': 'AI service temporarily unavailable'},
                 status=status.HTTP_502_BAD_GATEWAY
             )

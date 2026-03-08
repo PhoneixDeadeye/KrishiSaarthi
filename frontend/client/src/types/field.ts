@@ -69,7 +69,7 @@ export interface PestReport {
     id: number;
     image: string;
     uploaded_at: string;
-    result?: any; // JSON field from backend, depends on what we store
+    result?: Record<string, unknown>; // JSON field from backend
 }
 
 export interface NDVIData {

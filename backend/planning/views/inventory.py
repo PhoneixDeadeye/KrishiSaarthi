@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from django.db.models import Sum
+from django.db import models
+from django.db.models import Sum, F
 from ..models import InventoryItem, InventoryTransaction
 from ..serializers import InventoryItemSerializer, InventoryTransactionSerializer
 
@@ -21,7 +22,7 @@ class InventoryItemView(APIView):
             serializer = InventoryItemSerializer(item)
             return Response(serializer.data)
         
-        items = InventoryItem.objects.filter(user=request.user)
+        items = InventoryItem.objects.filter(user=request.user).order_by('category', 'name')
         
         # Filter by category
         category = request.query_params.get('category')
@@ -31,16 +32,20 @@ class InventoryItemView(APIView):
         # Filter low stock items
         low_stock = request.query_params.get('low_stock')
         if low_stock == 'true':
-            items = [item for item in items if item.is_low_stock]
+            from django.db.models import F
+            items = items.filter(quantity__lte=F('reorder_level'))
         
         serializer = InventoryItemSerializer(items, many=True)
         
         # Add summary data
+        all_items = InventoryItem.objects.filter(user=request.user)
         response_data = {
             'items': serializer.data,
             'summary': {
-                'total_items': len(items),
-                'low_stock_count': sum(1 for item in items if item.is_low_stock),
+                'total_items': all_items.count(),
+                'low_stock_count': all_items.filter(
+                    quantity__lte=models.F('reorder_level')
+                ).count(),
             }
         }
         return Response(response_data)
@@ -76,9 +81,9 @@ class InventoryTransactionView(APIView):
         """List transactions for an inventory item"""
         if item_id:
             item = get_object_or_404(InventoryItem, pk=item_id, user=request.user)
-            transactions = item.transactions.all()
+            transactions = item.transactions.select_related('item').all()
         else:
-            transactions = InventoryTransaction.objects.filter(item__user=request.user)
+            transactions = InventoryTransaction.objects.filter(item__user=request.user).select_related('item')
         
         serializer = InventoryTransactionSerializer(transactions, many=True)
         return Response(serializer.data)

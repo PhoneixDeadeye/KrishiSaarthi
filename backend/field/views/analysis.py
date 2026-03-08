@@ -52,7 +52,7 @@ class EEAnalysisView(APIView):
 
         except Exception as e:
             logger.error(traceback.format_exc())
-            return Response({"error": str(e)}, status=500)
+            return Response({"error": "Failed to perform analysis"}, status=500)
 
 class PestReport(APIView):
     permission_classes = [IsAuthenticated]
@@ -184,7 +184,7 @@ class PestReport(APIView):
         except Exception as e:
             logger.error(f"Error processing pest report: {e}")
             return Response(
-                {"error": "Failed to process image", "details": str(e)},
+                {"error": "Failed to process image"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -224,11 +224,12 @@ class CarbonCredit(APIView):
             coords = field.polygon.get('coordinates', [])[0]
             area = calculate_area_in_hectares(coords)
         except Exception as e:
-            return Response({"error": f"Area calculation failed: {str(e)}"}, status=500)
+            return Response({"error": f"Area calculation failed"}, status=500)
 
         # 2. Get EE data for AWD detection
         ndwi_series = []
         ndwi_dates = []
+        ee_warning = None
         try:
             ee_data = fetchEEData(user=request.user, field_instance=field)
             if 'error' not in ee_data:
@@ -238,11 +239,16 @@ class CarbonCredit(APIView):
                     if isinstance(entry, dict) and "NDWI" in entry:
                         ndwi_series.append(entry["NDWI"])
                         ndwi_dates.append(entry.get("date", ""))
-        except Exception:
-            pass
+            else:
+                ee_warning = "Satellite data unavailable; carbon metrics are estimated."
+        except Exception as e:
+            logger.warning(f"EE fetch for carbon credit failed: {e}")
+            ee_warning = "Satellite data unavailable; carbon metrics are estimated."
 
         # 3. Calculate Credits using robust model
         result = calculate_carbon_metrics(area_hectare=area, ndwi_series=ndwi_series, ndwi_dates=ndwi_dates)
+        if ee_warning:
+            result['warnings'] = [ee_warning]
         
         return Response(result)
     
@@ -305,6 +311,6 @@ class HealthScore(APIView):
         except Exception as e:
             logger.error(f"Error calculating health score: {e}")
             return Response(
-                {"error": "Failed to calculate health score", "details": str(e)},
+                {"error": "Failed to calculate health score"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

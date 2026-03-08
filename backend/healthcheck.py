@@ -1,6 +1,7 @@
 """
 Enhanced health check endpoint with detailed component status
 """
+import logging
 import sys
 import os
 from pathlib import Path
@@ -18,6 +19,8 @@ from django.db import connection
 from django.core.cache import cache
 from django.conf import settings
 import time
+
+logger = logging.getLogger(__name__)
 
 
 def health_check(request):
@@ -44,10 +47,18 @@ def health_check(request):
             'status': 'healthy',
             'message': 'Database connection OK'
         }
-    except Exception as e:
+    except Exception:
+        logger.error("Health check: database connection failed", exc_info=True)
         checks['components']['database'] = {
             'status': 'unhealthy',
-            'error': str(e)
+            'message': 'Database connection failed'
+        }
+        all_healthy = False
+    
+    # 2. Cache Check
+    try:
+        cache.set('health_check', 'ok', 10)
+        cache_value = cache.get('health_check')
         if cache_value == 'ok':
             checks['components']['cache'] = {
                 'status': 'healthy',
@@ -55,11 +66,11 @@ def health_check(request):
             }
         else:
             raise Exception('Cache read/write failed')
-    except Exception as e:
+    except Exception:
+        logger.warning("Health check: cache unavailable", exc_info=True)
         checks['components']['cache'] = {
             'status': 'degraded',
-            'warning': str(e),
-            'message': 'Application can run without cache'
+            'message': 'Cache unavailable — application can run without it'
         }
         # Cache is not critical, don't fail health check
     
@@ -111,10 +122,11 @@ def health_check(request):
                 'status': 'healthy',
                 'free_percent': round(free_percent, 2)
             }
-    except Exception as e:
+    except Exception:
+        logger.error("Health check: disk space check failed", exc_info=True)
         checks['components']['disk_space'] = {
             'status': 'unknown',
-            'error': str(e)
+            'message': 'Disk space check failed'
         }
     
     # 5. Memory Check
@@ -196,10 +208,3 @@ def liveness_check(request):
         'alive': True,
         'timestamp': time.time()
     })
-    else:
-        print(f"{RED}{BOLD}✗ {passed}/{total} checks passed. System not ready.{RESET}")
-        print(f"\n{YELLOW}Please fix the issues above before running the server.{RESET}")
-        return 1
-
-if __name__ == '__main__':
-    sys.exit(main())

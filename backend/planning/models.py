@@ -106,7 +106,7 @@ class InventoryTransaction(models.Model):
     
     transaction_type = models.CharField(max_length=20, choices=TransactionType.choices)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField()
+    date = models.DateField(db_index=True)
     notes = models.TextField(blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -115,13 +115,18 @@ class InventoryTransaction(models.Model):
         ordering = ['-date', '-created_at']
     
     def save(self, *args, **kwargs):
-        # Update item quantity on transaction
+        # Update item quantity on transaction using F() to avoid race condition
         if not self.pk:  # New transaction
+            from django.db.models import F
             if self.transaction_type in ['purchase', 'return']:
-                self.item.quantity += self.quantity
+                InventoryItem.objects.filter(pk=self.item_id).update(
+                    quantity=F('quantity') + self.quantity
+                )
             elif self.transaction_type == 'use':
-                self.item.quantity -= self.quantity
-            self.item.save()
+                InventoryItem.objects.filter(pk=self.item_id).update(
+                    quantity=F('quantity') - self.quantity
+                )
+            self.item.refresh_from_db()
         super().save(*args, **kwargs)
     
     def __str__(self):
@@ -140,7 +145,7 @@ class LaborEntry(models.Model):
     hourly_rate = models.DecimalField(max_digits=8, decimal_places=2)
     total_wage = models.DecimalField(max_digits=10, decimal_places=2)
     
-    date = models.DateField()
+    date = models.DateField(db_index=True)
     notes = models.TextField(blank=True)
     is_paid = models.BooleanField(default=False)
     
@@ -151,7 +156,7 @@ class LaborEntry(models.Model):
         verbose_name_plural = 'Labor entries'
     
     def save(self, *args, **kwargs):
-        if not self.total_wage:
+        if self.total_wage is None:
             self.total_wage = self.hours_worked * self.hourly_rate
         super().save(*args, **kwargs)
     

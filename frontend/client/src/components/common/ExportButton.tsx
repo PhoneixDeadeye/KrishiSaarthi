@@ -16,7 +16,7 @@ export interface Column {
 }
 
 interface ExportButtonProps {
-    data: any[];
+    data: Record<string, unknown>[];
     filename?: string;
     columns: Column[];
     title?: string;
@@ -71,7 +71,7 @@ export function ExportButton({ data, filename = "export", columns, title = "Repo
             doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
 
             const tableColumn = columns.map(col => col.header);
-            const tableRows: any[] = [];
+            const tableRows: string[][] = [];
 
             data.forEach(item => {
                 const rowData = columns.map(col => item[col.accessorKey] || "");

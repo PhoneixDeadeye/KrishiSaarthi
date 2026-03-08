@@ -92,8 +92,12 @@ class Revenue(models.Model):
         ordering = ['-date']
     
     def save(self, *args, **kwargs):
-        # Auto-calculate total if not provided
-        if not self.total_amount:
+        # Auto-calculate total if not explicitly provided
+        if self.total_amount is None or (
+            not self.pk  # New instance — always recalculate to match inputs
+            and self.quantity_sold is not None
+            and self.price_per_unit is not None
+        ):
             self.total_amount = self.quantity_sold * self.price_per_unit
         super().save(*args, **kwargs)
     

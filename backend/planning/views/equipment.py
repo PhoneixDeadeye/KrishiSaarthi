@@ -21,7 +21,7 @@ class EquipmentView(APIView):
             serializer = EquipmentSerializer(equipment)
             return Response(serializer.data)
         
-        equipment_list = Equipment.objects.filter(user=request.user)
+        equipment_list = Equipment.objects.filter(user=request.user).prefetch_related('bookings').order_by('name')
         
         # Filter by status
         eq_status = request.query_params.get('status')
@@ -76,9 +76,9 @@ class EquipmentBookingView(APIView):
         """List bookings for equipment"""
         if equipment_id:
             equipment = get_object_or_404(Equipment, pk=equipment_id, user=request.user)
-            bookings = equipment.bookings.all()
+            bookings = equipment.bookings.select_related('field').all()
         else:
-            bookings = EquipmentBooking.objects.filter(equipment__user=request.user)
+            bookings = EquipmentBooking.objects.filter(equipment__user=request.user).select_related('equipment', 'field')
         
         # Filter by date range
         start_date = request.query_params.get('start_date')

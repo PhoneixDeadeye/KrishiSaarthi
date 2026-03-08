@@ -1,4 +1,3 @@
-"use client";
 
 import React, { useState } from "react";
 import {
@@ -15,6 +14,7 @@ import L from "leaflet";
 import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 import { useAuth } from "@/context/AuthContext";
 import { useField } from "@/context/FieldContext";
+import { useToast } from "@/hooks/use-toast";
 import "leaflet/dist/leaflet.css";
 import "leaflet-geosearch/dist/geosearch.css";
 import "./MapView.css";
@@ -25,7 +25,7 @@ function MapClickHandler({
   onMapClick,
   isDrawing,
 }: {
-  onMapClick: (latlng: any) => void;
+  onMapClick: (latlng: L.LatLng) => void;
   isDrawing: boolean;
 }) {
   useMapEvents({
@@ -110,6 +110,7 @@ export default function MapView({
 }) {
   const { token } = useAuth();
   const { selectedField, refreshFields } = useField();
+  const { toast } = useToast();
   const [farmPolygon, setFarmPolygon] = useState<any[]>([]);
   const [fieldName, setFieldName] = useState("My Field");
   const [isDrawing, setIsDrawing] = useState(false);
@@ -117,11 +118,12 @@ export default function MapView({
   const [mapType, setMapType] = useState("street");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   // Geolocation states
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [locationRequested, setLocationRequested] = useState(false);
-  const [centerPosition, setCenterPosition] = useState<[number, number]>([9.1632, 76.6413]); // Kerala default
+  const [centerPosition, setCenterPosition] = useState<[number, number]>([20.5937, 78.9629]); // India center default
 
   // Request user's location on mount
   React.useEffect(() => {
@@ -136,11 +138,9 @@ export default function MapView({
             ];
             setUserLocation(userLoc);
             setCenterPosition(userLoc);
-            console.log("📍 User location detected:", userLoc);
           },
           (error) => {
-            console.log("📍 Location access denied or unavailable, using default location");
-            console.error(error);
+            // Location access denied or unavailable, using default
           },
           {
             enableHighAccuracy: true,
@@ -160,7 +160,7 @@ export default function MapView({
         const coords = selectedField.polygon.coordinates[0];
         if (coords) {
           // Convert [lon, lat] to [lat, lon]
-          const latlngs = coords.map((c: any) => [c[1], c[0]]);
+          const latlngs = coords.map((c: number[]) => [c[1], c[0]]);
           // Remove last point if it duplicates first (closed loop)
           if (latlngs.length > 2 && latlngs[0][0] === latlngs[latlngs.length - 1][0] && latlngs[0][1] === latlngs[latlngs.length - 1][1]) {
             latlngs.pop();
@@ -194,7 +194,7 @@ export default function MapView({
     }
   }, [selectedField, userLocation]);
 
-  const handleMapClick = (latlng: any) => {
+  const handleMapClick = (latlng: L.LatLng) => {
     if (isDrawing) {
       const newPoint = [latlng.lat, latlng.lng];
       const newPolygon = [...farmPolygon, newPoint];
@@ -225,7 +225,9 @@ export default function MapView({
       setFarmArea(
         Number((turf.area(turf.polygon([coords])) / 10000).toFixed(2))
       );
-    } else alert("Please select at least 3 points!");
+    } else {
+      toast({ title: "Insufficient Points", description: "Please select at least 3 points.", variant: "destructive" });
+    }
   };
   const clearFarm = () => {
     setFarmPolygon([]);
@@ -247,11 +249,9 @@ export default function MapView({
           ];
           setUserLocation(userLoc);
           setCenterPosition(userLoc);
-          console.log("📍 User location updated:", userLoc);
         },
         (error) => {
-          alert("📍 Unable to access location. Please enable location services or use the search bar to find your area.");
-          console.error(error);
+          toast({ title: "Location Unavailable", description: "Please enable location services or use the search bar.", variant: "destructive" });
         },
         {
           enableHighAccuracy: true,
@@ -260,24 +260,24 @@ export default function MapView({
         }
       );
     } else {
-      alert("📍 Geolocation is not supported by your browser. Please use the search bar to find your area.");
+      toast({ title: "Not Supported", description: "Geolocation is not supported by your browser. Use the search bar.", variant: "destructive" });
     }
   };
 
   // ================= Submit =================
   const handleSubmit = async () => {
     if (farmPolygon.length < 3) {
-      alert("⚠️ Please draw a farm boundary first.");
+      toast({ title: "No Boundary", description: "Please draw a farm boundary first.", variant: "destructive" });
       return;
     }
 
     if (!cropType) {
-      alert("⚠️ Please select a crop type.");
+      toast({ title: "Missing Crop Type", description: "Please select a crop type.", variant: "destructive" });
       return;
     }
 
     if (!token) {
-      alert("⚠️ Please log in to save your field.");
+      toast({ title: "Not Authenticated", description: "Please log in to save your field.", variant: "destructive" });
       return;
     }
 
@@ -319,16 +319,13 @@ export default function MapView({
       }
 
       const data = await res.json();
-      console.log("✅ Polygon saved:", data);
       setSubmitted(true);
       setIsDrawing(false);
-      setSubmitted(true);
-      setIsDrawing(false);
-      await refreshFields(); // Refresh the list in sidebar
-      alert("✅ Farm polygon saved successfully!");
-    } catch (err: any) {
-      console.error(err);
-      alert(`🚨 Error submitting farm data: ${err.message}`);
+      await refreshFields();
+      toast({ title: "Success", description: "Farm polygon saved successfully!" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      toast({ title: "Error", description: `Failed to save: ${message}`, variant: "destructive" });
     } finally {
       setLoading(false);
     }

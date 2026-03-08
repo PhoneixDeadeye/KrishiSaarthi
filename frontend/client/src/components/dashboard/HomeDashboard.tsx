@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -7,12 +5,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useTranslation } from "@/hooks/useTranslation";
 import { useAuth } from "@/context/AuthContext";
 import { useField } from "@/context/FieldContext";
-import { Sprout, Plus, ArrowRight } from "lucide-react";
+import { Sprout, Plus, ArrowRight, AlertCircle, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
-import { HealthScoreResponse, PredictionData } from "@/types/field";
+import { PredictionData } from "@/types/field";
 import { WeatherWidget } from "./WeatherWidget";
 import { HealthGauge } from "./HealthGauge";
+import { useWeather } from "@/hooks/useWeather";
+import { useHealthScore } from "@/hooks/useHealthScore";
 
 interface MarketData {
     crops_summary: {
@@ -28,72 +28,31 @@ export function HomeDashboard({ onNavigate }: { onNavigate: (tab: string) => voi
     const { user, token } = useAuth();
     const { selectedField, fields } = useField();
 
-    const [weather, setWeather] = useState<any>(null);
-    const [healthData, setHealthData] = useState<HealthScoreResponse | null>(null);
+    const { weather, isLoading: weatherLoading, error: weatherError } = useWeather();
+    const { healthData, isLoading: healthLoading, error: healthError } = useHealthScore();
+
     const [marketPrices, setMarketPrices] = useState<any[]>([]);
+    const [marketLoading, setMarketLoading] = useState(true);
+    const [marketError, setMarketError] = useState<string | null>(null);
     const [predictionData, setPredictionData] = useState<PredictionData | null>(null);
-
-    // Fetch Weather
-    useEffect(() => {
-        const fetchWeather = async () => {
-            if (!token) return;
-            try {
-                let coordEndpoint = '/field/coord';
-                if (selectedField) coordEndpoint += `?field_id=${selectedField.id}`;
-                const coordData = await apiFetch<any>(coordEndpoint);
-                const coord = coordData?.coord || coordData?.location || null;
-                let lon: number | undefined, lat: number | undefined;
-                if (Array.isArray(coord)) { [lon, lat] = coord; }
-                else if (coord && typeof coord === "object") { lon = coord.lon ?? coord.x; lat = coord.lat ?? coord.y; }
-
-                if (lat === undefined || lon === undefined) {
-                    setWeather({ temp: 24, condition: "Partly Cloudy", humidity: 65, wind: 12 });
-                    return;
-                }
-
-                const weatherData = await apiFetch<any>(`/field/weather?lat=${lat}&lon=${lon}`);
-                setWeather({
-                    temp: Math.round(weatherData.current.main.temp),
-                    condition: weatherData.current.weather[0].main,
-                    humidity: weatherData.current.main.humidity,
-                    wind: Math.round(weatherData.current.wind.speed * 3.6)
-                });
-
-            } catch (err) {
-                console.error("Weather fetch error", err);
-                setWeather({ temp: "--", condition: "Unavailable", humidity: 0, wind: 0 });
-            }
-        };
-        fetchWeather();
-    }, [selectedField, token]);
-
-    // Fetch Health
-    useEffect(() => {
-        const fetchHealth = async () => {
-            if (!token) return;
-            try {
-                let endpoint = '/field/healthscore';
-                if (selectedField) endpoint += `?field_id=${selectedField.id}`;
-                const data = await apiFetch<HealthScoreResponse>(endpoint);
-                setHealthData(data);
-            } catch (err) {
-                console.error("Health fetch error", err);
-                setHealthData(null);
-            }
-        };
-        fetchHealth();
-    }, [selectedField, token]);
+    const [predictionLoading, setPredictionLoading] = useState(false);
 
     // Fetch Yield Prediction (NDVI)
     useEffect(() => {
         const fetchPrediction = async () => {
-            if (!token || !selectedField) return;
+            if (!token || !selectedField) {
+                setPredictionLoading(false);
+                return;
+            }
+            setPredictionLoading(true);
             try {
                 const data = await apiFetch<PredictionData>(`/field/yield-prediction?field_id=${selectedField.id}`);
                 setPredictionData(data);
             } catch (err) {
-                console.error("Prediction fetch error", err);
+                console.error("Prediction fetch error:", err);
                 setPredictionData(null);
+            } finally {
+                setPredictionLoading(false);
             }
         };
         fetchPrediction();
@@ -103,6 +62,8 @@ export function HomeDashboard({ onNavigate }: { onNavigate: (tab: string) => voi
     // Fetch Market Prices
     useEffect(() => {
         const fetchMarket = async () => {
+            setMarketLoading(true);
+            setMarketError(null);
             try {
                 const data = await apiFetch<MarketData>('/finance/market-prices?state=Punjab');
                 if (data && data.crops_summary) {
@@ -114,7 +75,10 @@ export function HomeDashboard({ onNavigate }: { onNavigate: (tab: string) => voi
                     setMarketPrices(formatPrices);
                 }
             } catch (error) {
-                console.error("Market fetch error", error);
+                console.error("Market fetch error:", error);
+                setMarketError("Unable to load market prices");
+            } finally {
+                setMarketLoading(false);
             }
         };
         fetchMarket();
@@ -145,22 +109,39 @@ export function HomeDashboard({ onNavigate }: { onNavigate: (tab: string) => voi
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Weather Widget (Span 4) */}
                 <div className="lg:col-span-4">
-                    <WeatherWidget weather={weather} />
+                    <WeatherWidget weather={weather} isLoading={weatherLoading} error={weatherError} />
                 </div>
 
-                {/* Crop Status Cards (Span 8 -> 2x1 or 2x2 grid) */}
-                <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <HealthGauge
-                        score={healthData?.score_percent || 0}
-                        rating={healthData?.rating || "Unknown"}
-                        title={selectedField?.name || "Select Field"}
-                    />
-                    <HealthGauge
-                        score={85}
-                        rating="Good"
-                        title="Winter Wheat"
-                        accentColor="text-yellow-500"
-                    />
+                {/* Crop Health Card (Span 8) */}
+                <div className="lg:col-span-8">
+                    {healthLoading ? (
+                        <Card className="h-full flex items-center justify-center">
+                            <CardContent className="flex flex-col items-center gap-2 py-8">
+                                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                                <p className="text-sm text-muted-foreground">Loading health data...</p>
+                            </CardContent>
+                        </Card>
+                    ) : healthError ? (
+                        <Card className="h-full flex items-center justify-center">
+                            <CardContent className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
+                                <AlertCircle className="h-8 w-8" />
+                                <p className="text-sm">{healthError}</p>
+                            </CardContent>
+                        </Card>
+                    ) : healthData ? (
+                        <HealthGauge
+                            score={healthData.score_percent || 0}
+                            rating={healthData.rating || "Unknown"}
+                            title={selectedField?.name || "Select Field"}
+                        />
+                    ) : (
+                        <Card className="h-full flex items-center justify-center">
+                            <CardContent className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
+                                <Sprout className="h-8 w-8" />
+                                <p className="text-sm">Select a field to view crop health</p>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             </div>
 
@@ -173,9 +154,6 @@ export function HomeDashboard({ onNavigate }: { onNavigate: (tab: string) => voi
                             <CardTitle>Yield Prediction</CardTitle>
                             <CardDescription>Estimated output based on current conditions vs last year.</CardDescription>
                         </div>
-                        <Button variant="outline" size="sm" className="h-8">
-                            <span className="material-symbols-outlined text-sm mr-2">download</span> Export
-                        </Button>
                     </CardHeader>
                     <CardContent className="p-6">
                         <div className="h-64 w-full">
@@ -222,8 +200,7 @@ export function HomeDashboard({ onNavigate }: { onNavigate: (tab: string) => voi
                 {/* Alerts Feed (Span 4) */}
                 <Card className="lg:col-span-4 flex flex-col h-[450px]">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b">
-                        <CardTitle className="text-lg">Recent Activity</CardTitle>
-                        <Button variant="ghost" size="sm" className="text-primary hover:text-primary/90 p-0 h-auto">View All</Button>
+                        <CardTitle className="text-lg">Recommendations</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-1 overflow-y-auto pt-4 pr-2">
                         <div className="space-y-4">
@@ -231,41 +208,24 @@ export function HomeDashboard({ onNavigate }: { onNavigate: (tab: string) => voi
                                 predictionData.recommendations.map((rec, i) => (
                                     <div key={i} className="flex gap-3 group">
                                         <div className="flex flex-col items-center">
-                                            <div className="size-2 rounded-full bg-destructive mt-2 ring-4 ring-destructive/10"></div>
+                                            <div className="size-2 rounded-full bg-primary mt-2 ring-4 ring-primary/10"></div>
                                             <div className="w-0.5 h-full bg-border my-1 group-last:hidden"></div>
                                         </div>
                                         <div className="pb-4">
                                             <p className="text-sm font-semibold">Recommendation</p>
                                             <p className="text-xs text-muted-foreground mt-0.5">{rec.text}</p>
-                                            <p className="text-[10px] text-muted-foreground mt-2">Just now</p>
                                         </div>
                                     </div>
                                 ))
                             ) : (
-                                <>
-                                    <div className="flex gap-3 group">
-                                        <div className="flex flex-col items-center">
-                                            <div className="size-2 rounded-full bg-destructive mt-2 ring-4 ring-destructive/10"></div>
-                                            <div className="w-0.5 h-full bg-border my-1 group-last:hidden"></div>
-                                        </div>
-                                        <div className="pb-4">
-                                            <p className="text-sm font-semibold">Severe Storm Alert</p>
-                                            <p className="text-xs text-muted-foreground mt-0.5">High probability of hail in Sector 4. Cover sensitive equipment.</p>
-                                            <p className="text-[10px] text-muted-foreground mt-2">2h ago</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-3 group">
-                                        <div className="flex flex-col items-center">
-                                            <div className="size-2 rounded-full bg-yellow-500 mt-2 ring-4 ring-yellow-100 dark:ring-yellow-900/30"></div>
-                                            <div className="w-0.5 h-full bg-border my-1 group-last:hidden"></div>
-                                        </div>
-                                        <div className="pb-4">
-                                            <p className="text-sm font-semibold">Irrigation System Warning</p>
-                                            <p className="text-xs text-muted-foreground mt-0.5">Pressure drop detected in Zone B pump.</p>
-                                            <p className="text-[10px] text-muted-foreground mt-2">4h ago</p>
-                                        </div>
-                                    </div>
-                                </>
+                                <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-8">
+                                    <AlertCircle className="h-8 w-8 mb-2" />
+                                    <p className="text-sm text-center">
+                                        {selectedField
+                                            ? "No recommendations available yet. Data will appear as we analyze your field."
+                                            : "Select a field to see AI-powered recommendations."}
+                                    </p>
+                                </div>
                             )}
                         </div>
                     </CardContent>
@@ -275,7 +235,10 @@ export function HomeDashboard({ onNavigate }: { onNavigate: (tab: string) => voi
             {/* Bottom Section: Market Prices Table */}
             <Card className="overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
-                    <CardTitle className="text-lg">Live Market Prices</CardTitle>
+                    <div>
+                        <CardTitle className="text-lg">Reference Market Prices</CardTitle>
+                        <CardDescription className="text-xs mt-1">MSP & indicative prices. Not real-time data.</CardDescription>
+                    </div>
                     <Button
                         variant="ghost"
                         onClick={() => onNavigate('market')}
@@ -291,13 +254,27 @@ export function HomeDashboard({ onNavigate }: { onNavigate: (tab: string) => voi
                                 <TableRow>
                                     <TableHead className="px-6 py-4">Commodity</TableHead>
                                     <TableHead className="px-6 py-4">Price (per Quintal)</TableHead>
-                                    <TableHead className="px-6 py-4">Change (24h)</TableHead>
+                                    <TableHead className="px-6 py-4">Change</TableHead>
                                     <TableHead className="px-6 py-4">Trend</TableHead>
-                                    <TableHead className="px-6 py-4 text-right">Action</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {marketPrices.length > 0 ? (
+                                {marketLoading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="text-center py-6">
+                                            <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                Loading market prices...
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : marketError ? (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                                            {marketError}
+                                        </TableCell>
+                                    </TableRow>
+                                ) : marketPrices.length > 0 ? (
                                     marketPrices.map((item, i) => (
                                         <TableRow key={i} className="hover:bg-muted/50 transition-colors">
                                             <TableCell className="px-6 py-4 font-medium flex items-center gap-3">
@@ -322,16 +299,11 @@ export function HomeDashboard({ onNavigate }: { onNavigate: (tab: string) => voi
                                                     </svg>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="px-6 py-4 text-right">
-                                                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary transition-colors h-8 w-8">
-                                                    <span className="material-symbols-outlined">more_vert</span>
-                                                </Button>
-                                            </TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">Loading market prices...</TableCell>
+                                        <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">No market data available.</TableCell>
                                     </TableRow>
                                 )}
                             </TableBody>

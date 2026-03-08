@@ -271,7 +271,9 @@ AgriSmart/
 │   │   ├── cnn.py               # MobileNetV2 pest detection
 │   │   ├── lstm.py              # Risk prediction model
 │   │   ├── health_score.py      # Multi-factor health scoring
-│   │   └── awd.py               # AWD detection from NDWI
+│   │   ├── awd.py               # AWD detection from NDWI
+│   │   ├── cc.py                # Carbon credit calculations
+│   │   └── registry.py          # Model versioning & integrity registry
 │   └── ml_models/               # Trained model weights
 │       ├── crop_health_model.pth   # 9.1MB CNN model
 │       ├── risk_lstm_final.pth     # LSTM weights
@@ -459,13 +461,41 @@ docker-compose -f docker-compose.prod.yml up -d
 cd backend
 python manage.py test
 
+# Run with pytest (recommended)
+pytest --tb=short -q
+
 # Frontend tests
 cd frontend/client
 npm test
-
-# E2E tests
-npm run test:e2e
 ```
+
+---
+
+## 🔒 Production Hardening
+
+This project includes several production-grade security and performance measures:
+
+### Security
+- **Login rate limiting** — 5 attempts per minute per IP
+- **Django password validation** — enforced on signup and password reset
+- **Session cookie hardening** — `HttpOnly`, `SESSION_COOKIE_AGE=86400`
+- **CSRF/XSS protection** — `X_FRAME_OPTIONS=DENY`, secure cookie flags
+- **User-scoped queries** — all data endpoints filter by `request.user`
+- **IDOR prevention** — chat sessions and claims verified against requesting user
+- **Input sanitization** — question length limits, coordinate validation
+
+### Performance
+- **`select_related` / `prefetch_related`** — all FK-traversing querysets optimized
+- **DB-level aggregation** — `Sum`/`Count` instead of Python-side loops
+- **Deterministic ordering** — all list views use explicit `order_by()`
+- **DRF pagination** — `PAGE_SIZE=50` configured globally
+- **Redis caching** — with `LocMemCache` fallback for development
+
+### Observability
+- **Structured logging** — `config/logging_config.py` with file rotation
+- **Request logging middleware** — method, path, status, duration
+- **Health endpoints** — `/health` (liveness) and `/ready` (readiness with ML model checks)
+- **Prometheus/Grafana** — monitoring stack in `monitoring/`
 
 ---
 
@@ -478,6 +508,28 @@ npm run test:e2e
 | Pest Detection | `crop_health_model.pth` | 9.1 MB | MobileNetV2 binary classifier |
 | Risk Prediction | `risk_lstm_final.pth` | 208 KB | LSTM time-series model |
 | Input Scaler | `risk_scaler.save` | 711 B | Feature normalization |
+
+### Model Registry
+
+All models are tracked via `ml_engine.registry` which provides:
+
+- **Versioning**: Semantic version for each model artifact
+- **Integrity checks**: SHA-256 file hashes verified at startup
+- **Health status**: Readiness endpoint reports model availability
+- **Metadata**: Architecture, input/output specs, file sizes
+
+```python
+from ml_engine import model_registry
+
+# Check all models
+status = model_registry.status()
+
+# Verify file integrity
+integrity = model_registry.verify_integrity()
+
+# Get specific model metadata
+cnn_meta = model_registry.get("cnn_crop_health")
+```
 
 ### Model Details
 

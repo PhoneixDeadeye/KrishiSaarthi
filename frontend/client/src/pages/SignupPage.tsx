@@ -96,7 +96,7 @@ export default function SignupPage() {
                         <div className="size-14 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
                             <span className="material-symbols-outlined text-2xl text-white">eco</span>
                         </div>
-                        <h1 className="text-2xl font-bold">Krishi Sakhi</h1>
+                        <h2 className="text-2xl font-bold">Krishi Sakhi</h2>
                     </div>
 
                     <div className="text-center mb-8">

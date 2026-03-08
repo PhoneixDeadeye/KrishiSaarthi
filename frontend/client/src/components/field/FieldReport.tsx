@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,8 +7,10 @@ import { useField } from "@/context/FieldContext";
 import { EEData } from "./EEData";
 import MapView from "./MapView";
 import { apiFetch } from "@/lib/api";
-import { HealthScoreResponse } from "@/types/field";
 import { cn } from "@/lib/utils";
+import { useWeather } from "@/hooks/useWeather";
+import { useHealthScore } from "@/hooks/useHealthScore";
+import { Loader2, AlertCircle } from "lucide-react";
 
 // Stat Card Component
 const StatCard = ({
@@ -47,17 +47,13 @@ export function FieldReport() {
   const { token } = useAuth();
   const { selectedField } = useField();
 
-  const [weather, setWeather] = useState<any>(null);
-  const [forecast, setForecast] = useState<any[]>([]);
-  const [isLoadingWeather, setIsLoadingWeather] = useState(true);
-
-  const [healthData, setHealthData] = useState<HealthScoreResponse | null>(null);
-  const [loadingHealth, setLoadingHealth] = useState(false);
+  const { weather, forecast, isLoading: isLoadingWeather, error: weatherError } = useWeather();
+  const { healthData, isLoading: loadingHealth, error: healthError } = useHealthScore();
 
   // Soil State
   type SoilInputs = { N: string; P: string; K: string; pH: string; };
-  const [soilInputs, setSoilInputs] = useState<SoilInputs>({ N: "120", P: "45", K: "180", pH: "6.8" });
-  const [soilSubmitted, setSoilSubmitted] = useState(true);
+  const [soilInputs, setSoilInputs] = useState<SoilInputs>({ N: "", P: "", K: "", pH: "" });
+  const [soilSubmitted, setSoilSubmitted] = useState(false);
 
   type SoilAdviceData = {
     overall_status: string;
@@ -90,47 +86,12 @@ export function FieldReport() {
     }
   };
 
-  // Fetch Health
-  useEffect(() => {
-    const fetchHealth = async () => {
-      if (!token) return;
-      setLoadingHealth(true);
-      try {
-        let endpoint = '/field/healthscore';
-        if (selectedField) endpoint += `?field_id=${selectedField.id}`;
-        const data = await apiFetch<HealthScoreResponse>(endpoint);
-        setHealthData(data);
-      } catch (err) { console.error(err); }
-      finally { setLoadingHealth(false); }
-    };
-    fetchHealth();
-  }, [token, selectedField]);
+  // Weather and health data are now fetched via shared hooks above
 
-  // Fetch Weather
-  useEffect(() => {
-    const fetchWeather = async () => {
-      if (!token) { setIsLoadingWeather(false); return; }
-      try {
-        let coordEndpoint = '/field/coord';
-        if (selectedField) coordEndpoint += `?field_id=${selectedField.id}`;
-        const coordData = await apiFetch<any>(coordEndpoint);
-        const coord = coordData?.coord || coordData?.location || null;
-        let lon: number | undefined, lat: number | undefined;
-        if (Array.isArray(coord)) { [lon, lat] = coord; }
-        else if (coord && typeof coord === "object") { lon = coord.lon ?? coord.x; lat = coord.lat ?? coord.y; }
-
-        if (lat === undefined || lon === undefined) { setIsLoadingWeather(false); return; }
-
-        const weatherData = await apiFetch<any>(`/field/weather?lat=${lat}&lon=${lon}`);
-        setWeather(weatherData.current);
-        setForecast(weatherData.forecast?.slice(0, 5) || []);
-      } catch (err) { console.error(err); }
-      finally { setIsLoadingWeather(false); }
-    };
-    fetchWeather();
-  }, [token, selectedField]);
-
-  const handlePDFDownload = () => { window.print(); };
+  const handlePDFDownload = () => {
+    // Use browser print dialog for PDF export
+    window.print();
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
@@ -152,28 +113,26 @@ export function FieldReport() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Area"
-          value={selectedField?.area ? `${selectedField.area} Ac` : "24.5 Ac"}
+          value={selectedField?.area ? `${selectedField.area} Ac` : "--"}
           icon="straighten"
         />
         <StatCard
           title="Crop Health"
-          value={healthData ? `${healthData.score_percent}%` : "87%"}
-          subtitle={healthData?.rating || "Good"}
+          value={healthData ? `${healthData.score_percent}%` : loadingHealth ? "..." : "--"}
+          subtitle={healthData?.rating || undefined}
           icon="monitoring"
           iconColor="text-primary"
         />
         <StatCard
-          title="Active Alerts"
-          value="2"
-          subtitle="1 High Priority"
-          icon="notifications_active"
-          iconColor="text-amber-500"
+          title="Crop Type"
+          value={selectedField?.cropType || "--"}
+          icon="eco"
+          iconColor="text-green-500"
         />
         <StatCard
-          title="Days to Harvest"
-          value="15"
-          subtitle="Wheat (Rabi)"
-          icon="calendar_today"
+          title="Field Name"
+          value={selectedField?.name || "--"}
+          icon="location_on"
           iconColor="text-blue-500"
         />
       </div>
@@ -228,13 +187,13 @@ export function FieldReport() {
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                         fill="none"
                         stroke="currentColor"
-                        strokeDasharray={`${healthData?.score_percent || 87}, 100`}
+                        strokeDasharray={`${healthData?.score_percent || 0}, 100`}
                         strokeLinecap="round"
                         strokeWidth="3"
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center flex-col">
-                      <span className="text-2xl font-bold">{healthData?.score_percent || 87}%</span>
+                      <span className="text-2xl font-bold">{healthData?.score_percent || "--"}%</span>
                       <span className="text-xs text-muted-foreground">Health</span>
                     </div>
                   </div>
@@ -242,18 +201,20 @@ export function FieldReport() {
 
                 {/* Insights */}
                 <div className="md:col-span-2 space-y-3">
-                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-                    <p className="text-sm font-medium text-primary">✓ Vegetation index is healthy</p>
-                    <p className="text-xs text-muted-foreground mt-1">NDVI shows optimal growth patterns across field.</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-                    <p className="text-sm font-medium text-amber-700 dark:text-amber-400">⚠ Low moisture detected in Zone B</p>
-                    <p className="text-xs text-muted-foreground mt-1">Consider irrigation within next 48 hours.</p>
-                  </div>
-                  {healthData?.recommendation && (
-                    <p className="text-sm text-muted-foreground p-3 bg-muted rounded-lg">
-                      {healthData.recommendation}
-                    </p>
+                  {healthData?.recommendation ? (
+                    <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                      <p className="text-sm font-medium text-primary">AI Analysis</p>
+                      <p className="text-xs text-muted-foreground mt-1">{healthData.recommendation}</p>
+                    </div>
+                  ) : loadingHealth ? (
+                    <div className="p-3 rounded-lg bg-muted flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm text-muted-foreground">Analyzing crop data...</span>
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-lg bg-muted border border-dashed">
+                      <p className="text-sm text-muted-foreground">Select a field to see AI-powered crop analysis.</p>
+                    </div>
                   )}
                 </div>
               </div>
@@ -266,25 +227,39 @@ export function FieldReport() {
           {/* Weather Card */}
           <Card className="overflow-hidden">
             <div className="p-5 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 text-sm">Current Weather</p>
-                  <p className="text-3xl font-bold mt-1">
-                    {weather?.main?.temp ? `${Math.round(weather.main.temp)}°C` : "24°C"}
-                  </p>
+              {isLoadingWeather ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Loading weather...</span>
                 </div>
-                <span className="material-symbols-outlined text-5xl text-yellow-300">wb_sunny</span>
-              </div>
-              <div className="flex gap-4 mt-4 text-sm">
-                <span className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-base">water_drop</span>
-                  {weather?.main?.humidity || 65}%
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-base">air</span>
-                  {weather?.wind?.speed ? `${Math.round(weather.wind.speed * 3.6)} km/h` : "12 km/h"}
-                </span>
-              </div>
+              ) : weather ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-blue-100 text-sm">Current Weather</p>
+                      <p className="text-3xl font-bold mt-1">
+                        {weather.temp}°C
+                      </p>
+                    </div>
+                    <span className="material-symbols-outlined text-5xl text-yellow-300">wb_sunny</span>
+                  </div>
+                  <div className="flex gap-4 mt-4 text-sm">
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-base">water_drop</span>
+                      {weather.humidity}%
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-base">air</span>
+                      {weather.wind} km/h
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-2">
+                  <p className="text-blue-100 text-sm">{weatherError || "Weather data unavailable"}</p>
+                  <p className="text-xs text-blue-200 mt-1">Save a field location to see weather</p>
+                </div>
+              )}
             </div>
             <CardContent className="p-4 space-y-2">
               {forecast.slice(0, 4).map((f, i) => (
@@ -305,39 +280,43 @@ export function FieldReport() {
                 <span className="material-symbols-outlined text-primary">science</span>
                 <h3 className="font-bold">Soil Nutrients</h3>
               </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Nitrogen (N)</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary rounded-full" style={{ width: `${Math.min(+soilInputs.N / 2, 100)}%` }}></div>
+              {soilSubmitted && (soilInputs.N || soilInputs.P || soilInputs.K || soilInputs.pH) ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Nitrogen (N)</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full" style={{ width: `${Math.min(+soilInputs.N / 2, 100)}%` }}></div>
+                      </div>
+                      <span className="text-sm font-medium w-12 text-right">{soilInputs.N || "--"}</span>
                     </div>
-                    <span className="text-sm font-medium w-12 text-right">{soilInputs.N}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Phosphorus (P)</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-orange-500 rounded-full" style={{ width: `${Math.min(+soilInputs.P, 100)}%` }}></div>
+                      </div>
+                      <span className="text-sm font-medium w-12 text-right">{soilInputs.P || "--"}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Potassium (K)</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-teal-500 rounded-full" style={{ width: `${Math.min(+soilInputs.K / 2, 100)}%` }}></div>
+                      </div>
+                      <span className="text-sm font-medium w-12 text-right">{soilInputs.K || "--"}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    <span className="text-sm text-muted-foreground">pH Level</span>
+                    <span className="text-sm font-bold text-primary">{soilInputs.pH || "--"}</span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Phosphorus (P)</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-orange-500 rounded-full" style={{ width: `${Math.min(+soilInputs.P, 100)}%` }}></div>
-                    </div>
-                    <span className="text-sm font-medium w-12 text-right">{soilInputs.P}</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Potassium (K)</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-violet-500 rounded-full" style={{ width: `${Math.min(+soilInputs.K / 2, 100)}%` }}></div>
-                    </div>
-                    <span className="text-sm font-medium w-12 text-right">{soilInputs.K}</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <span className="text-sm text-muted-foreground">pH Level</span>
-                  <span className="text-sm font-bold text-primary">{soilInputs.pH}</span>
-                </div>
-              </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">Enter soil nutrient values below to see analysis.</p>
+              )}
               {aiSoilAdvice?.overall_status && (
                 <div className="mt-4 p-3 rounded-lg bg-primary/10 text-sm">
                   {aiSoilAdvice.overall_status}

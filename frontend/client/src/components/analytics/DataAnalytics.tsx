@@ -23,8 +23,8 @@ export function DataAnalytics() {
   const { token } = useAuth();
   const { selectedField } = useField();
 
-  const [location, setLocation] = useState("Thiruvananthapuram, Kerala");
-  const [mapCenter, setMapCenter] = useState<[number, number]>([8.5241, 76.9366]);
+  const [location, setLocation] = useState("");
+  const [mapCenter, setMapCenter] = useState<[number, number]>([20.5937, 78.9629]); // India center default
   const [ccData, setCcData] = useState<CarbonCreditResponse | null>(null);
   const [ccLoading, setCcLoading] = useState(true);
   const [ccError, setCcError] = useState<unknown>(null);
@@ -77,7 +77,7 @@ export function DataAnalytics() {
             setLocation("My Field Location");
           }
         })
-        .catch((e) => console.log("Could not fetch coords for analytics map", e));
+        .catch(() => { /* Could not fetch coords for analytics map */ });
     }
   }, [token, selectedField]);
 
@@ -185,21 +185,20 @@ export function DataAnalytics() {
                 </div>
               </CardHeader>
               <CardContent className="p-6 flex-1 flex flex-col justify-center">
-                <div className="text-center space-y-6">
+                <div className="text-center space-y-4">
                   <div className="size-24 bg-primary/10 rounded-full mx-auto flex items-center justify-center border-4 border-background shadow-inner">
                     <span className="material-symbols-outlined text-4xl text-primary">
                       forest
                     </span>
                   </div>
                   <div>
-                    <div className="text-4xl font-extrabold text-primary">0</div>
-                    <div className="text-sm text-muted-foreground mt-1">
-                      {t("trees_detected")}
-                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Tree canopy detection is not yet available for your field.
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      This feature uses satellite imagery to count trees. Coming soon.
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground bg-secondary/50 py-1 px-3 rounded-full inline-block">
-                    {t("last_scan")}: Never
-                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -270,19 +269,13 @@ export function DataAnalytics() {
               </div>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
-              {/* Market Info */}
-              <div className="p-4 bg-primary/5 rounded-lg flex items-center justify-between border border-primary/10">
-                <div>
-                  <p className="font-medium">Rice</p>
-                  <p className="text-xs text-muted-foreground">Per quintal</p>
+              {/* Field Location Map */}
+              {!location && (
+                <div className="text-center text-sm text-muted-foreground py-2">
+                  <span className="material-symbols-outlined text-lg mr-1">info</span>
+                  Select a field to see its location on the map.
                 </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold">₹2,700</p>
-                  <p className="text-xs text-green-600 font-medium flex items-center justify-end">
-                    +2.5% <span className="material-symbols-outlined text-[10px] ml-0.5">arrow_upward</span>
-                  </p>
-                </div>
-              </div>
+              )}
 
               {/* Search */}
               <div className="flex gap-2">
@@ -319,7 +312,7 @@ export function DataAnalytics() {
                 </MapContainer>
               </div>
 
-              <Button className="w-full gap-2" size="lg">
+              <Button className="w-full gap-2" size="lg" variant="outline" disabled>
                 <span className="material-symbols-outlined text-lg">
                   directions
                 </span>

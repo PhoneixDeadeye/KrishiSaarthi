@@ -72,6 +72,14 @@ export default {
         "dashboard-primary": "#0df259",
         "dashboard-bg-light": "#f5f8f6",
         "dashboard-bg-dark": "#0d1a11",
+        /* Landing page colors */
+        landing: {
+          primary: "#4ade80",
+          "bg-light": "#f8fafc",
+          "bg-dark": "#0f1a12",
+          "text-light": "#1e293b",
+          "text-dark": "#e2e8f0",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

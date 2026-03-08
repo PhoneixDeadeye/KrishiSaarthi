@@ -32,6 +32,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const logoutTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     const logout = () => {
+        // Attempt server-side token invalidation (fire-and-forget)
+        const currentToken = token || localStorage.getItem("authToken");
+        if (currentToken) {
+            fetch(`${API_BASE_URL}/logout`, {
+                method: "POST",
+                headers: { Authorization: `Token ${currentToken}` },
+            }).catch(() => { /* best-effort */ });
+        }
         setToken(null);
         setUser(null);
         localStorage.removeItem("authToken");
@@ -54,21 +62,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }, SESSION_TIMEOUT_MS);
     };
 
-    // Load token from localStorage on mount
+    // Load token from localStorage on mount and validate with server
     useEffect(() => {
         const storedToken = localStorage.getItem("authToken");
         const storedUser = localStorage.getItem("authUser");
 
         if (storedToken && storedUser) {
-            setToken(storedToken);
+            // Optimistically set state for instant UI
             try {
                 setUser(JSON.parse(storedUser));
+                setToken(storedToken);
             } catch {
                 localStorage.removeItem("authToken");
                 localStorage.removeItem("authUser");
+                setIsLoading(false);
+                return;
             }
+
+            // Validate token server-side
+            fetch(`${API_BASE_URL}/test_token`, {
+                headers: { Authorization: `Token ${storedToken}` },
+            })
+                .then((res) => {
+                    if (!res.ok) {
+                        // Token expired or invalid — clear state
+                        setToken(null);
+                        setUser(null);
+                        localStorage.removeItem("authToken");
+                        localStorage.removeItem("authUser");
+                    }
+                })
+                .catch(() => {
+                    // Network error — keep optimistic state, don't log user out offline
+                })
+                .finally(() => setIsLoading(false));
+        } else {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }, []);
 
     // Setup activity listeners when authenticated
@@ -126,8 +156,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem("authUser", JSON.stringify(data.user));
 
             return { success: true };
-        } catch (error) {
-            console.error("Login error:", error);
+        } catch {
             return { success: false, error: "Network error. Please try again." };
         }
     };
@@ -158,8 +187,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem("authUser", JSON.stringify(data.user));
 
             return { success: true };
-        } catch (error) {
-            console.error("Signup error:", error);
+        } catch {
             return { success: false, error: "Network error. Please try again." };
         }
     };

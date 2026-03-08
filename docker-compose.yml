@@ -3,8 +3,8 @@ version: '3.8'
 services:
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: krishisaarthi-backend
     ports:
       - "8000:8000"
@@ -29,8 +29,8 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: krishisaarthi-frontend
     ports:
       - "80:80"
@@ -48,11 +48,11 @@ services:
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-krishisaarthi}
       - POSTGRES_USER=${POSTGRES_USER:-krishiuser}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # ports:  # Do not expose to host in development — access via docker network
+    #   - "5432:5432"
     restart: unless-stopped
     networks:
       - krishisaarthi-network

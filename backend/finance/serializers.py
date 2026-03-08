@@ -2,6 +2,7 @@
 Serializers for finance module.
 """
 from rest_framework import serializers
+from django.db.models import Sum
 from .models import Season, CostEntry, Revenue, CostCategory
 
 
@@ -19,10 +20,15 @@ class SeasonSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'total_costs', 'total_revenue', 'profit_loss']
     
     def get_total_costs(self, obj):
-        return sum(cost.amount for cost in obj.costs.all())
+        # Use annotated value if available (prefetched), else single aggregate query
+        if hasattr(obj, '_total_costs'):
+            return obj._total_costs or 0
+        return obj.costs.aggregate(total=Sum('amount'))['total'] or 0
     
     def get_total_revenue(self, obj):
-        return sum(rev.total_amount for rev in obj.revenues.all())
+        if hasattr(obj, '_total_revenue'):
+            return obj._total_revenue or 0
+        return obj.revenues.aggregate(total=Sum('total_amount'))['total'] or 0
     
     def get_profit_loss(self, obj):
         return self.get_total_revenue(obj) - self.get_total_costs(obj)

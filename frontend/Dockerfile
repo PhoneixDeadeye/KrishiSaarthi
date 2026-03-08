@@ -4,13 +4,13 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package files
-COPY frontend/package*.json ./
+COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install all dependencies (need devDeps for build)
+RUN npm ci
 
 # Copy source code
-COPY frontend/ .
+COPY . .
 
 # Build application
 RUN npm run build
@@ -18,11 +18,11 @@ RUN npm run build
 # Production stage with nginx
 FROM nginx:alpine
 
-# Copy built files
-COPY --from=builder /app/client/dist /usr/share/nginx/html
+# Copy built files (vite outputs to dist/public per vite.config.ts)
+COPY --from=builder /app/dist/public /usr/share/nginx/html
 
 # Copy nginx configuration
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port
 EXPOSE 80

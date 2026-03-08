@@ -1,5 +1,4 @@
 // src/components/planning/SeasonCalendar.tsx
-"use client";
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,7 @@ const ACTIVITY_TYPES = [
     { value: "irrigation", label: "Irrigation", icon: "water_drop", color: "bg-blue-500" },
     { value: "fertilizing", label: "Fertilizing", icon: "science", color: "bg-yellow-500" },
     { value: "spraying", label: "Spraying", icon: "bug_report", color: "bg-red-500" },
-    { value: "weeding", label: "Weeding", icon: "content_cut", color: "bg-violet-500" },
+    { value: "weeding", label: "Weeding", icon: "content_cut", color: "bg-teal-500" },
     { value: "harvesting", label: "Harvesting", icon: "agriculture", color: "bg-orange-500" },
     { value: "other", label: "Other", icon: "more_horiz", color: "bg-gray-500" },
 ];

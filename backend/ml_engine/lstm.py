@@ -181,9 +181,9 @@ def predict_risk_from_values(
         }
         
     except Exception as e:
-        logger.error(f"Risk prediction failed: {e}")
+        logger.error(f"Risk prediction failed: {e}", exc_info=True)
         return {
-            "error": str(e),
+            "error": "Risk prediction failed",
             "risk_probability": 0.5,
             "risk_level": "Unknown",
             "recommendation": "Prediction failed - please try again"

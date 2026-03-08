@@ -1,6 +1,15 @@
 """
-Crop Yield Prediction views for KrishiSaarthi.
-Rule-based yield prediction using NDVI trends and crop-specific models.
+Crop Yield Estimation views for KrishiSaarthi.
+
+TRANSPARENCY NOTE:
+This module uses a rule-based approach, NOT a trained ML model.
+Yield is estimated by:
+  1. Fetching real NDVI time series from Google Earth Engine (when available).
+  2. Applying published crop-specific base yields (ICAR data) scaled by NDVI.
+  3. Adjusting for vegetation trend direction.
+
+When Earth Engine data is unavailable, a deterministic fallback is used and
+the response is marked with `ndvi_source: 'estimated'`.
 """
 import logging
 from datetime import timedelta
@@ -63,7 +72,7 @@ class YieldPredictionView(APIView):
         # Get field size from polygon (approximate)
         field_area_hectares = self._calculate_field_area(field.polygon)
         
-        # Get NDVI data (mock for now - would come from Earth Engine)
+        # Attempt real NDVI from Earth Engine; falls back to estimate.
         ndvi_data = self._get_ndvi_data(field)
         
         # Get crop model
@@ -81,6 +90,9 @@ class YieldPredictionView(APIView):
             'field_name': field.name,
             'crop_type': crop_type,
             'field_area_hectares': round(field_area_hectares, 2),
+            'method': 'rule_based_ndvi',
+            'is_ml_prediction': False,
+            'ndvi_source': ndvi_data.get('source', 'earth_engine'),
             'prediction': {
                 'yield_per_hectare': round(prediction['yield_per_hectare']),
                 'total_yield': round(prediction['total_yield']),
@@ -144,7 +156,7 @@ class YieldPredictionView(APIView):
                             'increasing' if recent_avg > older_avg + 0.02
                             else ('decreasing' if recent_avg < older_avg - 0.02 else 'stable')
                         )
-                        return {'current': round(current, 3), 'trend': trend, 'time_series': time_series}
+                        return {'current': round(current, 3), 'trend': trend, 'time_series': time_series, 'source': 'earth_engine'}
         except Exception as e:
             logger.warning(f"EE data fetch failed for yield prediction: {e}")
 
@@ -170,7 +182,7 @@ class YieldPredictionView(APIView):
             else ('decreasing' if recent_avg < older_avg - 0.02 else 'stable')
         )
 
-        return {'current': round(current, 3), 'trend': trend, 'time_series': time_series}
+        return {'current': round(current, 3), 'trend': trend, 'time_series': time_series, 'source': 'estimated'}
     
     def _calculate_yield(self, ndvi_data, model, field_area):
         """Calculate predicted yield based on NDVI and crop model"""

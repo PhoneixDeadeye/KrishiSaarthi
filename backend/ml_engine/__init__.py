@@ -23,6 +23,7 @@ from .cc import calculate_carbon_metrics
 from .cnn import predict_health, get_model as get_cnn_model
 from .lstm import predict_risk_from_values, get_model_and_scaler as get_lstm_model
 from .health_score import get_health_score, compute_health_score, get_health_rating
+from .registry import registry as model_registry
 
 __all__ = [
     # AWD Detection
@@ -44,6 +45,9 @@ __all__ = [
     'get_health_score',
     'compute_health_score',
     'get_health_rating',
+    
+    # Model Registry
+    'model_registry',
 ]
 
-__version__ = '2.0.0'
+__version__ = '2.1.0'

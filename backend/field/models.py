@@ -34,7 +34,7 @@ class FieldLog(models.Model):
     """Model for storing farm calendar/log entries"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='field_logs')
     field = models.ForeignKey(FieldData, on_delete=models.CASCADE, related_name='logs', null=True, blank=True)
-    date = models.DateField()
+    date = models.DateField(db_index=True)
     activity = models.CharField(max_length=20, choices=ACTIVITY_CHOICES)
     details = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -52,7 +52,7 @@ class FieldAlert(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='field_alerts')
     field = models.ForeignKey(FieldData, on_delete=models.CASCADE, related_name='alerts', null=True, blank=True)
     log = models.ForeignKey(FieldLog, on_delete=models.CASCADE, related_name='alerts', null=True, blank=True)
-    date = models.DateField()
+    date = models.DateField(db_index=True)
     message = models.CharField(max_length=255)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -79,7 +79,7 @@ class IrrigationLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='irrigation_logs')
     field = models.ForeignKey(FieldData, on_delete=models.CASCADE, related_name='irrigation_logs')
     
-    date = models.DateField()
+    date = models.DateField(db_index=True)
     water_amount = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)  # liters or mm
     duration_minutes = models.PositiveIntegerField(null=True, blank=True)
     source = models.CharField(max_length=20, choices=IrrigationSource.choices, default=IrrigationSource.OTHER)

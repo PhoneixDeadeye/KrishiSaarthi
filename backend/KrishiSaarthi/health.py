@@ -4,6 +4,7 @@ Health check and monitoring endpoints
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from django.db import connection
 from django.conf import settings
 import os
@@ -50,10 +51,20 @@ class ReadinessCheckView(APIView):
             logger.error(f"Database check failed: {e}")
             all_ready = False
         
-        # Check ML models
-        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'crop_health_model.pth')
-        lstm_path = os.path.join(settings.BASE_DIR, 'ml_models', 'risk_lstm_final.pth')
-        checks["ml_models"] = os.path.exists(model_path) and os.path.exists(lstm_path)
+        # Check ML models via registry
+        try:
+            from ml_engine.registry import registry
+            ml_status = registry.status()
+            checks["ml_models"] = all(
+                info["file_exists"] for info in ml_status.values()
+            )
+            checks["ml_model_details"] = {
+                name: {"exists": info["file_exists"], "version": info["version"]}
+                for name, info in ml_status.items()
+            }
+        except Exception as e:
+            logger.warning(f"ML model check failed: {e}")
+            checks["ml_models"] = False
         if not checks["ml_models"]:
             logger.warning("ML models not found")
             all_ready = False
@@ -78,9 +89,10 @@ class ReadinessCheckView(APIView):
 
 class MetricsView(APIView):
     """
-    Basic metrics endpoint for monitoring
+    Basic metrics endpoint for monitoring.
+    Restricted to admin users for defense-in-depth.
     """
-    permission_classes = []  # Public endpoint
+    permission_classes = [IsAuthenticated]
     
     def get(self, request):
         """Return basic application metrics"""

@@ -82,8 +82,8 @@ export default function ChatBot() {
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, botMessage]);
-    } catch (error: any) {
-      const errorText = error?.message || "I'm having trouble connecting right now. Please try again later.";
+    } catch (error: unknown) {
+      const errorText = error instanceof Error ? error.message : "I'm having trouble connecting right now. Please try again later.";
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: errorText,

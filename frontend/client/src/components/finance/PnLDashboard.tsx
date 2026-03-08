@@ -1,5 +1,4 @@
 // src/components/finance/PnLDashboard.tsx
-"use client";
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -141,7 +140,7 @@ export function PnLDashboard() {
     }
 
     const { summary, cost_breakdown, revenue_by_crop } = data;
-    const costColors = ["bg-red-500", "bg-orange-500", "bg-amber-500", "bg-yellow-500", "bg-lime-500", "bg-teal-500", "bg-cyan-500", "bg-violet-500"];
+    const costColors = ["bg-red-500", "bg-orange-500", "bg-amber-500", "bg-yellow-500", "bg-lime-500", "bg-teal-500", "bg-cyan-500", "bg-teal-500"];
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-10">
@@ -152,13 +151,9 @@ export function PnLDashboard() {
                     <p className="text-muted-foreground text-sm mt-1">Financial overview for {selectedField.name}</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2" disabled>
                         <span className="material-symbols-outlined text-lg">download</span>
                         Export
-                    </Button>
-                    <Button className="gap-2">
-                        <span className="material-symbols-outlined text-lg">add</span>
-                        Add Entry
                     </Button>
                 </div>
             </div>
@@ -324,22 +319,10 @@ export function PnLDashboard() {
                             </span>
                         </div>
                     </div>
-                    <div className="h-48 flex items-end justify-between gap-2 px-4">
-                        {["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map((month, i) => (
-                            <div key={month} className="flex-1 flex flex-col items-center gap-1">
-                                <div className="w-full flex gap-1 justify-center items-end h-36">
-                                    <div
-                                        className="w-4 bg-primary rounded-t transition-all"
-                                        style={{ height: `${30 + Math.random() * 70}%` }}
-                                    />
-                                    <div
-                                        className="w-4 bg-destructive/70 rounded-t transition-all"
-                                        style={{ height: `${20 + Math.random() * 50}%` }}
-                                    />
-                                </div>
-                                <span className="text-xs text-muted-foreground">{month}</span>
-                            </div>
-                        ))}
+                    <div className="flex flex-col items-center justify-center h-48 text-center">
+                        <span className="material-symbols-outlined text-4xl text-muted-foreground mb-2">bar_chart</span>
+                        <p className="text-muted-foreground text-sm">Monthly trend visualization requires more transaction history.</p>
+                        <p className="text-muted-foreground text-xs mt-1">Continue logging income and expenses to see trends over time.</p>
                     </div>
                 </CardContent>
             </Card>

@@ -29,13 +29,14 @@ class FieldLogView(APIView):
             logs = FieldLog.objects.filter(user=request.user, field_id=field_id)
         else:
             logs = FieldLog.objects.filter(user=request.user)
-            
-        serializer = FieldLogSerializer(logs, many=True)
+        
+        logs = logs.select_related('field').order_by('-date', '-created_at')
+        serializer = FieldLogSerializer(logs, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request):
         """Create a new field log entry"""
-        serializer = FieldLogSerializer(data=request.data)
+        serializer = FieldLogSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             # If field_id is passed in body, it's handled by serializer.
             # Access validated_data to get the field if needed or just save.
@@ -86,8 +87,9 @@ class FieldAlertView(APIView):
             alerts = FieldAlert.objects.filter(user=request.user, field_id=field_id)
         else:
             alerts = FieldAlert.objects.filter(user=request.user)
-            
-        serializer = FieldAlertSerializer(alerts, many=True)
+        
+        alerts = alerts.select_related('field', 'log').order_by('-date', '-created_at')
+        serializer = FieldAlertSerializer(alerts, many=True, context={'request': request})
         return Response(serializer.data)
 
     def patch(self, request, pk=None):
@@ -101,7 +103,7 @@ class FieldAlertView(APIView):
             alert = FieldAlert.objects.get(pk=pk, user=request.user)
             alert.is_read = True
             alert.save()
-            return Response(FieldAlertSerializer(alert).data)
+            return Response(FieldAlertSerializer(alert, context={'request': request}).data)
         except FieldAlert.DoesNotExist:
             return Response(
                 {"error": "Alert not found"},

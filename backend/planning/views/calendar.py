@@ -15,7 +15,7 @@ class SeasonCalendarView(APIView):
     
     def get(self, request):
         """List calendar events for user, optionally filtered by field"""
-        events = SeasonCalendar.objects.filter(user=request.user)
+        events = SeasonCalendar.objects.filter(user=request.user).select_related('field').order_by('start_date')
         
         field_id = request.query_params.get('field_id')
         if field_id:

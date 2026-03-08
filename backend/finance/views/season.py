@@ -4,6 +4,7 @@ Season management API views.
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
+from django.db.models import Sum
 
 from ..models import Season
 from ..serializers import SeasonSerializer
@@ -18,15 +19,24 @@ class SeasonView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated]
 
+    def _annotated_queryset(self, qs):
+        """Annotate queryset with aggregate totals to avoid N+1 in serializer."""
+        return qs.annotate(
+            _total_costs=Sum('costs__amount'),
+            _total_revenue=Sum('revenues__total_amount'),
+        )
+
     def get(self, request, pk=None):
         if pk:
             try:
-                season = Season.objects.get(pk=pk, user=request.user)
+                season = self._annotated_queryset(
+                    Season.objects.filter(pk=pk, user=request.user)
+                ).get()
                 return Response(SeasonSerializer(season).data)
             except Season.DoesNotExist:
                 return Response({'error': 'Season not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        queryset = Season.objects.filter(user=request.user)
+        queryset = Season.objects.filter(user=request.user).select_related('field')
         
         field_id = request.query_params.get('field_id')
         if field_id:
@@ -36,6 +46,7 @@ class SeasonView(APIView):
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active.lower() == 'true')
         
+        queryset = self._annotated_queryset(queryset)
         serializer = SeasonSerializer(queryset, many=True)
         return Response(serializer.data)
 

@@ -40,7 +40,7 @@ class Command(BaseCommand):
                 user = User.objects.create_user(
                     username=username,
                     email=f'{username}@example.com',
-                    password='password123',
+                    password='TestFarmer@2026',
                     first_name=f'Farmer',
                     last_name=f'{i+1}'
                 )
@@ -90,7 +90,7 @@ class Command(BaseCommand):
             fields_created += 1
             
             # Create some field logs for this field
-            activities = ['Watering', 'Fertilizing', 'Weeding', 'Harvesting', 'Planting']
+            activities = ['Watering', 'Fertilizer', 'Sowing', 'Pesticide', 'Harvest', 'Other']
             for j in range(random.randint(2, 5)):
                 days_ago = random.randint(1, 30)
                 FieldLog.objects.create(
@@ -106,4 +106,4 @@ class Command(BaseCommand):
         self.stdout.write(f'  Field logs created: ~{fields_created * 3}')
         self.stdout.write(self.style.SUCCESS('\nTest credentials:'))
         self.stdout.write('  Username: farmer1, farmer2, etc.')
-        self.stdout.write('  Password: password123')
+        self.stdout.write('  Password: TestFarmer@2026')

@@ -41,6 +41,10 @@ Pillow==11.3.0
 # HTTP & API
 requests==2.32.3
 
+# Utilities
+joblib==1.4.2
+psutil==5.9.8
+
 # Development & Testing
 pytest==8.3.4
 pytest-django==4.9.0

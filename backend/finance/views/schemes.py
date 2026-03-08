@@ -146,24 +146,32 @@ class SchemesView(APIView):
         if scheme_type:
             qs = qs.filter(scheme_type=scheme_type)
 
-        user_fields = FieldData.objects.filter(user=request.user)
-        user_crops = list(set(f.cropType for f in user_fields if f.cropType))
+        # Use values_list to avoid loading full model instances (N+1 fix)
+        user_crops = list(
+            FieldData.objects.filter(user=request.user)
+            .exclude(cropType='')
+            .values_list('cropType', flat=True)
+            .distinct()
+        )
 
+        if land_acres:
+            try:
+                land_acres_float = float(land_acres)
+                qs = qs.filter(min_land_acres__lte=land_acres_float)
+            except (ValueError, TypeError):
+                pass
+
+        # Apply state/crop filters in Python because JSONField __contains
+        # is not supported on SQLite. On PostgreSQL the DB-level filter
+        # would be more efficient, but this keeps the code DB-agnostic.
         eligible_schemes = []
         for scheme in qs:
-            # Filter by state
+            # Filter by state (Python-side for SQLite compatibility)
             if state and scheme.eligible_states and state not in scheme.eligible_states:
                 continue
-
             # Filter by crop
             if crop and scheme.eligible_crops and crop not in scheme.eligible_crops:
                 continue
-
-            # Filter by land size
-            if land_acres:
-                land_acres_float = float(land_acres)
-                if land_acres_float < float(scheme.min_land_acres):
-                    continue
 
             scheme_data = {
                 'id': scheme.id,

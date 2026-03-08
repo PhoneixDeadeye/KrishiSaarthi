@@ -26,7 +26,7 @@ class RevenueView(APIView):
             except Revenue.DoesNotExist:
                 return Response({'error': 'Revenue entry not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        queryset = Revenue.objects.filter(user=request.user)
+        queryset = Revenue.objects.filter(user=request.user).select_related('field', 'season').order_by('-date')
         
         field_id = request.query_params.get('field_id')
         if field_id:

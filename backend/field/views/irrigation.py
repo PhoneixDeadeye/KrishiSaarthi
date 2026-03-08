@@ -156,7 +156,8 @@ class IrrigationScheduleView(APIView):
         return weather
     
     def _get_fallback_weather(self):
-        """Return deterministic fallback weather when API is unavailable."""
+        """Return deterministic fallback weather when API is unavailable.
+        Every value is flagged with source='fallback' so consumers know it's not real."""
         import hashlib
         today = timezone.now().date()
         weather = {}
@@ -174,7 +175,8 @@ class IrrigationScheduleView(APIView):
                 'rain_chance': rain_chance,
                 'rain_mm': ((seed % 20) if rain_chance > 60 else 0),
                 'description': ['Clear', 'Partly Cloudy', 'Light Rain', 'Cloudy'][seed % 4],
-                'icon': '01d'
+                'icon': '01d',
+                'source': 'fallback',
             }
         return weather
     
@@ -274,11 +276,11 @@ class IrrigationLogView(APIView):
     def get(self, request):
         field_id = request.query_params.get('field_id')
         
-        logs = IrrigationLog.objects.filter(user=request.user)
+        logs = IrrigationLog.objects.filter(user=request.user).select_related('field')
         if field_id:
             logs = logs.filter(field_id=field_id)
         
-        logs = logs[:30]  # Limit to 30 recent entries
+        logs = logs.order_by('-date', '-created_at')[:30]  # Limit to 30 recent entries
         
         return Response({
             'logs': IrrigationLogSerializer(logs, many=True).data,

@@ -28,7 +28,7 @@ class AuthenticationTestCase(TestCase):
             json.dumps(self.test_user),
             content_type='application/json'
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         self.assertIn('token', response.json())
 
         user = User.objects.get(username='testuser')
@@ -60,7 +60,7 @@ class AuthenticationTestCase(TestCase):
         self.assertIn('token', response.json())
 
     def test_login_invalid_credentials(self):
-        """Test login with wrong password"""
+        """Test login with wrong password returns generic error"""
         User.objects.create_user(**self.test_user)
 
         response = self.client.post(
@@ -71,7 +71,22 @@ class AuthenticationTestCase(TestCase):
             }),
             content_type='application/json'
         )
-        self.assertIn(response.status_code, [400, 404])
+        self.assertEqual(response.status_code, 401)
+        # Must not reveal whether username exists or password was wrong
+        self.assertEqual(response.json()['error'], 'Invalid credentials')
+    
+    def test_login_nonexistent_user(self):
+        """Test login with non-existent username returns same error as wrong password"""
+        response = self.client.post(
+            '/login',
+            json.dumps({
+                'username': 'doesnotexist',
+                'password': 'anypassword'
+            }),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()['error'], 'Invalid credentials')
 
 
 class FieldManagementTestCase(TestCase):
@@ -224,3 +239,45 @@ class ValidationTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, 400)
+
+
+class FieldLogIDORTestCase(TestCase):
+    """Test that users cannot reference other users' fields in log entries"""
+
+    def setUp(self):
+        self.client = Client()
+        self.user_a = User.objects.create_user(username='farmer_a', password='pass')
+        self.user_b = User.objects.create_user(username='farmer_b', password='pass')
+        self.token_b = Token.objects.create(user=self.user_b)
+        self.auth_b = {'HTTP_AUTHORIZATION': f'Token {self.token_b.key}'}
+        # Field owned by user_a
+        self.field_a = FieldData.objects.create(
+            user=self.user_a,
+            name='Field A',
+            cropType='Wheat',
+            polygon={'type': 'Polygon', 'coordinates': [[[77.5, 28.5]]]}
+        )
+
+    def test_user_b_cannot_create_log_for_user_a_field(self):
+        """IDOR: User B must not be able to create a log entry for User A's field"""
+        response = self.client.post(
+            '/field/logs',
+            json.dumps({
+                'field_id': self.field_a.id,
+                'date': '2025-01-01',
+                'activity': 'sowing',
+                'details': 'Malicious log'
+            }),
+            content_type='application/json',
+            **self.auth_b
+        )
+        # Serializer should reject the field_id since it doesn't belong to user_b
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_b_cannot_see_user_a_fields(self):
+        """Isolation: User B should only see their own fields"""
+        response = self.client.get('/field/data', **self.auth_b)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        field_ids = [f['id'] for f in data]
+        self.assertNotIn(self.field_a.id, field_ids)

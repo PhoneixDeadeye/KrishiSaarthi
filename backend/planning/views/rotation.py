@@ -1,6 +1,10 @@
 """
 Crop Rotation Planner views for KrishiSaarthi.
-AI-powered rotation suggestions based on soil health and crop history.
+Rule-based rotation suggestions using agronomic best practices.
+
+The rotation matrix scores are derived from published ICAR crop rotation
+guidelines. Crop history is pulled from the user's actual SeasonCalendar
+records; if no history exists, the response says so honestly.
 """
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,6 +15,7 @@ from datetime import timedelta
 import logging
 
 from field.models import FieldData
+from planning.models import SeasonCalendar
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +110,7 @@ class RotationPlannerView(APIView):
             'field_name': field.name,
             'current_crop': current_crop,
             'current_season': current_season,
-            'crop_history': self._get_mock_history(current_crop),
+            'crop_history': self._get_crop_history(field, request.user),
             'suggestions': suggestions,
             'timeline': timeline,
             'soil_health_tips': self._get_soil_tips(current_crop)
@@ -160,7 +165,7 @@ class RotationPlannerView(APIView):
         month = timezone.now().month
         if 6 <= month <= 10:  # June-October
             return 'Kharif'
-        elif 11 <= month <= 3:  # November-March
+        elif month >= 11 or month <= 3:  # November-March
             return 'Rabi'
         else:  # April-May
             return 'Zaid'
@@ -214,16 +219,44 @@ class RotationPlannerView(APIView):
         
         return timeline
     
-    def _get_mock_history(self, current_crop):
-        """Return mock crop history for display"""
-        year = timezone.now().year
-        return [
-            {'year': year - 2, 'season': 'Kharif', 'crop': 'Rice'},
-            {'year': year - 2, 'season': 'Rabi', 'crop': 'Wheat'},
-            {'year': year - 1, 'season': 'Kharif', 'crop': 'Rice'},
-            {'year': year - 1, 'season': 'Rabi', 'crop': 'Pulses'},
-            {'year': year, 'season': 'Kharif', 'crop': current_crop}
-        ]
+    def _get_crop_history(self, field, user):
+        """
+        Return real crop history from SeasonCalendar records for this field.
+        If no records exist, return an empty list with an explanatory note.
+        """
+        events = (
+            SeasonCalendar.objects
+            .filter(field=field, user=user)
+            .order_by('-start_date')[:10]
+        )
+        if not events.exists():
+            return {
+                'records': [],
+                'note': 'No planting history found. Add calendar events to improve rotation suggestions.',
+            }
+        return {
+            'records': [
+                {
+                    'year': e.start_date.year,
+                    'season': self._date_to_season(e.start_date.month),
+                    'crop': e.title,
+                    'activity': e.activity_type,
+                    'start_date': e.start_date.isoformat(),
+                    'end_date': e.end_date.isoformat(),
+                }
+                for e in events
+            ],
+            'note': None,
+        }
+
+    @staticmethod
+    def _date_to_season(month):
+        """Map a calendar month to an Indian agricultural season."""
+        if 6 <= month <= 10:
+            return 'Kharif'
+        elif month >= 11 or month <= 3:
+            return 'Rabi'
+        return 'Zaid'
     
     def _get_soil_tips(self, current_crop):
         """Get soil health tips based on current crop"""

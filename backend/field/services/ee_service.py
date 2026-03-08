@@ -51,7 +51,7 @@ def fetchEEData_safe(user=None, field_id=None, field_instance=None, start_date=N
         logger.warning("Earth Engine request blocked by circuit breaker")
         return {
             "error": "Service temporarily unavailable",
-            "details": "Circuit breaker open due to recent failures",
+            "details": "Please try again later",
             "fallback": True
         }
 
@@ -61,10 +61,10 @@ def fetchEEData_safe(user=None, field_id=None, field_instance=None, start_date=N
         return data
     except Exception as e:
         ee_breaker.record_failure()
-        logger.error(f"EE Service Failure: {e}")
+        logger.error(f"EE Service Failure: {e}", exc_info=True)
         return {
             "error": "Satellite data unavailable",
-            "details": str(e),
+            "details": "Please try again later",
             "fallback": True
         }
 

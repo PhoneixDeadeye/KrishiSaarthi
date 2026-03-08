@@ -25,7 +25,8 @@ class FieldDataView(APIView):
             serializer = FieldDataSerializer(fields, many=True)
             return Response(serializer.data)
         except Exception as e:
-            return Response({"error": str(e)}, status=500)
+            logger.error(f"Error listing fields: {e}")
+            return Response({"error": "Failed to retrieve fields"}, status=500)
 
     def delete(self, request, pk=None):
         """Delete a field by ID"""
@@ -104,7 +105,7 @@ class SavePolygon(APIView):
         except Exception as e:
             logger.error(f"Error saving polygon for user {request.user.username}: {e}")
             return Response(
-                {"error": "Failed to save field", "details": str(e)}, 
+                {"error": "Failed to save field"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.db.models import Sum
 import logging
 
 from ..models import InsuranceClaim, Season
@@ -25,7 +26,9 @@ class InsuranceClaimView(APIView):
     
     def get(self, request):
         """List all claims for the user"""
-        claims = InsuranceClaim.objects.filter(user=request.user)
+        claims = InsuranceClaim.objects.filter(
+            user=request.user
+        ).select_related('field')
         
         # Filter by status if provided
         claim_status = request.query_params.get('status', None)
@@ -51,12 +54,14 @@ class InsuranceClaimView(APIView):
                 'created_at': claim.created_at.isoformat(),
             })
         
-        # Get summary stats
+        # Get summary stats using DB-level aggregation (avoid N+1)
         total_claims = claims.count()
         pending_claims = claims.filter(status__in=['draft', 'submitted', 'under_review']).count()
-        approved_total = sum(
-            float(c.claim_amount or 0) for c in claims.filter(status__in=['approved', 'paid'])
-        )
+        approved_total = claims.filter(
+            status__in=['approved', 'paid']
+        ).aggregate(
+            total=Sum('claim_amount')
+        )['total'] or 0
         
         return Response({
             'claims': claims_data,
@@ -139,9 +144,9 @@ class InsuranceClaimView(APIView):
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
-            logger.error(f"Error creating insurance claim: {e}")
+            logger.error(f"Error creating insurance claim: {e}", exc_info=True)
             return Response(
-                {'error': 'Failed to create claim', 'details': str(e)},
+                {'error': 'Failed to create claim'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

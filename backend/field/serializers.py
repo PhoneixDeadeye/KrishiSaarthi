@@ -38,7 +38,7 @@ class FieldDataSerializer(serializers.ModelSerializer):
 
 class FieldLogSerializer(serializers.ModelSerializer):
     field_id = serializers.PrimaryKeyRelatedField(
-        queryset=FieldData.objects.all(), source='field', required=False, allow_null=True
+        queryset=FieldData.objects.none(), source='field', required=False, allow_null=True
     )
 
     class Meta:
@@ -46,10 +46,16 @@ class FieldLogSerializer(serializers.ModelSerializer):
         fields = ['id', 'field_id', 'date', 'activity', 'details', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            self.fields['field_id'].queryset = FieldData.objects.filter(user=request.user)
+
 
 class FieldAlertSerializer(serializers.ModelSerializer):
     field_id = serializers.PrimaryKeyRelatedField(
-        queryset=FieldData.objects.all(), source='field', required=False, allow_null=True
+        queryset=FieldData.objects.none(), source='field', required=False, allow_null=True
     )
 
     class Meta:
@@ -57,10 +63,16 @@ class FieldAlertSerializer(serializers.ModelSerializer):
         fields = ['id', 'field_id', 'log', 'date', 'message', 'is_read', 'created_at']
         read_only_fields = ['id', 'created_at']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            self.fields['field_id'].queryset = FieldData.objects.filter(user=request.user)
+
 
 class IrrigationLogSerializer(serializers.ModelSerializer):
     field_id = serializers.PrimaryKeyRelatedField(
-        queryset=FieldData.objects.all(), source='field', required=False, allow_null=True
+        queryset=FieldData.objects.none(), source='field', required=False, allow_null=True
     )
     field_name = serializers.CharField(source='field.name', read_only=True)
     source_display = serializers.CharField(source='get_source_display', read_only=True)
@@ -70,3 +82,9 @@ class IrrigationLogSerializer(serializers.ModelSerializer):
         fields = ['id', 'field_id', 'field_name', 'date', 'water_amount', 
                   'duration_minutes', 'source', 'source_display', 'notes', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            self.fields['field_id'].queryset = FieldData.objects.filter(user=request.user)

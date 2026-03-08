@@ -34,11 +34,12 @@ export default function ForgotPassword() {
                 title: "Email Sent",
                 description: "Check your inbox for password reset instructions.",
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Failed to send reset email";
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: error.message || "Failed to send reset email",
+                description: message,
             });
         } finally {
             setIsLoading(false);

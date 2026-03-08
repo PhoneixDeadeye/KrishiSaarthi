@@ -175,11 +175,63 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 1800  # 30 minutes
 
+# Celery Beat Schedule — Periodic background tasks
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'update-weather-data': {
+        'task': 'field.tasks.update_weather_data',
+        'schedule': crontab(minute=0, hour='*/6'),  # Every 6 hours
+        'options': {'expires': 3600},
+    },
+    'update-satellite-data': {
+        'task': 'field.tasks.update_satellite_data',
+        'schedule': crontab(minute=0, hour=2),  # Daily at 2 AM IST
+        'options': {'expires': 7200},
+    },
+    'calculate-risk-scores': {
+        'task': 'field.tasks.calculate_risk_scores',
+        'schedule': crontab(minute=0, hour=3),  # Daily at 3 AM IST
+        'options': {'expires': 7200},
+    },
+    'generate-daily-reports': {
+        'task': 'field.tasks.generate_daily_reports',
+        'schedule': crontab(minute=0, hour=6),  # Daily at 6 AM IST
+        'options': {'expires': 3600},
+    },
+    'cleanup-old-logs': {
+        'task': 'field.tasks.cleanup_old_logs',
+        'schedule': crontab(minute=0, hour=1, day_of_week='sunday'),  # Weekly on Sunday 1 AM
+        'options': {'expires': 7200},
+    },
+}
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Security settings — always-on hardening
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SECURE_BROWSER_XSS_FILTER = True
+
+# Additional production hardening
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    CSRF_COOKIE_HTTPONLY = False  # Must be readable by JS in SPA
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -205,15 +257,37 @@ REST_FRAMEWORK = {
         'sustained': '1000/day',
         'anon_burst': '20/min',
         'anon_sustained': '100/day',
+        'login': '5/min',
     },
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 50,
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ] + (['rest_framework.renderers.BrowsableAPIRenderer'] if DEBUG else []),
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.AcceptHeaderVersioning',
+    'DEFAULT_VERSION': '1.0',
+    'ALLOWED_VERSIONS': ['1.0'],
     'EXCEPTION_HANDLER': 'KrishiSaarthi.exceptions.custom_exception_handler',
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
 
 CORS_ALLOWED_ORIGINS = os.environ.get(
     'CORS_ALLOWED_ORIGINS',
-    'http://localhost:5000,http://localhost:5173'
+    'http://localhost:5000,http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:5000'
 ).split(',')
+CORS_ALLOW_ALL_ORIGINS = False  # Never allow all origins — use CORS_ALLOWED_ORIGINS instead
 CORS_ALLOWED_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -251,3 +325,16 @@ else:
     EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+# ──── Test overrides ──────────────────────────────────────────────
+# Disable throttling during test runs so rate limits don't interfere
+TESTING = 'test' in sys.argv or 'pytest' in sys.modules
+if TESTING:
+    REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = []
+    REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
+        'burst': '10000/min',
+        'sustained': '100000/day',
+        'anon_burst': '10000/min',
+        'anon_sustained': '100000/day',
+        'login': '10000/min',
+    }

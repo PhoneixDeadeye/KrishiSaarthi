@@ -51,11 +51,12 @@ export default function ResetPassword() {
 
             setIsSuccess(true);
             toast({ title: "Success", description: "Your password has been reset successfully." });
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Invalid or expired token";
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: error.message || "Invalid or expired token"
+                description: message
             });
         } finally {
             setIsLoading(false);

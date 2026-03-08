@@ -21,7 +21,7 @@ class LaborEntryView(APIView):
             serializer = LaborEntrySerializer(entry)
             return Response(serializer.data)
         
-        entries = LaborEntry.objects.filter(user=request.user)
+        entries = LaborEntry.objects.filter(user=request.user).select_related('field').order_by('-date')
         
         # Filter by field
         field_id = request.query_params.get('field_id')

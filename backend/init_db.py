@@ -44,7 +44,12 @@ def create_superuser():
     """Create a superuser if it doesn't exist"""
     username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
     email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@krishisaarthi.com')
-    password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'admin123')
+    password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
+    
+    if not password:
+        print("⚠️  DJANGO_SUPERUSER_PASSWORD not set. Skipping superuser creation.")
+        print("   Set the DJANGO_SUPERUSER_PASSWORD environment variable to create a superuser.")
+        return True  # Not a failure — just skipped
     
     if User.objects.filter(username=username).exists():
         print(f"✓ Superuser '{username}' already exists")
@@ -54,7 +59,6 @@ def create_superuser():
         User.objects.create_superuser(username=username, email=email, password=password)
         print(f"✓ Superuser '{username}' created successfully")
         print(f"  Username: {username}")
-        print(f"  Password: {password}")
         print("  ⚠️  CHANGE THIS PASSWORD IN PRODUCTION!")
         return True
     except Exception as e:

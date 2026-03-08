@@ -1,4 +1,3 @@
-"use client";
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -210,7 +209,7 @@ export function YieldPrediction() {
                                 value: formatYield(prediction.comparison.regional_average),
                                 icon: "bar_chart",
                                 sub: "per hectare",
-                                color: "text-violet-600 bg-violet-100 dark:bg-violet-900/30",
+                                color: "text-teal-600 bg-teal-100 dark:bg-teal-900/30",
                             },
                             {
                                 label: "Crop Type",

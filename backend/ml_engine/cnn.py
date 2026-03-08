@@ -135,9 +135,9 @@ def predict_health(img_path: str, device: str = DEVICE) -> Dict[str, Any]:
         }
         
     except Exception as e:
-        logger.error(f"Prediction failed for {img_path}: {e}")
+        logger.error(f"Prediction failed for {img_path}: {e}", exc_info=True)
         return {
-            "error": str(e),
+            "error": "Prediction failed",
             "probability": 0.5,
             "class": "Unknown",
             "confidence": "None"

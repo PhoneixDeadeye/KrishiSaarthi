@@ -1,5 +1,4 @@
 // src/components/field/FieldAlerts.tsx
-"use client";
 
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +24,7 @@ const ALERT_ICONS: Record<string, { icon: string; color: string }> = {
     Fertilizer: { icon: "compost", color: "text-green-500 bg-green-500/10" },
     Pesticide: { icon: "bug_report", color: "text-amber-500 bg-amber-500/10" },
     irrigation: { icon: "waves", color: "text-cyan-500 bg-cyan-500/10" },
-    Check: { icon: "visibility", color: "text-violet-500 bg-violet-500/10" },
+    Check: { icon: "visibility", color: "text-teal-500 bg-teal-500/10" },
     Reminder: { icon: "notifications", color: "text-primary bg-primary/10" },
     default: { icon: "warning", color: "text-orange-500 bg-orange-500/10" },
 };

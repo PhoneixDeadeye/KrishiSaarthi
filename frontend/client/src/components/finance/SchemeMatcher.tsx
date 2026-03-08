@@ -93,7 +93,7 @@ export function SchemeMatcher() {
         const colors: Record<string, string> = {
             subsidy: 'bg-green-100 text-green-700',
             loan: 'bg-blue-100 text-blue-700',
-            insurance: 'bg-violet-100 text-violet-700',
+            insurance: 'bg-teal-100 text-teal-700',
             grant: 'bg-yellow-100 text-yellow-700',
             training: 'bg-orange-100 text-orange-700',
         };
@@ -200,10 +200,10 @@ export function SchemeMatcher() {
                             <div className="text-sm text-blue-600">Loans</div>
                         </CardContent>
                     </Card>
-                    <Card className="bg-gradient-to-br from-violet-50 to-violet-100">
+                    <Card className="bg-gradient-to-br from-teal-50 to-teal-100">
                         <CardContent className="p-4 text-center">
-                            <div className="text-2xl font-bold text-violet-700">{data.grouped.insurance.length}</div>
-                            <div className="text-sm text-violet-600">Insurance</div>
+                            <div className="text-2xl font-bold text-teal-700">{data.grouped.insurance.length}</div>
+                            <div className="text-sm text-teal-600">Insurance</div>
                         </CardContent>
                     </Card>
                     <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100">

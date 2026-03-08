@@ -4,13 +4,13 @@ import os
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 
 logger = logging.getLogger(__name__)
 
 class WeatherView(APIView):
     """Proxy for OpenWeather API to keep API key server-side"""
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         lat = request.query_params.get('lat')
@@ -51,7 +51,7 @@ class WeatherView(APIView):
                 "forecast": forecast_data
             })
         except requests.RequestException as e:
-            logger.error(f"Weather request failed: {str(e)}")
+            logger.error(f"Weather request failed: {e}", exc_info=True)
             return Response(
                 {"error": "Weather service unreachable"},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE

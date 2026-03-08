@@ -40,7 +40,7 @@ class InventoryTransactionSerializer(serializers.ModelSerializer):
 class InventoryItemSerializer(serializers.ModelSerializer):
     category_display = serializers.CharField(source='get_category_display', read_only=True)
     is_low_stock = serializers.BooleanField(read_only=True)
-    recent_transactions = InventoryTransactionSerializer(source='transactions', many=True, read_only=True)
+    recent_transactions = serializers.SerializerMethodField()
     
     class Meta:
         model = InventoryItem
@@ -51,11 +51,10 @@ class InventoryItemSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at']
     
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        # Limit recent transactions to 5
-        data['recent_transactions'] = data['recent_transactions'][:5]
-        return data
+    def get_recent_transactions(self, obj):
+        # Only fetch 5 most recent at DB level, not all then slice in Python
+        txns = obj.transactions.select_related('item').order_by('-created_at')[:5]
+        return InventoryTransactionSerializer(txns, many=True).data
 
 
 class LaborEntrySerializer(serializers.ModelSerializer):
@@ -87,7 +86,7 @@ class EquipmentBookingSerializer(serializers.ModelSerializer):
 
 class EquipmentSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
-    upcoming_bookings = EquipmentBookingSerializer(source='bookings', many=True, read_only=True)
+    upcoming_bookings = serializers.SerializerMethodField()
     
     class Meta:
         model = Equipment
@@ -98,9 +97,8 @@ class EquipmentSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at']
     
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        # Limit to first 3 bookings (already ordered by start_datetime in model)
-        data['upcoming_bookings'] = data['upcoming_bookings'][:3]
-        return data
+    def get_upcoming_bookings(self, obj):
+        # Fetch only 3 most recent at DB level instead of loading all then slicing
+        bookings = obj.bookings.select_related('field').order_by('start_datetime')[:3]
+        return EquipmentBookingSerializer(bookings, many=True).data
 

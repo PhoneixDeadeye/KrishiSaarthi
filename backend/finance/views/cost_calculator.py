@@ -31,7 +31,7 @@ class CostEntryView(APIView):
                 return Response({'error': 'Cost entry not found'}, status=status.HTTP_404_NOT_FOUND)
         
         # Filter by field and/or season
-        queryset = CostEntry.objects.filter(user=request.user)
+        queryset = CostEntry.objects.filter(user=request.user).select_related('field', 'season').order_by('-date')
         
         field_id = request.query_params.get('field_id')
         if field_id:

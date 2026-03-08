@@ -1,8 +1,6 @@
 import { Link } from "wouter";
-import { useState } from "react";
 
 export default function LandingPage() {
-    const [email, setEmail] = useState("");
 
     return (
         <div className="bg-landing-bg-light dark:bg-landing-bg-dark text-landing-text-light dark:text-landing-text-dark font-sans antialiased overflow-x-hidden min-h-screen flex flex-col">
@@ -18,8 +16,7 @@ export default function LandingPage() {
                     <nav className="hidden md:flex items-center gap-8">
                         <a href="#features" className="text-sm font-medium hover:text-landing-primary transition-colors">Features</a>
                         <a href="#how-it-works" className="text-sm font-medium hover:text-landing-primary transition-colors">How it Works</a>
-                        <a href="#testimonials" className="text-sm font-medium hover:text-landing-primary transition-colors">Testimonials</a>
-                        <a href="#pricing" className="text-sm font-medium hover:text-landing-primary transition-colors">Pricing</a>
+                        <a href="#use-cases" className="text-sm font-medium hover:text-landing-primary transition-colors">Use Cases</a>
                     </nav>
                     <div className="flex items-center gap-4">
                         <Link href="/login" className="hidden sm:block text-sm font-medium hover:text-landing-primary transition-colors">Log In</Link>
@@ -45,7 +42,7 @@ export default function LandingPage() {
                         <div className="max-w-4xl flex flex-col items-center gap-6 animate-fade-in-up">
                             <div className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-sm font-medium text-white backdrop-blur-md mb-2">
                                 <span className="mr-2 flex h-2 w-2 rounded-full bg-landing-primary"></span>
-                                New: AI-Driven Yield Forecasting v2.0
+                                Satellite-Powered Farm Intelligence
                             </div>
                             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight tracking-tight drop-shadow-sm">
                                 Empowering the <span className="text-landing-primary">Future</span> of Farming
@@ -56,13 +53,15 @@ export default function LandingPage() {
                             <div className="flex flex-col sm:flex-row gap-4 mt-4 w-full sm:w-auto">
                                 <Link href="/signup">
                                     <button className="h-12 px-8 rounded-lg bg-landing-primary hover:bg-landing-primary/90 text-black text-base font-bold transition-all transform hover:scale-105 shadow-xl shadow-landing-primary/30 w-full sm:w-auto">
-                                        Start Free Trial
+                                        Get Started Free
                                     </button>
                                 </Link>
-                                <button className="h-12 px-8 rounded-lg bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-sm text-white text-base font-bold transition-all w-full sm:w-auto flex items-center justify-center gap-2">
-                                    <span className="material-symbols-outlined text-[20px]">play_circle</span>
-                                    Watch Demo
-                                </button>
+                                <a href="#features">
+                                    <button className="h-12 px-8 rounded-lg bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-sm text-white text-base font-bold transition-all w-full sm:w-auto flex items-center justify-center gap-2">
+                                        <span className="material-symbols-outlined text-[20px]">arrow_downward</span>
+                                        Learn More
+                                    </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -106,17 +105,17 @@ export default function LandingPage() {
                             </div>
                             <div>
                                 <h3 className="text-xl font-bold text-landing-text-light dark:text-white mb-2">Market Prices</h3>
-                                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">Real-time data on global commodity prices to help you decide when to sell.</p>
+                                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">Reference MSP and indicative commodity prices to help plan your selling strategy.</p>
                             </div>
                         </div>
                         {/* Feature 3 */}
                         <div className="group flex flex-col gap-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/5 p-6 hover:shadow-xl hover:shadow-landing-primary/5 hover:border-landing-primary/50 transition-all duration-300">
                             <div className="size-12 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-landing-primary group-hover:scale-110 transition-transform">
-                                <span className="material-symbols-outlined text-3xl">support_agent</span>
+                                <span className="material-symbols-outlined text-3xl">smart_toy</span>
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-landing-text-light dark:text-white mb-2">Expert Connection</h3>
-                                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">Direct, on-demand video access to agricultural specialists and agronomists.</p>
+                                <h3 className="text-xl font-bold text-landing-text-light dark:text-white mb-2">AI Chat Assistant</h3>
+                                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">Get instant, personalized farming advice powered by Gemini AI, available 24/7 in your language.</p>
                             </div>
                         </div>
                         {/* Feature 4 */}
@@ -145,12 +144,12 @@ export default function LandingPage() {
                             {/* Step 1 */}
                             <div className="relative z-10 flex flex-col items-center text-center group">
                                 <div className="w-24 h-24 rounded-full bg-landing-bg-light dark:bg-landing-bg-dark border-4 border-white dark:border-[#0c1a0e] shadow-lg flex items-center justify-center mb-6 group-hover:scale-105 transition-transform duration-300">
-                                    <span className="material-symbols-outlined text-4xl text-landing-primary">sensors</span>
+                                    <span className="material-symbols-outlined text-4xl text-landing-primary">map</span>
                                 </div>
                                 <div className="bg-gray-50 dark:bg-white/5 p-6 rounded-2xl w-full border border-gray-100 dark:border-gray-800">
                                     <div className="inline-block px-3 py-1 bg-landing-primary/10 text-landing-primary text-xs font-bold rounded-full mb-3">STEP 01</div>
-                                    <h3 className="text-xl font-bold text-landing-text-light dark:text-white mb-2">Connect Sensors</h3>
-                                    <p className="text-gray-500 dark:text-gray-400 text-sm">Deploy IoT sensors or link existing hardware. Our system auto-calibrates in minutes.</p>
+                                    <h3 className="text-xl font-bold text-landing-text-light dark:text-white mb-2">Map Your Fields</h3>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">Draw your field boundaries on an interactive map. Our system auto-calculates area and links to satellite data.</p>
                                 </div>
                             </div>
                             {/* Step 2 */}
@@ -180,71 +179,31 @@ export default function LandingPage() {
                 </section>
 
                 {/* Testimonials Section */}
-                <section className="py-20 md:py-32 px-4 md:px-10 max-w-[1440px] mx-auto w-full" id="testimonials">
-                    <h2 className="text-3xl md:text-4xl font-black text-center text-landing-text-light dark:text-landing-text-dark mb-16">Trusted by Modern Farmers</h2>
+                {/* Use Cases Section */}
+                <section className="py-20 md:py-32 px-4 md:px-10 max-w-[1440px] mx-auto w-full" id="use-cases">
+                    <h2 className="text-3xl md:text-4xl font-black text-center text-landing-text-light dark:text-landing-text-dark mb-4">Built for Real Farming Workflows</h2>
+                    <p className="text-center text-gray-500 dark:text-gray-400 mb-16 max-w-2xl mx-auto">See how AgriSmart helps farmers at every stage of the growing season.</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Testimonial 1 */}
-                        <div className="flex flex-col p-8 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-800 shadow-sm relative">
-                            <div className="absolute -top-4 -left-2 text-landing-primary/20">
-                                <span className="material-symbols-outlined text-6xl">format_quote</span>
+                        <div className="flex flex-col p-8 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-800 shadow-sm">
+                            <div className="size-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 mb-4">
+                                <span className="material-symbols-outlined text-3xl">satellite_alt</span>
                             </div>
-                            <p className="text-gray-600 dark:text-gray-300 mb-8 relative z-10 italic">"AgriSmart changed how we approach irrigation. We saved 30% on water costs in the first season alone while improving crop quality."</p>
-                            <div className="mt-auto flex items-center gap-4">
-                                <img alt="Portrait of happy farmer" className="w-12 h-12 rounded-full object-cover border-2 border-landing-primary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8HfSPHdVva0hZI4HIjeksahUAuA6J-gjFyq0BhjjcXEvlfHTc0kfWWB3HM7gw0PvNMT7cY_QrSardak4rq1KSoTSO6eBnKAAA2Lud7G5LFGKBlbdf6P6X6dWMucJ9NpSU5cIqyV08GTm-1_rUEIhn0yekbnuDH_QyeyCEzkiXIHyLZElExT_qJp5RZ8oDU_rXpMomxdDYVm8eGeMPkLBERdQUjYcMmV6b9IXSCI7eirwKkQHckBAyovao_IzSq8YAuIJeE0ykVs1" />
-                                <div>
-                                    <h4 className="font-bold text-landing-text-light dark:text-white text-sm">Thomas Reed</h4>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Owner, Reed Orchards</p>
-                                </div>
-                                <div className="ml-auto flex text-landing-primary text-xs">
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                </div>
-                            </div>
+                            <h3 className="text-xl font-bold text-landing-text-light dark:text-white mb-2">Satellite Monitoring</h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">Track NDVI vegetation indices over time using Google Earth Engine. Spot stressed zones before visible damage occurs and take targeted action.</p>
                         </div>
-                        {/* Testimonial 2 */}
-                        <div className="flex flex-col p-8 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-800 shadow-sm relative">
-                            <div className="absolute -top-4 -left-2 text-landing-primary/20">
-                                <span className="material-symbols-outlined text-6xl">format_quote</span>
+                        <div className="flex flex-col p-8 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-800 shadow-sm">
+                            <div className="size-12 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-500 mb-4">
+                                <span className="material-symbols-outlined text-3xl">account_balance_wallet</span>
                             </div>
-                            <p className="text-gray-600 dark:text-gray-300 mb-8 relative z-10 italic">"The yield prediction tool is scarily accurate. It helped us negotiate better contracts with our distributors months in advance."</p>
-                            <div className="mt-auto flex items-center gap-4">
-                                <img alt="Portrait of female agronomist" className="w-12 h-12 rounded-full object-cover border-2 border-landing-primary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbrB1hVsuNv33Ixtr1QhpygR1x2PMzBtCJCU1yUu_bI9h8ss-4wtjW4HJBGKO0rdwu43IDocYaqKHsrDDU7QbUem_Nf7gnFGl1kSa27OAB-fkujRAGbp2dmK63737ERNbCpgNTYpn2gYyXdpqhIiHizF47n5kC9IXFqgYdJ8or38nHmMPvGCqzArqKSLdVpv9BmGWQPAtZyuumlniT3g7_imFJb07tYUgxWc8jN9EHq247laoqa5PCAPfIPy0Qwzaj6md5ERDMGGI" />
-                                <div>
-                                    <h4 className="font-bold text-landing-text-light dark:text-white text-sm">Sarah Jenkins</h4>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Agronomist, GreenValley</p>
-                                </div>
-                                <div className="ml-auto flex text-landing-primary text-xs">
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                </div>
-                            </div>
+                            <h3 className="text-xl font-bold text-landing-text-light dark:text-white mb-2">Financial Planning</h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">Log income, expenses, and harvest sales. Get a clear financial overview of your farm operations with category breakdowns and trends.</p>
                         </div>
-                        {/* Testimonial 3 */}
-                        <div className="flex flex-col p-8 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-800 shadow-sm relative">
-                            <div className="absolute -top-4 -left-2 text-landing-primary/20">
-                                <span className="material-symbols-outlined text-6xl">format_quote</span>
+                        <div className="flex flex-col p-8 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-800 shadow-sm">
+                            <div className="size-12 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500 mb-4">
+                                <span className="material-symbols-outlined text-3xl">pest_control</span>
                             </div>
-                            <p className="text-gray-600 dark:text-gray-300 mb-8 relative z-10 italic">"Finally, a dashboard that makes sense. I can see everything from my tractor cab on my iPad. It's built for real work."</p>
-                            <div className="mt-auto flex items-center gap-4">
-                                <img alt="Portrait of vineyard manager" className="w-12 h-12 rounded-full object-cover border-2 border-landing-primary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvqq9UVFwLv-QV8LY2LFaXgj0HvglU2aZhwmSDwaUHIyuGCI5dS1kEE-s6D9szQM8hf9gARYz6l-ljb7sstxKzjFBqqR0X82p4Fcq9ol-jmlxjyHr9Bx5cYavlfEm9TOMihfOJOhmYGiqmxOtCc_KgMqPpCRT53chHRDeNOb1-a5jNmJ41_HMZd8qIAMZkQxO2GNPE0PoDRlXpOJXYm3JFryayiDdCKnmWvO2pfci2MVenAKmBB-v-WgDdx7g55Q6PDmNSaJSCb2M" />
-                                <div>
-                                    <h4 className="font-bold text-landing-text-light dark:text-white text-sm">Marcus Chen</h4>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Vineyard Manager</p>
-                                </div>
-                                <div className="ml-auto flex text-landing-primary text-xs">
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                    <span className="material-symbols-outlined text-sm">star</span>
-                                    <span className="material-symbols-outlined text-sm">star_half</span>
-                                </div>
-                            </div>
+                            <h3 className="text-xl font-bold text-landing-text-light dark:text-white mb-2">Pest Detection</h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">Upload a photo of affected crops and our CNN model identifies the disease. Get AI-powered treatment recommendations instantly.</p>
                         </div>
                     </div>
                 </section>
@@ -257,16 +216,18 @@ export default function LandingPage() {
                             <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(#13ec25 1px, transparent 1px)", backgroundSize: "30px 30px" }}></div>
                             <div className="relative z-10 max-w-3xl mx-auto">
                                 <h2 className="text-3xl md:text-5xl font-black text-white mb-6">Ready to maximize your yield?</h2>
-                                <p className="text-green-100 text-lg mb-10">Join 10,000+ modern farmers using AgriSmart to grow smarter, not harder. Start your 14-day free trial today.</p>
+                                <p className="text-green-100 text-lg mb-10">Map your fields, monitor crop health with satellite data, and get AI-powered insights — all in one platform.</p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                     <Link href="/signup">
                                         <button className="h-12 px-8 rounded-lg bg-landing-primary hover:bg-landing-primary/90 text-black text-base font-bold transition-all shadow-lg shadow-green-900/50">
-                                            Get Started Now
+                                            Create Free Account
                                         </button>
                                     </Link>
-                                    <button className="h-12 px-8 rounded-lg bg-transparent border border-white/30 text-white hover:bg-white/10 text-base font-bold transition-all">
-                                        Contact Sales
-                                    </button>
+                                    <Link href="/login">
+                                        <button className="h-12 px-8 rounded-lg bg-transparent border border-white/30 text-white hover:bg-white/10 text-base font-bold transition-all">
+                                            Log In
+                                        </button>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -301,34 +262,24 @@ export default function LandingPage() {
                         <div>
                             <h4 className="font-bold text-landing-text-light dark:text-white mb-4">Product</h4>
                             <ul className="flex flex-col gap-3 text-sm text-gray-500 dark:text-gray-400">
-                                <li><a href="#" className="hover:text-landing-primary transition-colors">Features</a></li>
-                                <li><a href="#" className="hover:text-landing-primary transition-colors">Pricing</a></li>
-                                <li><a href="#" className="hover:text-landing-primary transition-colors">Integrations</a></li>
-                                <li><a href="#" className="hover:text-landing-primary transition-colors">Enterprise</a></li>
+                                <li><a href="#features" className="hover:text-landing-primary transition-colors">Features</a></li>
+                                <li><a href="#how-it-works" className="hover:text-landing-primary transition-colors">How it Works</a></li>
+                                <li><a href="#use-cases" className="hover:text-landing-primary transition-colors">Use Cases</a></li>
                             </ul>
                         </div>
                         <div>
                             <h4 className="font-bold text-landing-text-light dark:text-white mb-4">Company</h4>
                             <ul className="flex flex-col gap-3 text-sm text-gray-500 dark:text-gray-400">
-                                <li><a href="#" className="hover:text-landing-primary transition-colors">About Us</a></li>
-                                <li><a href="#" className="hover:text-landing-primary transition-colors">Careers</a></li>
-                                <li><a href="#" className="hover:text-landing-primary transition-colors">Blog</a></li>
-                                <li><a href="#" className="hover:text-landing-primary transition-colors">Contact</a></li>
+                                <li><Link href="/signup" className="hover:text-landing-primary transition-colors">Sign Up</Link></li>
+                                <li><Link href="/login" className="hover:text-landing-primary transition-colors">Log In</Link></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="font-bold text-landing-text-light dark:text-white mb-4">Newsletter</h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Subscribe for the latest agricultural trends and product updates.</p>
-                            <form className="flex flex-col gap-2" onSubmit={(e) => e.preventDefault()}>
-                                <input
-                                    className="w-full h-10 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-landing-primary focus:border-transparent"
-                                    placeholder="Enter your email"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
-                                <button className="h-10 w-full rounded-md bg-landing-primary hover:bg-landing-primary/90 text-black text-sm font-bold transition-colors">Subscribe</button>
-                            </form>
+                            <h4 className="font-bold text-landing-text-light dark:text-white mb-4">Get Started</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Create an account to start monitoring your fields with satellite data and AI insights.</p>
+                            <Link href="/signup">
+                                <button className="h-10 w-full rounded-md bg-landing-primary hover:bg-landing-primary/90 text-black text-sm font-bold transition-colors">Sign Up Free</button>
+                            </Link>
                         </div>
                     </div>
                     <div className="border-t border-gray-100 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500 dark:text-gray-500">

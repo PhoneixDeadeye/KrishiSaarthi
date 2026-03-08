@@ -10,17 +10,22 @@ type UseVoiceRecordingReturn = {
   setLanguage: (l: string) => void;
 };
 
+/** Extended SpeechRecognition with a custom flag for auto-restart */
+interface ExtendedSpeechRecognition extends SpeechRecognition {
+  __shouldKeepRecording?: boolean;
+}
+
 export function useVoiceRecording(): UseVoiceRecordingReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [language, setLanguage] = useState<string>('en-US'); // default
 
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<ExtendedSpeechRecognition | null>(null);
   const restartingRef = useRef(false);
 
   useEffect(() => {
     const SpeechRecognition =
-      (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      window.webkitSpeechRecognition || window.SpeechRecognition;
 
     if (!SpeechRecognition) {
       // Browser does not support Web Speech API
@@ -63,7 +68,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
       }
     };
 
-    recognition.onerror = (event: any) => {
+    recognition.onerror = (event: Event) => {
       console.warn('Speech recognition error', event);
       // do not forcibly stop; allow user to stop manually
     };
@@ -72,7 +77,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
       setIsRecording(false);
 
       // if we flagged to keep recording, restart after a small delay
-      if (recognitionRef.current && (recognitionRef.current as any).__shouldKeepRecording) {
+      if (recognitionRef.current && recognitionRef.current.__shouldKeepRecording) {
         if (!restartingRef.current) {
           restartingRef.current = true;
           setTimeout(() => {
@@ -98,7 +103,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
         recognition.onend = null;
         recognition.onerror = null;
         recognition.onstart = null;
-        (recognition as any).__shouldKeepRecording = false;
+        recognition.__shouldKeepRecording = false;
         recognition.stop?.();
       } catch {}
       recognitionRef.current = null;
@@ -123,7 +128,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
     }
 
     // mark that we want to auto-restart on end
-    (rec as any).__shouldKeepRecording = true;
+    rec.__shouldKeepRecording = true;
 
     try {
       // avoid double start; start() may throw if engine in transient state
@@ -142,7 +147,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
   const stopRecording = useCallback(() => {
     const rec = recognitionRef.current;
     if (!rec) return;
-    (rec as any).__shouldKeepRecording = false;
+    rec.__shouldKeepRecording = false;
     try {
       rec.stop();
     } catch (err) {

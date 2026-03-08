@@ -1,4 +1,3 @@
-"use client";
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -64,6 +63,7 @@ export function MarketPrices() {
     const [loading, setLoading] = useState(false);
     const [state, setState] = useState(() => localStorage.getItem('market_state') || 'Punjab');
     const [crop, setCrop] = useState<string>('');
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         localStorage.setItem('market_state', state);
@@ -86,9 +86,13 @@ export function MarketPrices() {
 
     const formatPrice = (price: number) => `₹${price.toLocaleString()}`;
 
+    // Filter helper
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch = (text: string) => !q || text.toLowerCase().includes(q);
+
     // Get top gainers and losers
-    const topGainers = data?.crops_summary?.filter(c => c.change > 0).sort((a, b) => b.change - a.change).slice(0, 3) || [];
-    const topLosers = data?.crops_summary?.filter(c => c.change < 0).sort((a, b) => a.change - b.change).slice(0, 3) || [];
+    const topGainers = data?.crops_summary?.filter(c => c.change > 0 && matchesSearch(c.crop)).sort((a, b) => b.change - a.change).slice(0, 3) || [];
+    const topLosers = data?.crops_summary?.filter(c => c.change < 0 && matchesSearch(c.crop)).sort((a, b) => a.change - b.change).slice(0, 3) || [];
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-10">
@@ -96,7 +100,7 @@ export function MarketPrices() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Market Prices</h1>
-                    <p className="text-muted-foreground text-sm mt-1">Live commodity prices from agricultural mandis</p>
+                    <p className="text-muted-foreground text-sm mt-1">Commodity prices from agricultural mandis</p>
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
                     <Select value={state} onValueChange={setState}>
@@ -126,6 +130,8 @@ export function MarketPrices() {
                         <input
                             type="text"
                             placeholder="Search commodities..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-48 pl-10 pr-4 py-2 bg-card border rounded-lg text-sm focus:ring-2 focus:ring-primary/50"
                         />
                     </div>
@@ -236,7 +242,7 @@ export function MarketPrices() {
                                 </thead>
                                 <tbody className="divide-y divide-border text-sm">
                                     {data.mandi_prices.flatMap(m =>
-                                        m.prices.map((p, pIdx) => ({ ...p, mandi: m.mandi, arrivals: m.arrivals, id: `${m.mandi}-${p.crop}-${pIdx}` }))
+                                        m.prices.filter(p => matchesSearch(p.crop) || matchesSearch(m.mandi)).map((p, pIdx) => ({ ...p, mandi: m.mandi, arrivals: m.arrivals, id: `${m.mandi}-${p.crop}-${pIdx}` }))
                                     ).slice(0, 15).map((row) => (
                                         <tr key={row.id} className="hover:bg-muted/50 transition-colors">
                                             <td className="px-5 py-4 font-medium flex items-center gap-3">
@@ -290,7 +296,7 @@ export function MarketPrices() {
 
                         {/* Mobile Cards */}
                         <CardContent className="md:hidden p-4 space-y-3">
-                            {data.mandi_prices.slice(0, 5).map((mandi, idx) => (
+                            {data.mandi_prices.filter(m => !q || m.mandi.toLowerCase().includes(q) || m.prices.some(p => matchesSearch(p.crop))).slice(0, 5).map((mandi, idx) => (
                                 <div key={idx} className="p-4 rounded-lg bg-muted/50 space-y-3">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">

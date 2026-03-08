@@ -1,4 +1,3 @@
-"use client";
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -24,10 +23,6 @@ export function Pest() {
   const [predictionLoading, setPredictionLoading] = useState(true);
   const [pestHistory, setPestHistory] = useState<PestReport[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
-  const [agroAlerts, setAgroAlerts] = useState<AgroAlert[]>([]);
-
-  // Agro alerts now come from field/alerts API via FieldAlerts component
-  // Initialize with empty array - we only show pest-specific predictions here
 
   useEffect(() => {
     const fetchPestPrediction = async () => {
@@ -99,14 +94,6 @@ export function Pest() {
     }
   };
 
-  const getAlertIcon = (type: string) => {
-    switch (type) {
-      case "Pest Outbreak": return "pest_control";
-      case "Cattle Disease": return "healing";
-      default: return "warning";
-    }
-  };
-
   const getRiskColor = (level: string) => {
     switch (level) {
       case "Low": return { bg: "bg-primary/10", text: "text-primary" };
@@ -126,33 +113,6 @@ export function Pest() {
         </h1>
         <p className="text-muted-foreground text-sm mt-1">AI-powered pest detection and risk analysis</p>
       </div>
-
-      {/* Agro Alerts */}
-      <Card>
-        <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4 border-b">
-          <span className="material-symbols-outlined text-red-500">warning</span>
-          <CardTitle className="text-lg">Agro Alerts</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 divide-y">
-          {agroAlerts.map((alert) => (
-            <div key={alert.id} className="p-4 flex items-center justify-between hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className={cn(
-                  "size-10 rounded-lg flex items-center justify-center",
-                  alert.severity === 'high' ? "bg-red-500/10 text-red-600" : "bg-amber-500/10 text-amber-600"
-                )}>
-                  <span className="material-symbols-outlined">{getAlertIcon(alert.type)}</span>
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{alert.type}</p>
-                  <p className="text-xs text-muted-foreground">{alert.location}</p>
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground">{alert.description}</p>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
 
       {/* Detection + Prediction Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -285,13 +245,13 @@ export function Pest() {
       {/* History Section */}
       <Card>
         <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4 border-b">
-          <span className="material-symbols-outlined text-violet-500">history</span>
+          <span className="material-symbols-outlined text-teal-500">history</span>
           <CardTitle className="text-lg">Recent Scans</CardTitle>
         </CardHeader>
         <CardContent className="p-5">
           {historyLoading ? (
             <div className="flex justify-center py-8">
-              <span className="material-symbols-outlined text-3xl animate-spin text-violet-500">progress_activity</span>
+              <span className="material-symbols-outlined text-3xl animate-spin text-teal-500">progress_activity</span>
             </div>
           ) : pestHistory.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">

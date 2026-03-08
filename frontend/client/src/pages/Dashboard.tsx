@@ -173,7 +173,7 @@ export default function Dashboard() {
               <p className="text-sm font-medium truncate">{user?.username || 'User'}</p>
               <p className="text-xs text-muted-foreground truncate">{user?.email || 'user@example.com'}</p>
             </div>
-            <span className="material-symbols-outlined text-muted-foreground text-lg">expand_more</span>
+            <span className="material-symbols-outlined text-muted-foreground text-lg"></span>
           </div>
         </div>
       </aside>
@@ -208,9 +208,12 @@ export default function Dashboard() {
             </div>
 
             {/* Notifications */}
-            <button className="relative p-2 text-muted-foreground hover:text-foreground transition-colors">
+            <button
+              className="relative p-2 text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setActiveTab('alerts')}
+              title="View alerts"
+            >
               <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-1.5 right-1.5 size-2.5 bg-destructive rounded-full border-2 border-card"></span>
             </button>
 
             {/* Mobile Search Button */}
