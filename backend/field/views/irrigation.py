@@ -105,7 +105,7 @@ class IrrigationScheduleView(APIView):
         try:
             # Get field centroid from GeoJSON polygon {coordinates: [[[lon, lat], ...]]}
             polygon = field.polygon
-            lat, lng = 10.0, 76.0  # Default fallback
+            lat, lng = None, None
 
             if isinstance(polygon, dict) and 'coordinates' in polygon:
                 coords = polygon['coordinates']
@@ -116,6 +116,10 @@ class IrrigationScheduleView(APIView):
                     if lons and lats:
                         lng = sum(lons) / len(lons)
                         lat = sum(lats) / len(lats)
+
+            if lat is None or lng is None:
+                logger.warning("Cannot compute centroid for field %d — missing polygon data", field.id)
+                return self._get_fallback_weather()
 
             api_key = os.environ.get('OPENWEATHER_API_KEY')
             if not api_key:
@@ -129,14 +133,14 @@ class IrrigationScheduleView(APIView):
                 data = response.json()
                 return self._parse_weather_data(data)
         except Exception as e:
-            logger.warning(f"Weather API error: {e}")
+            logger.warning("Weather API error: %s", e)
 
         return self._get_fallback_weather()
     
     def _parse_weather_data(self, data):
         """Parse OpenWeatherMap forecast response"""
         weather = {}
-        today = datetime.now().date()
+        today = timezone.now().date()
         
         for item in data.get('list', []):
             dt = datetime.fromtimestamp(item['dt'])

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Star, ArrowRight, Leaf, AlertTriangle, Lightbulb, CheckCircle } from "lucide-react";
 import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
+import { logger } from "@/lib/logger";
 
 interface Suggestion {
     crop: string;
@@ -58,7 +59,7 @@ export function RotationPlanner() {
             const result = await apiFetch(`/planning/rotation?field_id=${selectedField.id}`) as RotationData;
             setData(result);
         } catch (error) {
-            console.error("Failed to fetch rotation plan:", error);
+            logger.error("Failed to fetch rotation plan:", error);
         } finally {
             setLoading(false);
         }

@@ -62,6 +62,6 @@ class RevenueView(APIView):
         try:
             revenue = Revenue.objects.get(pk=pk, user=request.user)
             revenue.delete()
-            return Response({'message': 'Revenue entry deleted'}, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         except Revenue.DoesNotExist:
             return Response({'error': 'Revenue entry not found'}, status=status.HTTP_404_NOT_FOUND)

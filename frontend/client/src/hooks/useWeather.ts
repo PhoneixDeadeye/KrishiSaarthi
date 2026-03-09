@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
+import { logger } from "@/lib/logger";
 
 export interface WeatherData {
     temp: number | string;
@@ -76,7 +77,7 @@ export function useWeather(): UseWeatherReturn {
 
             setForecast(weatherData.forecast?.slice(0, 8) || []);
         } catch (err) {
-            console.error("Weather fetch error:", err);
+            logger.error("Weather fetch error:", err);
             setError("Unable to load weather data");
             setWeather(null);
         } finally {

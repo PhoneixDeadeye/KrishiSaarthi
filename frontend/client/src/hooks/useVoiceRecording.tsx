@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 
 type UseVoiceRecordingReturn = {
   isRecording: boolean;
@@ -69,7 +70,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
     };
 
     recognition.onerror = (event: Event) => {
-      console.warn('Speech recognition error', event);
+      logger.warn('Speech recognition error', event);
       // do not forcibly stop; allow user to stop manually
     };
 
@@ -85,7 +86,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
               recognitionRef.current.start();
               setIsRecording(true);
             } catch (err) {
-              console.warn('recognition restart failed', err);
+              logger.warn('recognition restart failed', err);
             } finally {
               restartingRef.current = false;
             }
@@ -124,7 +125,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
     try {
       rec.lang = language;
     } catch (err) {
-      console.warn('Could not set recognition.lang', err);
+      logger.warn('Could not set recognition.lang', err);
     }
 
     // mark that we want to auto-restart on end
@@ -138,7 +139,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
         try {
           rec.start();
         } catch (e) {
-          console.warn('recognition start retry failed', e);
+          logger.warn('recognition start retry failed', e);
         }
       }, 200);
     }
@@ -151,7 +152,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
     try {
       rec.stop();
     } catch (err) {
-      console.warn('recognition stop error', err);
+      logger.warn('recognition stop error', err);
     } finally {
       setIsRecording(false);
     }

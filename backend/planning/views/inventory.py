@@ -71,7 +71,7 @@ class InventoryItemView(APIView):
         """Delete an inventory item"""
         item = get_object_or_404(InventoryItem, pk=pk, user=request.user)
         item.delete()
-        return Response({'message': 'Item deleted'}, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class InventoryTransactionView(APIView):

@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 const INVENTORY_CATEGORIES = [
     { value: "seeds", label: "Seeds", icon: "grass" },
@@ -76,7 +77,7 @@ export function InventoryTracker() {
             const response = await apiFetch<InventoryResponse>("/planning/inventory");
             setData(response);
         } catch (err) {
-            console.error("Failed to fetch inventory:", err);
+            logger.error("Failed to fetch inventory:", err);
         } finally {
             setLoading(false);
         }
@@ -117,7 +118,7 @@ export function InventoryTracker() {
             setShowAddForm(false);
             fetchInventory();
         } catch (err) {
-            console.error("Failed to add item:", err);
+            logger.error("Failed to add item:", err);
         } finally {
             setSubmitting(false);
         }
@@ -150,7 +151,7 @@ export function InventoryTracker() {
             setTransactionQty("");
             fetchInventory();
         } catch (err) {
-            console.error("Failed to record transaction:", err);
+            logger.error("Failed to record transaction:", err);
         } finally {
             setSubmitting(false);
         }
@@ -161,7 +162,7 @@ export function InventoryTracker() {
             await apiFetch(`/planning/inventory/${id}`, { method: "DELETE" });
             fetchInventory();
         } catch (err) {
-            console.error("Failed to delete item:", err);
+            logger.error("Failed to delete item:", err);
         }
     };
 

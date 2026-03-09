@@ -235,7 +235,7 @@ class ChatAuthTestCase(TestCase):
     def test_chat_requires_auth(self):
         """Test chat endpoint requires authentication"""
         response = self.client.post(
-            '/api/a',
+            '/api/chat',
             json.dumps({'question': 'test'}),
             content_type='application/json'
         )
@@ -243,5 +243,5 @@ class ChatAuthTestCase(TestCase):
     
     def test_chat_history_requires_auth(self):
         """Test chat history endpoint requires authentication"""
-        response = self.client.get('/api/a/history/test_session')
+        response = self.client.get('/api/chat/history/test_session')
         self.assertEqual(response.status_code, 401)

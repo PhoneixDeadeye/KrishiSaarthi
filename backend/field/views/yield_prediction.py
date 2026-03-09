@@ -158,7 +158,7 @@ class YieldPredictionView(APIView):
                         )
                         return {'current': round(current, 3), 'trend': trend, 'time_series': time_series, 'source': 'earth_engine'}
         except Exception as e:
-            logger.warning(f"EE data fetch failed for yield prediction: {e}")
+            logger.warning("EE data fetch failed for yield prediction: %s", e)
 
         # Fallback: use deterministic estimate based on crop type
         import hashlib

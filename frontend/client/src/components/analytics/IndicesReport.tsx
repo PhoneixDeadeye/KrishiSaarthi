@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useField } from "@/context/FieldContext";
 import { AWDResponse } from "@/types/field";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 export function IndicesReport() {
     const { t } = useTranslation();
@@ -29,7 +30,7 @@ export function IndicesReport() {
                 const json = await apiFetch<AWDResponse>(url);
                 setData(json);
             } catch (err) {
-                console.error("AWD fetch error:", err);
+                logger.error("AWD fetch error:", err);
                 setError(err);
             } finally {
                 setLoading(false);

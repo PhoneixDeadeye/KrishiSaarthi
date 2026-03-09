@@ -30,7 +30,7 @@ class CircuitBreaker:
         self.last_failure_time = time.time()
         if self.failure_count >= self.failure_threshold:
             self.state = "OPEN"
-            logger.error(f"Circuit breaker OPENED after {self.failure_count} failures")
+            logger.error("Circuit breaker OPENED after %d failures", self.failure_count)
 
     def record_success(self):
         if self.state == "HALF-OPEN":
@@ -61,7 +61,7 @@ def fetchEEData_safe(user=None, field_id=None, field_instance=None, start_date=N
         return data
     except Exception as e:
         ee_breaker.record_failure()
-        logger.error(f"EE Service Failure: {e}", exc_info=True)
+        logger.error("EE Service Failure: %s", e, exc_info=True)
         return {
             "error": "Satellite data unavailable",
             "details": "Please try again later",

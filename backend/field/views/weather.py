@@ -36,7 +36,7 @@ class WeatherView(APIView):
             weather_res = requests.get(weather_url, timeout=5)
             
             if not weather_res.ok:
-                logger.error(f"Weather API error: {weather_res.status_code} - {weather_res.text}")
+                logger.error("Weather API error: %s - %s", weather_res.status_code, weather_res.text)
                 return Response({"error": "Failed to fetch weather data"}, status=weather_res.status_code)
 
             weather_data = weather_res.json()
@@ -51,7 +51,7 @@ class WeatherView(APIView):
                 "forecast": forecast_data
             })
         except requests.RequestException as e:
-            logger.error(f"Weather request failed: {e}", exc_info=True)
+            logger.error("Weather request failed: %s", e, exc_info=True)
             return Response(
                 {"error": "Weather service unreachable"},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE

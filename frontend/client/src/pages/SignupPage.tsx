@@ -1,5 +1,5 @@
 // src/pages/SignupPage.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -17,10 +17,10 @@ export default function SignupPage() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    if (isAuthenticated) {
-        setLocation("/dashboard");
-        return null;
-    }
+    // Redirect authenticated users (moved from render body to useEffect)
+    useEffect(() => {
+        if (isAuthenticated) setLocation("/dashboard");
+    }, [isAuthenticated, setLocation]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -67,7 +67,7 @@ export default function SignupPage() {
                         <div className="size-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6">
                             <span className="material-symbols-outlined text-3xl">eco</span>
                         </div>
-                        <h1 className="text-4xl font-bold mb-4">Krishi Sakhi</h1>
+                        <h1 className="text-4xl font-bold mb-4">KrishiSaarthi</h1>
                         <p className="text-xl text-white/80">Start Your Smart Farming Journey</p>
                     </div>
 
@@ -96,7 +96,7 @@ export default function SignupPage() {
                         <div className="size-14 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
                             <span className="material-symbols-outlined text-2xl text-white">eco</span>
                         </div>
-                        <h2 className="text-2xl font-bold">Krishi Sakhi</h2>
+                        <h2 className="text-2xl font-bold">KrishiSaarthi</h2>
                     </div>
 
                     <div className="text-center mb-8">

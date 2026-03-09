@@ -4,13 +4,16 @@ Health check and monitoring endpoints
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.db import connection
 from django.conf import settings
 import os
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Module-level flag to track EE initialization status
+_ee_initialized = False
 
 
 class HealthCheckView(APIView):
@@ -35,6 +38,8 @@ class ReadinessCheckView(APIView):
         Check if the service is ready to accept requests
         Verifies: database, ML models, Earth Engine
         """
+        global _ee_initialized
+
         checks = {
             "database": False,
             "ml_models": False,
@@ -48,7 +53,7 @@ class ReadinessCheckView(APIView):
             connection.ensure_connection()
             checks["database"] = True
         except Exception as e:
-            logger.error(f"Database check failed: {e}")
+            logger.error("Database check failed: %s", e)
             all_ready = False
         
         # Check ML models via registry
@@ -63,21 +68,25 @@ class ReadinessCheckView(APIView):
                 for name, info in ml_status.items()
             }
         except Exception as e:
-            logger.warning(f"ML model check failed: {e}")
+            logger.warning("ML model check failed: %s", e)
             checks["ml_models"] = False
         if not checks["ml_models"]:
             logger.warning("ML models not found")
             all_ready = False
         
-        # Check Earth Engine
-        try:
-            import ee
-            ee.Initialize()
+        # Check Earth Engine (cache initialization to avoid repeated slow calls)
+        if _ee_initialized:
             checks["earth_engine"] = True
-        except Exception as e:
-            logger.warning(f"Earth Engine check failed: {e}")
-            checks["earth_engine"] = False
-            all_ready = False
+        else:
+            try:
+                import ee
+                ee.Initialize()
+                _ee_initialized = True
+                checks["earth_engine"] = True
+            except Exception as e:
+                logger.warning("Earth Engine check failed: %s", e)
+                checks["earth_engine"] = False
+                all_ready = False
         
         response_status = status.HTTP_200_OK if all_ready else status.HTTP_503_SERVICE_UNAVAILABLE
         
@@ -92,7 +101,7 @@ class MetricsView(APIView):
     Basic metrics endpoint for monitoring.
     Restricted to admin users for defense-in-depth.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
     
     def get(self, request):
         """Return basic application metrics"""
@@ -109,7 +118,7 @@ class MetricsView(APIView):
             
             return Response(metrics, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"Metrics collection failed: {e}")
+            logger.error("Metrics collection failed: %s", e)
             return Response(
                 {"error": "Failed to collect metrics"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

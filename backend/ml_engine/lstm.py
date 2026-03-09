@@ -65,11 +65,11 @@ def load_risk_model(model_path: str = _DEFAULT_MODEL_PATH,
     import joblib
     
     if not os.path.exists(model_path):
-        logger.warning(f"Risk model not found at {model_path}. Risk prediction will return fallback values.")
+        logger.warning("Risk model not found at %s. Risk prediction will return fallback values.", model_path)
         return None, None
     
     if not os.path.exists(scaler_path):
-        logger.warning(f"Risk scaler not found at {scaler_path}. Risk prediction will return fallback values.")
+        logger.warning("Risk scaler not found at %s. Risk prediction will return fallback values.", scaler_path)
         return None, None
     
     try:
@@ -79,11 +79,11 @@ def load_risk_model(model_path: str = _DEFAULT_MODEL_PATH,
         model.eval()
         
         scaler = joblib.load(scaler_path)
-        logger.info(f"LSTM model and scaler loaded successfully")
+        logger.info("LSTM model and scaler loaded successfully")
         return model, scaler
         
     except Exception as e:
-        logger.error(f"Failed to load risk model or scaler: {e}")
+        logger.error("Failed to load risk model or scaler: %s", e)
         return None, None
 
 
@@ -181,7 +181,7 @@ def predict_risk_from_values(
         }
         
     except Exception as e:
-        logger.error(f"Risk prediction failed: {e}", exc_info=True)
+        logger.error("Risk prediction failed: %s", e, exc_info=True)
         return {
             "error": "Risk prediction failed",
             "risk_probability": 0.5,

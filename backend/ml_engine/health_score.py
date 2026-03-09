@@ -111,7 +111,7 @@ def get_health_score(
         cnn_result = predict_health(image_path)
         if "error" in cnn_result and not cnn_result.get("fallback"):
             # Hard error - but continue with other metrics
-            logger.warning(f"CNN prediction error: {cnn_result['error']}")
+            logger.warning("CNN prediction error: %s", cnn_result['error'])
             p_cnn_healthy = 0.5  # Neutral value
             breakdown["cnn"] = {"value": 0.5, "status": "unavailable", "error": cnn_result["error"]}
         else:
@@ -143,7 +143,7 @@ def get_health_score(
     if sequence:
         risk_result = predict_risk_from_values(sequence)
         if "error" in risk_result and not risk_result.get("fallback"):
-            logger.warning(f"LSTM prediction error: {risk_result['error']}")
+            logger.warning("LSTM prediction error: %s", risk_result['error'])
             risk_prob = 0.5
             breakdown["risk"] = {"value": 0.5, "status": "unavailable", "error": risk_result["error"]}
         else:

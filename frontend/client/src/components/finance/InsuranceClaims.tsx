@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Shield, Plus, FileText, Calendar, AlertTriangle, CheckCircle2, Clock, XCircle, IndianRupee, RefreshCw, Send, Trash2, Eye } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useField } from "@/context/FieldContext";
+import { logger } from "@/lib/logger";
 
 interface Claim {
     id: number;
@@ -82,7 +83,7 @@ export function InsuranceClaims() {
             setData(response as ClaimsData);
         } catch (err) {
             setError('Failed to load insurance claims');
-            console.error(err);
+            logger.error(err);
         } finally {
             setLoading(false);
         }
@@ -129,7 +130,7 @@ export function InsuranceClaims() {
             setFormData(INITIAL_FORM);
             fetchClaims();
         } catch (err) {
-            console.error('Failed to submit claim:', err);
+            logger.error('Failed to submit claim:', err);
         } finally {
             setSubmitting(false);
         }
@@ -143,7 +144,7 @@ export function InsuranceClaims() {
             });
             fetchClaims();
         } catch (err) {
-            console.error('Failed to submit claim:', err);
+            logger.error('Failed to submit claim:', err);
         }
     };
 
@@ -154,7 +155,7 @@ export function InsuranceClaims() {
             await apiFetch(`/finance/insurance/${claimId}`, { method: 'DELETE' });
             fetchClaims();
         } catch (err) {
-            console.error('Failed to delete claim:', err);
+            logger.error('Failed to delete claim:', err);
         }
     };
 

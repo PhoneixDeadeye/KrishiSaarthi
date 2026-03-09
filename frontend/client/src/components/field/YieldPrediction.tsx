@@ -6,6 +6,7 @@ import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
 import { PredictionData } from "@/types/field";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 import {
     BarChart,
     Bar,
@@ -35,7 +36,7 @@ export function YieldPrediction() {
             const data = await apiFetch<PredictionData>(`/field/yield-prediction?field_id=${selectedField.id}`);
             setPrediction(data);
         } catch (error) {
-            console.error("Failed to fetch yield prediction:", error);
+            logger.error("Failed to fetch yield prediction:", error);
         } finally {
             setLoading(false);
         }

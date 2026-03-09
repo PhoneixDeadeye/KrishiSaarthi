@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 interface WeatherData {
     temp_max: number | null;
@@ -82,7 +83,7 @@ export function IrrigationScheduler() {
             const data = await apiFetch(`/field/irrigation-schedule?field_id=${selectedField.id}`) as ScheduleData;
             setSchedule(data);
         } catch (error) {
-            console.error("Failed to fetch irrigation schedule:", error);
+            logger.error("Failed to fetch irrigation schedule:", error);
         } finally {
             setLoading(false);
         }
@@ -93,7 +94,7 @@ export function IrrigationScheduler() {
             const data = await apiFetch("/field/irrigation-logs") as { sources?: IrrigationSource[] };
             setSources(data.sources || []);
         } catch (error) {
-            console.error("Failed to fetch sources:", error);
+            logger.error("Failed to fetch sources:", error);
         }
     };
 
@@ -117,7 +118,7 @@ export function IrrigationScheduler() {
             setLogForm({ water_amount: "", duration_minutes: "", source: "other", notes: "" });
             fetchSchedule();
         } catch (error) {
-            console.error("Failed to log irrigation:", error);
+            logger.error("Failed to log irrigation:", error);
         }
     };
 

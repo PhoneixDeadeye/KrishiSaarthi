@@ -172,7 +172,7 @@ class FieldLogTestCase(TestCase):
         """Test creating a field log entry"""
         data = {
             'field_id': self.field.id,
-            'activity': 'Watering',
+            'activity': 'watering',
             'details': 'Irrigated the entire field',
             'date': '2026-02-28'
         }

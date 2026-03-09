@@ -16,17 +16,17 @@ class ChatAuthenticationTestCase(TestCase):
         self.client = Client()
 
     def test_chat_requires_auth(self):
-        """Test that POST /api/a requires authentication"""
+        """Test that POST /api/chat requires authentication"""
         response = self.client.post(
-            '/api/a',
+            '/api/chat',
             json.dumps({'question': 'What is NDVI?'}),
             content_type='application/json'
         )
         self.assertEqual(response.status_code, 401)
 
     def test_chat_history_requires_auth(self):
-        """Test that GET /api/a/history/<id> requires authentication"""
-        response = self.client.get('/api/a/history/test-session-123')
+        """Test that GET /api/chat/history/<id> requires authentication"""
+        response = self.client.get('/api/chat/history/test-session-123')
         self.assertEqual(response.status_code, 401)
 
 
@@ -42,7 +42,7 @@ class ChatValidationTestCase(TestCase):
     def test_chat_missing_question(self):
         """Test that missing question returns 400"""
         response = self.client.post(
-            '/api/a',
+            '/api/chat',
             json.dumps({}),
             content_type='application/json',
             **self.auth_headers
@@ -53,7 +53,7 @@ class ChatValidationTestCase(TestCase):
     def test_chat_empty_question(self):
         """Test that empty question returns 400"""
         response = self.client.post(
-            '/api/a',
+            '/api/chat',
             json.dumps({'question': ''}),
             content_type='application/json',
             **self.auth_headers
@@ -92,7 +92,7 @@ class ChatSessionModelTestCase(TestCase):
         token = Token.objects.create(user=user)
         client = Client()
         response = client.get(
-            '/api/a/history/nonexistent-session',
+            '/api/chat/history/nonexistent-session',
             HTTP_AUTHORIZATION=f'Token {token.key}'
         )
         self.assertEqual(response.status_code, 404)
@@ -106,7 +106,7 @@ class ChatSessionModelTestCase(TestCase):
 
         client = Client()
         response = client.delete(
-            '/api/a/history/delete-me',
+            '/api/chat/history/delete-me',
             HTTP_AUTHORIZATION=f'Token {token.key}'
         )
         self.assertEqual(response.status_code, 200)
@@ -130,7 +130,7 @@ class ChatIDORPreventionTestCase(TestCase):
     def test_user_b_cannot_read_user_a_history(self):
         """IDOR: User B must not see User A's chat session"""
         response = self.client.get(
-            '/api/a/history/session-a',
+            '/api/chat/history/session-a',
             HTTP_AUTHORIZATION=f'Token {self.token_b.key}'
         )
         self.assertEqual(response.status_code, 404)
@@ -138,7 +138,7 @@ class ChatIDORPreventionTestCase(TestCase):
     def test_user_b_cannot_delete_user_a_session(self):
         """IDOR: User B must not be able to delete User A's chat session"""
         response = self.client.delete(
-            '/api/a/history/session-a',
+            '/api/chat/history/session-a',
             HTTP_AUTHORIZATION=f'Token {self.token_b.key}'
         )
         self.assertEqual(response.status_code, 404)
@@ -148,7 +148,7 @@ class ChatIDORPreventionTestCase(TestCase):
     def test_owner_can_read_own_session(self):
         """Positive: Owner can read their own session"""
         response = self.client.get(
-            '/api/a/history/session-a',
+            '/api/chat/history/session-a',
             HTTP_AUTHORIZATION=f'Token {self.token_a.key}'
         )
         self.assertEqual(response.status_code, 200)

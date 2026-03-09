@@ -134,7 +134,7 @@ class EndpointAuthenticationTestCase(TestCase):
 
     def test_chat_endpoints_require_auth(self):
         """Test chat endpoints require authentication"""
-        self._assert_requires_auth('POST', '/api/a', {'question': 'test'})
+        self._assert_requires_auth('POST', '/api/chat', {'question': 'test'})
 
     def test_public_endpoints_allow_anonymous(self):
         """Test that public endpoints work without auth"""

@@ -125,7 +125,7 @@ class FieldManagementTestCase(TestCase):
             **self.auth_header
         )
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
 
         field = FieldData.objects.get(user=self.user)
         self.assertEqual(field.name, 'Test Field')

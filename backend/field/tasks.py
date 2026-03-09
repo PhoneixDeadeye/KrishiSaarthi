@@ -4,19 +4,54 @@ All tasks use actual model fields from field.models.
 """
 from celery import shared_task
 from django.utils import timezone
+from django.core.cache import cache
 from datetime import timedelta
+from functools import wraps
 import logging
 
 logger = logging.getLogger(__name__)
 
+# Default log retention in days (configurable via Django settings)
+LOG_RETENTION_DAYS = 730
 
-@shared_task(name='field.tasks.update_weather_data')
-def update_weather_data():
+
+def task_lock(timeout=600):
+    """Decorator to prevent concurrent runs of the same task using Redis lock."""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            lock_id = f'celery-lock-{func.__name__}'
+            acquired = cache.add(lock_id, 'locked', timeout)
+            if not acquired:
+                logger.info("Task %s skipped — already running.", func.__name__)
+                return None
+            try:
+                return func(*args, **kwargs)
+            finally:
+                cache.delete(lock_id)
+        return wrapper
+    return decorator
+
+
+@shared_task(
+    name='field.tasks.update_weather_data',
+    bind=True,
+    max_retries=3,
+    default_retry_delay=60,
+    rate_limit='10/m',
+)
+def update_weather_data(self):
     """
     Update weather data for all active fields.
-    Runs every 6 hours.
+    Runs every 6 hours. Stores results in FieldLog entries.
+    Delegates to _update_weather_data_impl which holds a Redis lock.
     """
-    from field.models import FieldData
+    return _update_weather_data_impl(self)
+
+
+@task_lock(timeout=1200)
+def _update_weather_data_impl(self):
+    from field.models import FieldData, FieldLog
     import os
     import requests
 
@@ -27,7 +62,7 @@ def update_weather_data():
         logger.warning("OPENWEATHER_API_KEY not set. Skipping weather update.")
         return 0
 
-    fields = FieldData.objects.all()
+    fields = FieldData.objects.select_related('user').all()
     updated_count = 0
 
     for field in fields:
@@ -40,7 +75,6 @@ def update_weather_data():
             if not coords or not coords[0]:
                 continue
 
-            # Calculate centroid from GeoJSON polygon
             ring = coords[0]
             lons = [p[0] for p in ring if len(p) >= 2]
             lats = [p[1] for p in ring if len(p) >= 2]
@@ -56,18 +90,39 @@ def update_weather_data():
             )
             response = requests.get(url, timeout=10)
             if response.status_code == 200:
+                weather_data = response.json()
+                temp = weather_data.get('main', {}).get('temp', 'N/A')
+                humidity = weather_data.get('main', {}).get('humidity', 'N/A')
+                description = weather_data.get('weather', [{}])[0].get('description', 'N/A')
+                FieldLog.objects.create(
+                    user=field.user,
+                    field=field,
+                    date=timezone.now().date(),
+                    activity='other',
+                    details=f"Weather update: {description}, Temp: {temp}\u00b0C, Humidity: {humidity}%",
+                )
                 updated_count += 1
+            else:
+                logger.warning("Weather API returned %d for field %d", response.status_code, field.id)
 
-        except Exception as e:
-            logger.error(f"Error updating weather for field {field.id}: {e}")
+        except requests.exceptions.RequestException as exc:
+            logger.error("Network error updating weather for field %d: %s", field.id, exc)
+            continue
+        except Exception as exc:
+            logger.error("Error updating weather for field %d: %s", field.id, exc)
             continue
 
-    logger.info(f"Weather update completed: {updated_count} fields updated")
+    logger.info("Weather update completed: %d fields updated", updated_count)
     return updated_count
 
 
-@shared_task(name='field.tasks.update_satellite_data')
-def update_satellite_data():
+@shared_task(
+    name='field.tasks.update_satellite_data',
+    bind=True,
+    max_retries=3,
+    default_retry_delay=120,
+)
+def update_satellite_data(self):
     """
     Update satellite imagery and indices for all fields.
     Runs daily at 2 AM.
@@ -89,27 +144,32 @@ def update_satellite_data():
             if 'error' not in ee_data:
                 updated_count += 1
 
-        except Exception as e:
-            logger.error(f"Error updating satellite data for field {field.id}: {e}")
+        except Exception as exc:
+            logger.error("Error updating satellite data for field %d: %s", field.id, exc)
             continue
 
-    logger.info(f"Satellite data update completed: {updated_count} fields updated")
+    logger.info("Satellite data update completed: %d fields updated", updated_count)
     return updated_count
 
 
-@shared_task(name='field.tasks.calculate_risk_scores')
-def calculate_risk_scores():
+@shared_task(
+    name='field.tasks.calculate_risk_scores',
+    bind=True,
+    max_retries=3,
+    default_retry_delay=120,
+)
+def calculate_risk_scores(self):
     """
     Calculate and update risk scores for all fields.
-    Runs daily at 3 AM.
+    Runs daily at 3 AM. Stores results in FieldAlert entries.
     """
-    from field.models import FieldData
+    from field.models import FieldData, FieldAlert
     from field.utils import fetchEEData
     from ml_engine.lstm import predict_risk_from_values
 
     logger.info("Starting risk score calculation...")
 
-    fields = FieldData.objects.all()
+    fields = FieldData.objects.select_related('user').all()
     updated_count = 0
 
     for field in fields:
@@ -125,13 +185,26 @@ def calculate_risk_scores():
             if len(ndvi_series) >= 7:
                 result = predict_risk_from_values(ee_data)
                 if 'error' not in result or result.get('fallback'):
+                    risk_level = result.get('risk_level', 'unknown')
+                    risk_score = result.get('risk_score', 0)
+
+                    # Store risk alert if score is concerning
+                    if risk_score > 0.6:
+                        FieldAlert.objects.get_or_create(
+                            user=field.user,
+                            field=field,
+                            date=timezone.now().date(),
+                            message=f"High risk detected for {field.name}: {risk_level} (score: {risk_score:.2f})",
+                            defaults={'is_read': False},
+                        )
+
                     updated_count += 1
 
-        except Exception as e:
-            logger.error(f"Error calculating risk for field {field.id}: {e}")
+        except Exception as exc:
+            logger.error("Error calculating risk for field %d: %s", field.id, exc)
             continue
 
-    logger.info(f"Risk calculation completed: {updated_count} fields updated")
+    logger.info("Risk calculation completed: %d fields updated", updated_count)
     return updated_count
 
 
@@ -155,12 +228,6 @@ def generate_daily_reports():
             if not fields.exists():
                 continue
 
-            yesterday = timezone.now().date() - timedelta(days=1)
-            daily_logs = FieldLog.objects.filter(
-                user=user,
-                date=yesterday
-            )
-
             # Create auto-alerts for fields with no recent activity
             for field in fields:
                 last_log = FieldLog.objects.filter(
@@ -180,11 +247,11 @@ def generate_daily_reports():
 
             reports_generated += 1
 
-        except Exception as e:
-            logger.error(f"Error generating report for user {user.id}: {e}")
+        except Exception as exc:
+            logger.error("Error generating report for user %d: %s", user.id, exc)
             continue
 
-    logger.info(f"Daily reports completed: {reports_generated} reports generated")
+    logger.info("Daily reports completed: %d reports generated", reports_generated)
     return reports_generated
 
 
@@ -198,14 +265,16 @@ def cleanup_old_logs():
 
     logger.info("Starting cleanup of old logs...")
 
-    # Delete logs older than 2 years
-    cutoff_date = timezone.now().date() - timedelta(days=730)
+    # Delete logs older than configured retention period
+    from django.conf import settings
+    retention_days = getattr(settings, 'LOG_RETENTION_DAYS', LOG_RETENTION_DAYS)
+    cutoff_date = timezone.now().date() - timedelta(days=retention_days)
 
     deleted_count, _ = FieldLog.objects.filter(
         date__lt=cutoff_date
     ).delete()
 
-    logger.info(f"Cleanup completed: {deleted_count} old logs deleted")
+    logger.info("Cleanup completed: %d old logs deleted", deleted_count)
     return deleted_count
 
 
@@ -217,7 +286,7 @@ def generate_field_analytics(field_id, start_date=None, end_date=None):
     from field.models import FieldData, FieldLog
     from django.db.models import Count
 
-    logger.info(f"Generating analytics for field {field_id}")
+    logger.info("Generating analytics for field %s", field_id)
 
     try:
         field = FieldData.objects.get(id=field_id)
@@ -243,12 +312,12 @@ def generate_field_analytics(field_id, start_date=None, end_date=None):
             ),
         }
 
-        logger.info(f"Analytics generated for field {field_id}")
+        logger.info("Analytics generated for field %s", field_id)
         return analytics
 
     except FieldData.DoesNotExist:
-        logger.error(f"Field {field_id} not found")
+        logger.error("Field %s not found", field_id)
         return {'error': f'Field {field_id} not found'}
     except Exception as e:
-        logger.error(f"Error generating analytics: {e}")
+        logger.error("Error generating analytics: %s", e)
         raise

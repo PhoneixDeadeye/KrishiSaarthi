@@ -66,7 +66,7 @@ class EquipmentView(APIView):
         """Remove equipment from registry"""
         equipment = get_object_or_404(Equipment, pk=pk, user=request.user)
         equipment.delete()
-        return Response({'message': 'Equipment deleted'}, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class EquipmentBookingView(APIView):
@@ -169,4 +169,4 @@ class EquipmentBookingView(APIView):
             equipment.status = EquipmentStatus.AVAILABLE
             equipment.save()
         
-        return Response({'message': 'Booking cancelled'}, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)

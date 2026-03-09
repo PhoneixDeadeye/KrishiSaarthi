@@ -93,7 +93,13 @@ class FieldAlertView(APIView):
         return Response(serializer.data)
 
     def patch(self, request, pk=None):
-        """Mark an alert as read"""
+        """Mark a single alert as read, or mark all alerts read when pk='all'"""
+        if pk == 'all':
+            updated = FieldAlert.objects.filter(
+                user=request.user, is_read=False
+            ).update(is_read=True)
+            return Response({'marked_read': updated})
+
         if not pk:
             return Response(
                 {"error": "Alert ID is required"},

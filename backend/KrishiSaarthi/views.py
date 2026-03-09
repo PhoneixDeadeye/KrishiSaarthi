@@ -10,6 +10,7 @@ import logging
 import os
 
 from django.conf import settings
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -48,9 +49,11 @@ class Login(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
+        # Use authenticate() to avoid timing side-channel (constant-time comparison)
+        user = authenticate(request=request, username=username, password=password)
+
+        if user is None:
+            logger.warning("Failed login attempt for user %s", username)
             return Response(
                 {"error": "Invalid credentials"},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -60,13 +63,6 @@ class Login(APIView):
             return Response(
                 {"error": "Account is disabled. Contact support."},
                 status=status.HTTP_403_FORBIDDEN,
-            )
-
-        if not user.check_password(password):
-            logger.warning("Failed login attempt for user %s", username)
-            return Response(
-                {"error": "Invalid credentials"},
-                status=status.HTTP_401_UNAUTHORIZED,
             )
 
         from rest_framework.authtoken.models import Token
@@ -85,20 +81,9 @@ class Signup(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        password = request.data.get("password", "")
-
-        # Run Django's full password validation
-        try:
-            validate_password(password)
-        except DjangoValidationError as exc:
-            return Response(
-                {"error": "Password too weak.", "details": exc.messages},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
+        # Password validation is now handled inside UserSerializer.validate_password()
+        # create_user() is handled inside UserSerializer.create() — no double-save
         user = serializer.save()
-        user.set_password(password)
-        user.save()
 
         from rest_framework.authtoken.models import Token
         token = Token.objects.create(user=user)
@@ -121,8 +106,11 @@ class Logout(APIView):
     def post(self, request) -> Response:
         try:
             request.user.auth_token.delete()
-        except Exception:
+        except AttributeError:
+            # Token may not exist if user signed in via another method
             pass
+        except Exception:
+            logger.warning("Unexpected error during logout for user %s", request.user.username)
         return Response({"success": "Logged out"}, status=status.HTTP_200_OK)
 
 

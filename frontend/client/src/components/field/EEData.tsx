@@ -38,6 +38,7 @@ ChartJS.register(
 
 import { apiFetch } from "@/lib/api";
 import { EEDataResponse } from "@/types/field";
+import { logger } from "@/lib/logger";
 
 export function EEData() {
   const { token } = useAuth();
@@ -63,7 +64,7 @@ export function EEData() {
         const json = await apiFetch<EEDataResponse>(endpoint);
         setData(json);
       } catch (err) {
-        console.error("EE fetch error:", err);
+        logger.error("EE fetch error:", err);
         setData(null);
       } finally {
         setLoading(false);

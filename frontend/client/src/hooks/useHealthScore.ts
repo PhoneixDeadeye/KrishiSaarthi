@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
 import { HealthScoreResponse } from "@/types/field";
+import { logger } from "@/lib/logger";
 
 interface UseHealthScoreReturn {
     healthData: HealthScoreResponse | null;
@@ -34,7 +35,7 @@ export function useHealthScore(): UseHealthScoreReturn {
             const data = await apiFetch<HealthScoreResponse>(endpoint);
             setHealthData(data);
         } catch (err) {
-            console.error("Health score fetch error:", err);
+            logger.error("Health score fetch error:", err);
             setError("Unable to load health data");
             setHealthData(null);
         } finally {

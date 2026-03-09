@@ -20,7 +20,7 @@ Usage:
 
 from .awd import detect_awd_from_ndwi, calculate_awd_score
 from .cc import calculate_carbon_metrics
-from .cnn import predict_health, get_model as get_cnn_model
+from .cnn import predict_health, get_model as get_cnn_model, predict_health_batch
 from .lstm import predict_risk_from_values, get_model_and_scaler as get_lstm_model
 from .health_score import get_health_score, compute_health_score, get_health_rating
 from .registry import registry as model_registry
@@ -35,6 +35,7 @@ __all__ = [
     
     # CNN (Image-based health detection)
     'predict_health',
+    'predict_health_batch',
     'get_cnn_model',
     
     # LSTM (Time-series risk prediction)

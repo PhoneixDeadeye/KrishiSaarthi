@@ -7,6 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
+import { ExportButton } from "@/components/common/ExportButton";
 
 type PnLData = {
     summary: {
@@ -82,7 +84,7 @@ export function PnLDashboard() {
                 );
                 setData(pnlData);
             } catch (err) {
-                console.error("Failed to fetch P&L data:", err);
+                logger.error("Failed to fetch P&L data:", err);
             } finally {
                 setLoading(false);
             }
@@ -151,10 +153,30 @@ export function PnLDashboard() {
                     <p className="text-muted-foreground text-sm mt-1">Financial overview for {selectedField.name}</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2" disabled>
-                        <span className="material-symbols-outlined text-lg">download</span>
-                        Export
-                    </Button>
+                    <ExportButton
+                        data={[
+                            ...(data?.cost_breakdown?.map(c => ({
+                                type: 'Cost',
+                                category: c.category,
+                                amount: c.total,
+                                percentage: c.percentage,
+                            })) || []),
+                            ...(data?.revenue_by_crop?.map(r => ({
+                                type: 'Revenue',
+                                category: r.crop,
+                                amount: r.amount,
+                                percentage: ((r.amount / (data?.summary.total_revenue || 1)) * 100).toFixed(1),
+                            })) || []),
+                        ]}
+                        columns={[
+                            { header: 'Type', accessorKey: 'type' },
+                            { header: 'Category', accessorKey: 'category' },
+                            { header: 'Amount (₹)', accessorKey: 'amount' },
+                            { header: '%', accessorKey: 'percentage' },
+                        ]}
+                        filename={`pnl-${selectedField.name}`}
+                        title={`P&L Report - ${selectedField.name}`}
+                    />
                 </div>
             </div>
 

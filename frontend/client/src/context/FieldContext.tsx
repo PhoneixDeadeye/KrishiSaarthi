@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useAuth } from "./AuthContext";
 import { API_BASE_URL } from "@/lib/api";
 import { FieldPolygon } from "@/types/field";
+import { logger } from "@/lib/logger";
 
 export interface Field {
     id: number;
@@ -62,10 +63,10 @@ export const FieldProvider = ({ children }: { children: ReactNode }) => {
                     setSelectedField(null);
                 }
             } else {
-                console.error("Failed to fetch fields");
+                logger.error("Failed to fetch fields");
             }
         } catch (error) {
-            console.error("Error fetching fields:", error);
+            logger.error("Error fetching fields:", error);
         } finally {
             setLoading(false);
         }
@@ -92,11 +93,11 @@ export const FieldProvider = ({ children }: { children: ReactNode }) => {
                 await refreshFields();
                 return true;
             } else {
-                console.error("Failed to delete field");
+                logger.error("Failed to delete field");
                 return false;
             }
         } catch (error) {
-            console.error("Error deleting field:", error);
+            logger.error("Error deleting field:", error);
             return false;
         }
     };

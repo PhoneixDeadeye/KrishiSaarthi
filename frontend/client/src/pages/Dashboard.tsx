@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { FieldReport } from '@/components/field/FieldReport';
 import { MyField } from '@/components/field/MyField';
 import { DataAnalytics } from '@/components/analytics/DataAnalytics';
@@ -80,7 +80,18 @@ const tabTitles: Record<string, string> = {
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('home');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { user } = useAuth();
+
+  // Filter nav items based on search query
+  const filteredNavItems = useMemo(() => {
+    if (!searchQuery.trim()) return navItems;
+    const q = searchQuery.toLowerCase();
+    return navItems.filter(item =>
+      item.label.toLowerCase().includes(q) ||
+      item.id.toLowerCase().includes(q)
+    );
+  }, [searchQuery]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -204,7 +215,32 @@ export default function Dashboard() {
                 className="w-64 pl-10 pr-4 py-2 bg-muted border-none rounded-full text-sm focus:ring-2 focus:ring-primary/50 placeholder-muted-foreground"
                 placeholder="Search data, crops, reports..."
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
+              {/* Search results dropdown */}
+              {searchQuery.trim() && filteredNavItems.length > 0 && (
+                <div className="absolute top-full mt-1 left-0 w-full bg-card border border-border rounded-lg shadow-lg z-50 overflow-hidden">
+                  {filteredNavItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setSearchQuery('');
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-muted transition-colors text-left"
+                    >
+                      <span className="material-symbols-outlined text-base text-muted-foreground">{item.icon}</span>
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {searchQuery.trim() && filteredNavItems.length === 0 && (
+                <div className="absolute top-full mt-1 left-0 w-full bg-card border border-border rounded-lg shadow-lg z-50 px-4 py-3 text-sm text-muted-foreground">
+                  No results found
+                </div>
+              )}
             </div>
 
             {/* Notifications */}

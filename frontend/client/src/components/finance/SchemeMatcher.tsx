@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Building2, FileText, ExternalLink, Calendar, IndianRupee, Filter, Search, CheckCircle2, Clock, AlertCircle, Wallet, GraduationCap, Shield, Gift, RefreshCw } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { logger } from "@/lib/logger";
 
 interface Scheme {
     id: number;
@@ -70,7 +71,7 @@ export function SchemeMatcher() {
             setData(response as SchemesData);
         } catch (err) {
             setError('Failed to load government schemes');
-            console.error(err);
+            logger.error(err);
         } finally {
             setLoading(false);
         }

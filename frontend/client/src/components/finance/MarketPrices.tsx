@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 interface MandiPrice {
     crop: string;
@@ -78,7 +79,7 @@ export function MarketPrices() {
             const result = await apiFetch(`/finance/market-prices?${params}`) as MarketData;
             setData(result);
         } catch (error) {
-            console.error("Failed to fetch market data:", error);
+            logger.error("Failed to fetch market data:", error);
         } finally {
             setLoading(false);
         }

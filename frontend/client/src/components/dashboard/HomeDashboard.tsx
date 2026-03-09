@@ -9,6 +9,7 @@ import { Sprout, Plus, ArrowRight, AlertCircle, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { PredictionData } from "@/types/field";
+import { logger } from "@/lib/logger";
 import { WeatherWidget } from "./WeatherWidget";
 import { HealthGauge } from "./HealthGauge";
 import { useWeather } from "@/hooks/useWeather";
@@ -49,7 +50,7 @@ export function HomeDashboard({ onNavigate }: { onNavigate: (tab: string) => voi
                 const data = await apiFetch<PredictionData>(`/field/yield-prediction?field_id=${selectedField.id}`);
                 setPredictionData(data);
             } catch (err) {
-                console.error("Prediction fetch error:", err);
+                logger.error("Prediction fetch error:", err);
                 setPredictionData(null);
             } finally {
                 setPredictionLoading(false);
@@ -75,7 +76,7 @@ export function HomeDashboard({ onNavigate }: { onNavigate: (tab: string) => voi
                     setMarketPrices(formatPrices);
                 }
             } catch (error) {
-                console.error("Market fetch error:", error);
+                logger.error("Market fetch error:", error);
                 setMarketError("Unable to load market prices");
             } finally {
                 setMarketLoading(false);

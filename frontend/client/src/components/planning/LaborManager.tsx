@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 type LaborEntry = {
     id: number;
@@ -61,7 +62,7 @@ export function LaborManager() {
             const response = await apiFetch<LaborResponse>(url);
             setData(response);
         } catch (err) {
-            console.error("Failed to fetch labor entries:", err);
+            logger.error("Failed to fetch labor entries:", err);
         } finally {
             setLoading(false);
         }
@@ -108,7 +109,7 @@ export function LaborManager() {
             setShowAddForm(false);
             fetchLabor();
         } catch (err) {
-            console.error("Failed to add labor entry:", err);
+            logger.error("Failed to add labor entry:", err);
         } finally {
             setSubmitting(false);
         }
@@ -122,7 +123,7 @@ export function LaborManager() {
             });
             fetchLabor();
         } catch (err) {
-            console.error("Failed to update payment status:", err);
+            logger.error("Failed to update payment status:", err);
         }
     };
 
@@ -131,7 +132,7 @@ export function LaborManager() {
             await apiFetch(`/planning/labor/${id}`, { method: "DELETE" });
             fetchLabor();
         } catch (err) {
-            console.error("Failed to delete entry:", err);
+            logger.error("Failed to delete entry:", err);
         }
     };
 

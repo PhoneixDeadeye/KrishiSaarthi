@@ -136,9 +136,19 @@ class SchemesView(APIView):
         scheme_type = request.query_params.get('type', None)
         land_acres = request.query_params.get('land_acres', None)
 
-        # Auto-seed DB with sample data on first access if empty
+        # Ensure schemes exist (seed via: python manage.py seed_schemes)
         if not GovernmentScheme.objects.exists():
-            self._seed_schemes()
+            logger.warning(
+                "No government schemes in DB. Run: python manage.py seed_schemes"
+            )
+            return Response({
+                'total_schemes': 0,
+                'user_crops': [],
+                'schemes': [],
+                'grouped': {'subsidy': [], 'loan': [], 'insurance': [], 'grant': [], 'training': []},
+                'tips': [],
+                'setup_required': 'Run "python manage.py seed_schemes" to load scheme data.',
+            })
 
         # Build queryset
         qs = GovernmentScheme.objects.filter(is_active=True)
@@ -255,7 +265,7 @@ class SchemesView(APIView):
                 link=data.get('link', ''),
                 is_active=data.get('is_active', True),
             )
-        logger.info(f"Seeded {len(SAMPLE_SCHEMES)} government schemes into DB")
+        logger.info("Seeded %d government schemes into DB", len(SAMPLE_SCHEMES))
 
 
 class SchemeDetailView(APIView):

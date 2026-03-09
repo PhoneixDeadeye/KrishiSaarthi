@@ -58,4 +58,4 @@ class SeasonCalendarView(APIView):
         """Delete a calendar event"""
         event = get_object_or_404(SeasonCalendar, pk=pk, user=request.user)
         event.delete()
-        return Response({'message': 'Event deleted'}, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)

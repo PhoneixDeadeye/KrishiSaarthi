@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
 import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
+import { logger } from "@/lib/logger";
 import {
     Plus,
     Trash2,
@@ -145,7 +146,7 @@ export function CostCalculator() {
             setRevenues(revenuesData);
             setSeasons(seasonsData);
         } catch (err) {
-            console.error("Failed to fetch data:", err);
+            logger.error("Failed to fetch data:", err);
         } finally {
             setLoading(false);
         }
@@ -185,7 +186,7 @@ export function CostCalculator() {
             });
             fetchData();
         } catch (err) {
-            console.error("Failed to add cost:", err);
+            logger.error("Failed to add cost:", err);
         } finally {
             setSubmitting(false);
         }
@@ -223,7 +224,7 @@ export function CostCalculator() {
             });
             fetchData();
         } catch (err) {
-            console.error("Failed to add revenue:", err);
+            logger.error("Failed to add revenue:", err);
         } finally {
             setSubmitting(false);
         }
@@ -234,7 +235,7 @@ export function CostCalculator() {
             await apiFetch(`/finance/costs/${id}`, { method: "DELETE" });
             fetchData();
         } catch (err) {
-            console.error("Failed to delete cost:", err);
+            logger.error("Failed to delete cost:", err);
         }
     };
 
@@ -243,7 +244,7 @@ export function CostCalculator() {
             await apiFetch(`/finance/revenue/${id}`, { method: "DELETE" });
             fetchData();
         } catch (err) {
-            console.error("Failed to delete revenue:", err);
+            logger.error("Failed to delete revenue:", err);
         }
     };
 

@@ -24,6 +24,7 @@ urlpatterns = [
     path('logs/<int:pk>', FieldLogView.as_view(), name='fieldLogDetail'),
     # FieldAlert API
     path('alerts', FieldAlertView.as_view(), name='fieldAlerts'),
+    path('alerts/all', FieldAlertView.as_view(), kwargs={'pk': 'all'}, name='fieldAlertBulkRead'),
     path('alerts/<int:pk>', FieldAlertView.as_view(), name='fieldAlertDetail'),
     # Soil Advice API
     path('soil-advice', SoilAdviceView.as_view(), name='soilAdvice'),

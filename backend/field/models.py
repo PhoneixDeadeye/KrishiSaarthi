@@ -1,19 +1,32 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
+
 class FieldData(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='fields')
     name = models.CharField(max_length=100, default="My Field")
-    cropType = models.CharField(max_length=32)
+    cropType = models.CharField(max_length=32, db_column='cropType')  # kept for backwards-compat
+    crop_type = None  # alias handled via property below
     polygon = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.name} ({self.cropType})"
-    
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', 'created_at']),
+        ]
+
+
 class Pest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    field = models.ForeignKey(
+        FieldData, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='pest_reports',
+        help_text='The field this pest report is associated with',
+    )
     image = models.ImageField(upload_to="pest/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
@@ -22,12 +35,12 @@ class Pest(models.Model):
 
 
 ACTIVITY_CHOICES = [
-    ('Watering', 'Watering'),
-    ('Fertilizer', 'Fertilizer'),
-    ('Sowing', 'Sowing'),
-    ('Pesticide', 'Pesticide'),
-    ('Harvest', 'Harvest'),
-    ('Other', 'Other'),
+    ('watering', 'Watering'),
+    ('fertilizer', 'Fertilizer'),
+    ('sowing', 'Sowing'),
+    ('pesticide', 'Pesticide'),
+    ('harvest', 'Harvest'),
+    ('other', 'Other'),
 ]
 
 class FieldLog(models.Model):
@@ -42,6 +55,9 @@ class FieldLog(models.Model):
 
     class Meta:
         ordering = ['-date', '-created_at']
+        indexes = [
+            models.Index(fields=['user', 'field', '-date']),
+        ]
 
     def __str__(self):
         return f"{self.user.username} - {self.activity} on {self.date}"
@@ -59,6 +75,9 @@ class FieldAlert(models.Model):
 
     class Meta:
         ordering = ['-date', '-created_at']
+        indexes = [
+            models.Index(fields=['user', 'is_read', '-date']),
+        ]
 
     def __str__(self):
         return f"{self.user.username} - Alert on {self.date}"

@@ -135,7 +135,7 @@ class InsuranceClaimView(APIView):
                 status='draft'
             )
             
-            logger.info(f"Created insurance claim {claim.id} for user {request.user.username}")
+            logger.info("Created insurance claim %d for user %s", claim.id, request.user.username)
             
             return Response({
                 'message': 'Claim created successfully',
@@ -144,7 +144,7 @@ class InsuranceClaimView(APIView):
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
-            logger.error(f"Error creating insurance claim: {e}", exc_info=True)
+            logger.error("Error creating insurance claim: %s", e, exc_info=True)
             return Response(
                 {'error': 'Failed to create claim'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -182,7 +182,7 @@ class InsuranceClaimDetailView(APIView):
             'submitted_at': claim.submitted_at.isoformat() if claim.submitted_at else None,
             'reviewed_at': claim.reviewed_at.isoformat() if claim.reviewed_at else None,
             'reviewer_notes': claim.reviewer_notes,
-            'bank_account': claim.bank_account,
+            'bank_account': self._mask_account(claim.bank_account),
             'ifsc_code': claim.ifsc_code,
             'created_at': claim.created_at.isoformat(),
             'updated_at': claim.updated_at.isoformat(),
@@ -240,3 +240,10 @@ class InsuranceClaimDetailView(APIView):
         
         claim.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @staticmethod
+    def _mask_account(account_number: str) -> str:
+        """Mask bank account number, showing only last 4 digits."""
+        if not account_number or len(account_number) <= 4:
+            return account_number
+        return '●' * (len(account_number) - 4) + account_number[-4:]

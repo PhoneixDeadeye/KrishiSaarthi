@@ -64,5 +64,5 @@ def calculate_area_in_hectares(coords_list):
     except Exception as e:
         import logging
         logger = logging.getLogger(__name__)
-        logger.error(f"Area calculation failed: {e}")
+        logger.error("Area calculation failed: %s", e)
         return 0.0

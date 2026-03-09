@@ -1,7 +1,7 @@
 // src/context/AuthContext.tsx
-import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, setUnauthorizedHandler } from "@/lib/api";
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 interface User {
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Use refs for timers and listeners to avoid stale closures
     const logoutTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    const logout = () => {
+    const logout = useCallback(() => {
         // Attempt server-side token invalidation (fire-and-forget)
         const currentToken = token || localStorage.getItem("authToken");
         if (currentToken) {
@@ -45,7 +45,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem("authToken");
         localStorage.removeItem("authUser");
         if (logoutTimerRef.current) clearTimeout(logoutTimerRef.current);
-    };
+    }, [token]);
+
+    // Register global 401 interceptor so API calls auto-logout on expired tokens
+    useEffect(() => {
+        setUnauthorizedHandler(() => {
+            logout();
+            toast({
+                title: "Session Expired",
+                description: "Your session has expired. Please log in again.",
+                variant: "destructive",
+            });
+        });
+    }, [logout, toast]);
 
     const resetTimer = () => {
         if (!token) return;

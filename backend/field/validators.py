@@ -3,52 +3,92 @@ Validation utilities for field data
 """
 from typing import Dict, List, Any, Tuple
 import logging
+import math
 
 logger = logging.getLogger(__name__)
 
+# Maximum field area in square degrees (~111km per degree)
+MAX_FIELD_AREA_SQ_DEG = 1.0  # Roughly 12,000 hectares at the equator
 
-def validate_polygon(polygon: Any) -> Tuple[bool, str]:
+
+def _ring_area(ring: List) -> float:
+    """Calculate area of a ring using the Shoelace formula (in square degrees)."""
+    n = len(ring)
+    if n < 3:
+        return 0.0
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += ring[i][0] * ring[j][1]
+        area -= ring[j][0] * ring[i][1]
+    return abs(area) / 2.0
+
+
+def validate_polygon(polygon: Any) -> None:
     """
     Validate GeoJSON polygon structure.
-    
-    Args:
-        polygon: The polygon data to validate
-        
-    Returns:
-        Tuple of (is_valid, error_message)
+    Raises ``django.core.exceptions.ValidationError`` when the polygon is invalid.
+
+    Can be used as a Django model/field validator or called directly.
     """
+    from django.core.exceptions import ValidationError as DjangoValidationError
+
     if not isinstance(polygon, dict):
-        return False, "Polygon must be a dictionary"
-    
+        raise DjangoValidationError("Polygon must be a dictionary")
+
+    # GeoJSON type is required and must be 'Polygon'
+    geo_type = polygon.get('type')
+    if geo_type is None:
+        raise DjangoValidationError("Missing required 'type' field. Expected 'Polygon'.")
+    if geo_type != 'Polygon':
+        raise DjangoValidationError(f"Expected GeoJSON type 'Polygon', got '{geo_type}'")
+
     if 'coordinates' not in polygon:
-        return False, "Polygon must contain 'coordinates' key"
-    
+        raise DjangoValidationError("Polygon must contain 'coordinates' key")
+
     coords = polygon.get('coordinates')
     if not coords or not isinstance(coords, list):
-        return False, "Coordinates must be a non-empty list"
-    
+        raise DjangoValidationError("Coordinates must be a non-empty list")
+
     if len(coords) == 0:
-        return False, "Coordinates array cannot be empty"
-    
-    # Check first ring
-    if not isinstance(coords[0], list) or len(coords[0]) < 3:
-        return False, "Polygon must have at least 3 points"
-    
+        raise DjangoValidationError("Coordinates array cannot be empty")
+
+    # A valid polygon ring needs at least 4 points (3 unique + closure)
+    if not isinstance(coords[0], list) or len(coords[0]) < 4:
+        raise DjangoValidationError("Polygon must have at least 4 points (3 vertices + closure)")
+
     # Validate coordinate format
-    for ring in coords:
+    for ring_idx, ring in enumerate(coords):
         if not isinstance(ring, list):
-            return False, "Each ring must be a list"
+            raise DjangoValidationError("Each ring must be a list")
         for point in ring:
             if not isinstance(point, (list, tuple)) or len(point) < 2:
-                return False, "Each point must have at least [lon, lat]"
+                raise DjangoValidationError("Each point must have at least [lon, lat]")
             try:
                 lon, lat = float(point[0]), float(point[1])
                 if not (-180 <= lon <= 180 and -90 <= lat <= 90):
-                    return False, f"Invalid coordinates: ({lon}, {lat})"
+                    raise DjangoValidationError(f"Invalid coordinates: ({lon}, {lat})")
             except (ValueError, TypeError):
-                return False, "Coordinates must be numeric"
-    
-    return True, ""
+                raise DjangoValidationError("Coordinates must be numeric")
+
+        # Validate ring closure (first point must equal last point)
+        if len(ring) >= 3:
+            first, last = ring[0], ring[-1]
+            if (float(first[0]) != float(last[0])) or (float(first[1]) != float(last[1])):
+                raise DjangoValidationError(f"Ring {ring_idx} is not closed (first and last points must match)")
+
+    # Check that polygon area is reasonable (not unreasonably large)
+    exterior = coords[0]
+    area = _ring_area([[float(p[0]), float(p[1])] for p in exterior])
+    if area > MAX_FIELD_AREA_SQ_DEG:
+        raise DjangoValidationError(f"Polygon area too large ({area:.4f} sq degrees). Max allowed: {MAX_FIELD_AREA_SQ_DEG}")
+
+    # Check for self-intersection (simplified check: no duplicate consecutive points)
+    for ring in coords:
+        for i in range(len(ring) - 1):
+            if (float(ring[i][0]) == float(ring[i + 1][0]) and
+                    float(ring[i][1]) == float(ring[i + 1][1])):
+                raise DjangoValidationError("Ring contains duplicate consecutive points")
 
 
 def validate_field_data(data: Dict[str, Any]) -> Tuple[bool, str]:
@@ -68,9 +108,11 @@ def validate_field_data(data: Dict[str, Any]) -> Tuple[bool, str]:
             return False, f"Missing required field: {field}"
     
     # Validate polygon
-    is_valid, error = validate_polygon(data['polygon'])
-    if not is_valid:
-        return False, f"Invalid polygon: {error}"
+    from django.core.exceptions import ValidationError as DjangoValidationError
+    try:
+        validate_polygon(data['polygon'])
+    except DjangoValidationError as e:
+        return False, f"Invalid polygon: {e.message}"
     
     # Validate crop type if provided
     if 'cropType' in data and data['cropType']:
@@ -91,26 +133,33 @@ def validate_field_data(data: Dict[str, Any]) -> Tuple[bool, str]:
 
 def sanitize_coordinates(coords: List) -> List:
     """
-    Sanitize and normalize coordinate values.
+    Sanitize and validate coordinate values.
+    Rejects invalid coordinates instead of silently clamping them.
     
     Args:
-        coords: List of coordinates
+        coords: List of coordinate rings
         
     Returns:
         Sanitized coordinates
+        
+    Raises:
+        ValueError: If any coordinate is out of valid range
     """
-    def sanitize_point(point):
-        try:
-            lon = max(-180, min(180, float(point[0])))
-            lat = max(-90, min(90, float(point[1])))
-            return [lon, lat]
-        except (ValueError, TypeError, IndexError):
-            logger.warning(f"Invalid point in coordinates: {point}")
-            return point
-    
     sanitized = []
     for ring in coords:
-        sanitized_ring = [sanitize_point(p) for p in ring]
+        sanitized_ring = []
+        for point in ring:
+            try:
+                lon = float(point[0])
+                lat = float(point[1])
+                if not (-180 <= lon <= 180):
+                    raise ValueError(f"Longitude {lon} out of range [-180, 180]")
+                if not (-90 <= lat <= 90):
+                    raise ValueError(f"Latitude {lat} out of range [-90, 90]")
+                sanitized_ring.append([lon, lat])
+            except (ValueError, TypeError, IndexError) as exc:
+                logger.warning("Invalid point in coordinates: %s — %s", point, exc)
+                raise ValueError(f"Invalid coordinate point: {point}") from exc
         sanitized.append(sanitized_ring)
     
     return sanitized

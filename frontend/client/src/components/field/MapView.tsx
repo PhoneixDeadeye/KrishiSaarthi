@@ -19,6 +19,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-geosearch/dist/geosearch.css";
 import "./MapView.css";
 import { API_BASE_URL } from "@/lib/api";
+import { logger } from "@/lib/logger";
 
 // ================= Map Click Handler =================
 function MapClickHandler({
@@ -171,7 +172,7 @@ export default function MapView({
           try {
             const area = Number((turf.area(selectedField.polygon) / 10000).toFixed(2));
             setFarmArea(area);
-          } catch (e) { console.error(e); }
+          } catch (e) { logger.error(e); }
 
           // Center map on the selected field
           if (latlngs.length > 0) {

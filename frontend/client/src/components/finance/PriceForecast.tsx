@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Minus, LineChart, RefreshCw, AlertTriangle, Lightbulb, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { logger } from "@/lib/logger";
 
 interface ForecastDay {
     date: string;
@@ -57,7 +58,7 @@ export function PriceForecast() {
             setData(response as ForecastData);
         } catch (err) {
             setError('Failed to load price forecast');
-            console.error(err);
+            logger.error(err);
         } finally {
             setLoading(false);
         }

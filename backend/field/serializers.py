@@ -32,8 +32,8 @@ class FieldDataSerializer(serializers.ModelSerializer):
     """Serializer for FieldData model"""
     class Meta:
         model = FieldData
-        fields = ['id', 'user', 'name', 'cropType', 'polygon', 'created_at']
-        read_only_fields = ['id', 'user', 'created_at']
+        fields = ['id', 'user', 'name', 'cropType', 'polygon', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
 
 
 class FieldLogSerializer(serializers.ModelSerializer):

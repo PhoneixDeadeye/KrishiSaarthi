@@ -82,6 +82,12 @@ class InventoryItem(models.Model):
     
     class Meta:
         ordering = ['category', 'name']
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(quantity__gte=0),
+                name='inventory_quantity_non_negative',
+            ),
+        ]
     
     @property
     def is_low_stock(self):
@@ -123,6 +129,14 @@ class InventoryTransaction(models.Model):
                     quantity=F('quantity') + self.quantity
                 )
             elif self.transaction_type == 'use':
+                # Check stock availability before deducting
+                self.item.refresh_from_db()
+                if self.item.quantity < self.quantity:
+                    from django.core.exceptions import ValidationError
+                    raise ValidationError(
+                        f"Insufficient stock: available {self.item.quantity} {self.item.unit}, "
+                        f"requested {self.quantity} {self.item.unit}"
+                    )
                 InventoryItem.objects.filter(pk=self.item_id).update(
                     quantity=F('quantity') - self.quantity
                 )
@@ -156,7 +170,8 @@ class LaborEntry(models.Model):
         verbose_name_plural = 'Labor entries'
     
     def save(self, *args, **kwargs):
-        if self.total_wage is None:
+        # Always recalculate total_wage from hours * rate
+        if self.hours_worked is not None and self.hourly_rate is not None:
             self.total_wage = self.hours_worked * self.hourly_rate
         super().save(*args, **kwargs)
     
@@ -211,6 +226,33 @@ class EquipmentBooking(models.Model):
     
     class Meta:
         ordering = ['start_datetime']
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(end_datetime__gt=models.F('start_datetime')),
+                name='booking_end_after_start',
+            ),
+        ]
+
+    def clean(self):
+        """Validate no overlapping bookings for the same equipment."""
+        from django.core.exceptions import ValidationError
+        if self.start_datetime and self.end_datetime:
+            if self.end_datetime <= self.start_datetime:
+                raise ValidationError("End datetime must be after start datetime.")
+            overlapping = EquipmentBooking.objects.filter(
+                equipment=self.equipment,
+                is_completed=False,
+                start_datetime__lt=self.end_datetime,
+                end_datetime__gt=self.start_datetime,
+            ).exclude(pk=self.pk)
+            if overlapping.exists():
+                raise ValidationError(
+                    f"Equipment '{self.equipment.name}' is already booked during this period."
+                )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return f"{self.equipment.name} for {self.purpose} ({self.start_datetime.date()})"

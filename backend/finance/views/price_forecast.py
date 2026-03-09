@@ -19,6 +19,7 @@ from datetime import timedelta
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import status as http_status
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -58,7 +59,16 @@ class PriceForecastView(APIView):
 
     def get(self, request):
         crop = request.query_params.get('crop', 'Rice')
-        days = min(int(request.query_params.get('days', 30)), 90)
+
+        # Validate and clamp days parameter
+        try:
+            days = int(request.query_params.get('days', 30))
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'days must be a positive integer'},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        days = max(1, min(days, 90))
 
         base_price = BASE_PRICES.get(crop, 2000)
         today = timezone.now().date()
@@ -96,8 +106,8 @@ class PriceForecastView(APIView):
             })
 
         except Exception as e:
-            logger.error(f"Error in price forecast: {e}")
-            return Response({'error': 'Failed to generate forecast'}, status=500)
+            logger.error("Error in price forecast: %s", e)
+            return Response({'error': 'Failed to generate forecast'}, status=http_status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # ------------------------------------------------------------------
     # Internal helpers

@@ -4,15 +4,17 @@ from django.conf import settings
 from django.conf.urls.static import static
 from . import views
 from .health import HealthCheckView, ReadinessCheckView, MetricsView
-from field.views import PestReport
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # App-specific routes
     path('field/', include('field.urls')),
     path('finance/', include('finance.urls')),
     path('planning/', include('planning.urls')),
     path('api/', include('chat.urls')),
-    path('pest', PestReport.as_view(), name='pest_report'),
+
+    # Auth endpoints
     path('login', views.Login.as_view(), name='login'),
     path('signup', views.Signup.as_view(), name='signup'),
     path('test_token', views.TestToken.as_view(), name='test_token'),

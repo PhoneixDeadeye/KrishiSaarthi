@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { translations, Language, TranslationKey } from '../lib/translations';
 
 interface TranslationContextType {
@@ -10,7 +10,14 @@ interface TranslationContextType {
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
 export function TranslationProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>(
+    () => (localStorage.getItem('language') as Language) || 'en'
+  );
+
+  // Persist language choice to localStorage
+  useEffect(() => {
+    localStorage.setItem('language', language);
+  }, [language]);
 
   const t = (key: TranslationKey): string => {
     return translations[language][key] || translations.en[key] || key;

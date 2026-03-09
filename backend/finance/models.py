@@ -65,6 +65,10 @@ class CostEntry(models.Model):
     class Meta:
         ordering = ['-date']
         verbose_name_plural = 'Cost entries'
+        indexes = [
+            models.Index(fields=['user', 'field', '-date']),
+            models.Index(fields=['user', 'season', 'category']),
+        ]
     
     def __str__(self):
         return f"{self.category}: ₹{self.amount} - {self.date}"
@@ -90,14 +94,14 @@ class Revenue(models.Model):
     
     class Meta:
         ordering = ['-date']
-    
+        indexes = [
+            models.Index(fields=['user', 'field', '-date']),
+            models.Index(fields=['user', 'crop']),
+        ]
+
     def save(self, *args, **kwargs):
-        # Auto-calculate total if not explicitly provided
-        if self.total_amount is None or (
-            not self.pk  # New instance — always recalculate to match inputs
-            and self.quantity_sold is not None
-            and self.price_per_unit is not None
-        ):
+        # Always recalculate total from quantity and price when both are provided
+        if self.quantity_sold is not None and self.price_per_unit is not None:
             self.total_amount = self.quantity_sold * self.price_per_unit
         super().save(*args, **kwargs)
     

@@ -18,16 +18,16 @@ class FieldConfig(AppConfig):
                      logger.warning("GEE_PROJECT not set in .env, defaulting to 'nabard-field-data'")
                      project_id = "nabard-field-data"
                 
-                logger.info(f"Attempting to initialize Earth Engine with project: {project_id}")
+                logger.info("Attempting to initialize Earth Engine with project: %s", project_id)
                 ee.Initialize(project=project_id)
-                logger.info(f"Earth Engine initialized successfully with project: {project_id}")
+                logger.info("Earth Engine initialized successfully with project: %s", project_id)
             except ee.EEException as e:
-                logger.error(f"Earth Engine initialization failed (EEException): {e}")
+                logger.error("Earth Engine initialization failed (EEException): %s", e)
                 logger.error("Make sure you have run 'earthengine authenticate' and your GEE_PROJECT has Earthengine API enabled.")
                 logger.warning("Earth Engine features will be disabled.")
             except Exception as e:
-                logger.error(f"Earth Engine initialization failed (General): {e}")
+                logger.error("Earth Engine initialization failed (General): %s", e)
         except ImportError:
             logger.warning("earthengine-api not installed. Earth Engine features disabled.")
         except Exception as e:
-            logger.error(f"Unexpected error in FieldConfig.ready: {e}")
+            logger.error("Unexpected error in FieldConfig.ready: %s", e)

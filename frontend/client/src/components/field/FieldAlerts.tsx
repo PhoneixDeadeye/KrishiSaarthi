@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 type Alert = {
     id: number;
@@ -52,7 +53,7 @@ export function FieldAlerts() {
             const data = await apiFetch<Alert[]>(`/field/alerts${params}`);
             setAlerts(data);
         } catch (err) {
-            console.error("Failed to fetch alerts:", err);
+            logger.error("Failed to fetch alerts:", err);
         } finally {
             setLoading(false);
         }
@@ -69,7 +70,7 @@ export function FieldAlerts() {
                 prev.map((a) => (a.id === alertId ? { ...a, is_read: true } : a))
             );
         } catch (err) {
-            console.error("Failed to mark alert as read:", err);
+            logger.error("Failed to mark alert as read:", err);
         }
     };
 

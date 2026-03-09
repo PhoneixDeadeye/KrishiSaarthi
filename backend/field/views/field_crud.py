@@ -12,6 +12,7 @@ from ..validators import validate_field_data, sanitize_coordinates
 
 logger = logging.getLogger(__name__)
 
+
 class FieldDataView(APIView):
     """
     GET: List all fields for the user
@@ -21,12 +22,12 @@ class FieldDataView(APIView):
 
     def get(self, request):
         try:
-            fields = FieldData.objects.filter(user=request.user)
+            fields = FieldData.objects.filter(user=request.user).order_by('-created_at')
             serializer = FieldDataSerializer(fields, many=True)
             return Response(serializer.data)
         except Exception as e:
-            logger.error(f"Error listing fields: {e}")
-            return Response({"error": "Failed to retrieve fields"}, status=500)
+            logger.error("Error listing fields: %s", e)
+            return Response({"error": "Failed to retrieve fields"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, pk=None):
         """Delete a field by ID"""
@@ -44,6 +45,7 @@ class FieldDataView(APIView):
                 {"error": "Field not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
+
 
 class SavePolygon(APIView):
     permission_classes = [IsAuthenticated]
@@ -66,9 +68,15 @@ class SavePolygon(APIView):
                     {"error": error_msg},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            
-            # Sanitize coordinates
-            polygon['coordinates'] = sanitize_coordinates(polygon['coordinates'])
+
+            # Sanitize coordinates (now raises ValueError on invalid data)
+            try:
+                polygon['coordinates'] = sanitize_coordinates(polygon['coordinates'])
+            except ValueError as exc:
+                return Response(
+                    {"error": str(exc)},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             if field_id:
                 # Update existing field
@@ -78,7 +86,7 @@ class SavePolygon(APIView):
                 field_data.name = name
                 field_data.save()
                 created = False
-                logger.info(f"Updated field {field_id} for user {request.user.username}")
+                logger.info("Updated field %s for user %s", field_id, request.user.username)
             else:
                 # Create new field
                 field_data = FieldData.objects.create(
@@ -88,7 +96,7 @@ class SavePolygon(APIView):
                     name=name
                 )
                 created = True
-                logger.info(f"Created new field {field_data.id} for user {request.user.username}")
+                logger.info("Created new field %s for user %s", field_data.id, request.user.username)
 
             return Response(
                 {
@@ -99,17 +107,20 @@ class SavePolygon(APIView):
                     "polygon": field_data.polygon,
                     "cropType": field_data.cropType,
                 },
-                status=status.HTTP_200_OK,
+                status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
             )
 
         except Exception as e:
-            logger.error(f"Error saving polygon for user {request.user.username}: {e}")
+            logger.error("Error saving polygon for user %s: %s", request.user.username, e)
             return Response(
-                {"error": "Failed to save field"}, 
+                {"error": "Failed to save field"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-class getCoord(APIView):
+
+# Renamed from getCoord to follow PEP 8 naming conventions.
+# The old name `getCoord` is preserved as an alias for backwards-compatibility.
+class GetCoordView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -118,23 +129,28 @@ class getCoord(APIView):
             field_data = get_object_or_404(FieldData, id=field_id, user=request.user)
         else:
             field_data = FieldData.objects.filter(user=request.user).first()
-            
+
         if not field_data:
             return Response({"coord": None})
-            
+
         polygon = field_data.polygon
         coords = polygon.get("coordinates", [])
         first_coord = coords[0][0] if coords and coords[0] else None
 
         return Response({"coord": first_coord})
 
-# get coordinates list
+
+# Backwards-compatible alias
+getCoord = GetCoordView
+
+
 def get_polygon(user, field_id=None):
+    """Get polygon data for a user's field."""
     try:
         if field_id:
             field_data = FieldData.objects.get(id=field_id, user=user)
         else:
             field_data = FieldData.objects.filter(user=user).first()
         return field_data.polygon if field_data else None
-    except Exception:
+    except FieldData.DoesNotExist:
         return None

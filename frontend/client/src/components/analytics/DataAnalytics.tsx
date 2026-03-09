@@ -8,6 +8,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { apiFetch } from "@/lib/api";
 import { CarbonCreditResponse, AWDResponse } from "@/types/field";
 import { IndicesReport } from "./IndicesReport";
+import { logger } from "@/lib/logger";
 
 // Helper component to update map view
 function MapUpdater({ center }: { center: [number, number] }) {
@@ -44,7 +45,7 @@ export function DataAnalytics() {
         const json = await apiFetch<CarbonCreditResponse>(url);
         setCcData(json);
       } catch (err) {
-        console.error("Carbon Credits fetch error:", err);
+        logger.error("Carbon Credits fetch error:", err);
         setCcError(err);
       } finally {
         setCcLoading(false);
@@ -60,7 +61,7 @@ export function DataAnalytics() {
         const json = await apiFetch<AWDResponse>(url);
         setAwdData(json);
       } catch (err) {
-        console.error("AWD fetch error:", err);
+        logger.error("AWD fetch error:", err);
       } finally {
         setAwdLoading(false);
       }

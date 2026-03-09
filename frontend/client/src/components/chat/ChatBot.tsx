@@ -6,6 +6,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useVoiceRecording } from '@/hooks/useVoiceRecording';
 import { askCropQuestion, clearConversationHistory } from '@/lib/gemini';
 import { MessageCircle, X, Mic, Send, Bot, User, Trash2 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface Message {
   id: string;
@@ -121,7 +122,7 @@ export default function ChatBot() {
         timestamp: new Date(),
       }]);
     } catch (err) {
-      console.error('Failed to clear history:', err);
+      logger.error('Failed to clear history:', err);
     }
   };
 

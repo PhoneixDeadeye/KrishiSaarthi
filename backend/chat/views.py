@@ -6,6 +6,7 @@ from rest_framework import status, permissions
 from django.conf import settings
 from .models import ChatSession, ChatMessage
 from .serializers import ChatSessionSerializer
+from config.throttling import GeminiChatThrottle
 import uuid
 import logging
 
@@ -24,6 +25,7 @@ MAX_QUESTION_LENGTH = 4000
 
 class ChatView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [GeminiChatThrottle]
 
     def post(self, request):
         if not _gemini_api_key:
@@ -119,7 +121,7 @@ Goal: Improve farm productivity, sustainability, and farmer success with actiona
             })
 
         except Exception as e:
-            logger.error(f"Gemini Error: {e}", exc_info=True)
+            logger.error("Gemini Error: %s", e, exc_info=True)
             return Response({'error': 'Chat service temporarily unavailable'}, status=status.HTTP_502_BAD_GATEWAY)
 
 class ChatHistoryView(APIView):

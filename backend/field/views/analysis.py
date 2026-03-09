@@ -52,7 +52,7 @@ class EEAnalysisView(APIView):
 
         except Exception as e:
             logger.error(traceback.format_exc())
-            return Response({"error": "Failed to perform analysis"}, status=500)
+            return Response({"error": "Failed to perform analysis"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class PestReport(APIView):
     permission_classes = [IsAuthenticated]
@@ -66,7 +66,7 @@ class PestReport(APIView):
             serializer = PestSerializer(pests, many=True)
             return Response(serializer.data)
         except Exception as e:
-            logger.error(f"Error fetching pest history: {e}")
+            logger.error("Error fetching pest history: %s", e)
             return Response(
                 {"error": "Failed to fetch history"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -117,7 +117,7 @@ class PestReport(APIView):
             return {"is_plant": False, "confidence": "low", "detected": "Could not analyze image"}
             
         except Exception as e:
-            logger.warning(f"Plant validation failed: {e}. Proceeding with detection anyway.")
+            logger.warning("Plant validation failed: %s. Proceeding with detection anyway.", e)
             # If validation fails, allow the image through (fail-open)
             return {"is_plant": True, "confidence": "unknown", "detected": "validation_error"}
 
@@ -155,7 +155,7 @@ class PestReport(APIView):
                 image=image_file
             )
             
-            logger.info(f"Processing pest image for user {request.user.username}")
+            logger.info("Processing pest image for user %s", request.user.username)
             
             # Validate that image contains a plant using Gemini Vision
             validation = self._validate_plant_image(uploaded.image.path)
@@ -182,7 +182,7 @@ class PestReport(APIView):
             return Response(result, status=status.HTTP_201_CREATED)
             
         except Exception as e:
-            logger.error(f"Error processing pest report: {e}")
+            logger.error("Error processing pest report: %s", e)
             return Response(
                 {"error": "Failed to process image"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -224,7 +224,7 @@ class CarbonCredit(APIView):
             coords = field.polygon.get('coordinates', [])[0]
             area = calculate_area_in_hectares(coords)
         except Exception as e:
-            return Response({"error": f"Area calculation failed"}, status=500)
+            return Response({"error": f"Area calculation failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # 2. Get EE data for AWD detection
         ndwi_series = []
@@ -242,7 +242,7 @@ class CarbonCredit(APIView):
             else:
                 ee_warning = "Satellite data unavailable; carbon metrics are estimated."
         except Exception as e:
-            logger.warning(f"EE fetch for carbon credit failed: {e}")
+            logger.warning("EE fetch for carbon credit failed: %s", e)
             ee_warning = "Satellite data unavailable; carbon metrics are estimated."
 
         # 3. Calculate Credits using robust model
@@ -305,11 +305,11 @@ class HealthScore(APIView):
                 sequence=data
             )
             
-            logger.info(f"Health score calculated for user {request.user.username}: {result['score']}")
+            logger.info("Health score calculated for user %s: %s", request.user.username, result['score'])
             return Response(result)
             
         except Exception as e:
-            logger.error(f"Error calculating health score: {e}")
+            logger.error("Error calculating health score: %s", e)
             return Response(
                 {"error": "Failed to calculate health score"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

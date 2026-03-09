@@ -39,7 +39,7 @@ class RequestLoggingMiddleware(MiddlewareMixin):
         if request.method == 'GET' and request.GET:
             log_data['query_params'] = dict(request.GET)
         
-        logger.info(f"Request: {json.dumps(log_data)}")
+        logger.info("Request: %s", json.dumps(log_data))
         
     def process_response(self, request, response):
         """Log response details"""
@@ -61,11 +61,11 @@ class RequestLoggingMiddleware(MiddlewareMixin):
             
             # Color code based on status
             if 200 <= response.status_code < 300:
-                logger.info(f"Response: {json.dumps(log_data)}")
+                logger.info("Response: %s", json.dumps(log_data))
             elif 400 <= response.status_code < 500:
-                logger.warning(f"Response: {json.dumps(log_data)}")
+                logger.warning("Response: %s", json.dumps(log_data))
             else:
-                logger.error(f"Response: {json.dumps(log_data)}")
+                logger.error("Response: %s", json.dumps(log_data))
         
         return response
     
@@ -77,7 +77,7 @@ class RequestLoggingMiddleware(MiddlewareMixin):
             'exception': str(exception),
             'type': type(exception).__name__,
         }
-        logger.error(f"Exception: {json.dumps(log_data)}", exc_info=True)
+        logger.error("Exception: %s", json.dumps(log_data), exc_info=True)
     
     @staticmethod
     def get_client_ip(request):

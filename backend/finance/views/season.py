@@ -73,6 +73,6 @@ class SeasonView(APIView):
         try:
             season = Season.objects.get(pk=pk, user=request.user)
             season.delete()
-            return Response({'message': 'Season deleted'}, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         except Season.DoesNotExist:
             return Response({'error': 'Season not found'}, status=status.HTTP_404_NOT_FOUND)

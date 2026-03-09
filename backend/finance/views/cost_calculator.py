@@ -71,7 +71,7 @@ class CostEntryView(APIView):
         try:
             cost = CostEntry.objects.get(pk=pk, user=request.user)
             cost.delete()
-            return Response({'message': 'Cost entry deleted'}, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         except CostEntry.DoesNotExist:
             return Response({'error': 'Cost entry not found'}, status=status.HTTP_404_NOT_FOUND)
 

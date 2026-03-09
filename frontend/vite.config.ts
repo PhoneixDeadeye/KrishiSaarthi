@@ -19,6 +19,16 @@ export default defineConfig({
     emptyOutDir: true,
     // Strip debug/info logs from production bundles
     minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'leaflet': ['leaflet', 'react-leaflet'],
+          'charts': ['recharts'],
+          'pdf': ['jspdf', 'jspdf-autotable'],
+          'radix': ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-tooltip', '@radix-ui/react-dropdown-menu'],
+        },
+      },
+    },
   },
   esbuild: {
     drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],

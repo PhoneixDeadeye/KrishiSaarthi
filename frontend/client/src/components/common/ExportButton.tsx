@@ -9,6 +9,7 @@ import {
 import { Download, FileJson, FileType } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { logger } from "@/lib/logger";
 
 export interface Column {
     header: string;
@@ -89,7 +90,7 @@ export function ExportButton({ data, filename = "export", columns, title = "Repo
 
             doc.save(`${filename}.pdf`);
         } catch (error) {
-            console.error("PDF Export failed:", error);
+            logger.error("PDF Export failed:", error);
             alert("PDF generation failed. Please ensure all dependencies are installed.");
         }
     };

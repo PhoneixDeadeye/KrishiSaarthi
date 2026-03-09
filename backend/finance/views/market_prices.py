@@ -18,6 +18,7 @@ import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -94,10 +95,10 @@ class MarketPricesView(APIView):
             })
 
         except Exception as e:
-            logger.error(f"Error in market prices: {e}")
+            logger.error("Error in market prices: %s", e)
             return Response(
                 {'error': 'Failed to load market price data'},
-                status=500,
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
     def _get_tips(self, crop):

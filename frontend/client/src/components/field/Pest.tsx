@@ -7,6 +7,7 @@ import { useField } from "@/context/FieldContext";
 import { apiGet, apiPost, API_BASE_URL } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { PestDetectionResult, PestReport, AgroAlert } from "@/types/field";
+import { logger } from "@/lib/logger";
 
 export function Pest() {
   const { token } = useAuth();
@@ -33,7 +34,7 @@ export function Pest() {
         const pestData = await apiGet<{ risk_probability: number; risk_level: string }>(url);
         setPestPrediction(pestData);
       } catch (err) {
-        console.error("Pest prediction fetch error:", err);
+        logger.error("Pest prediction fetch error:", err);
       } finally {
         setPredictionLoading(false);
       }
@@ -48,7 +49,7 @@ export function Pest() {
         const historyData = await apiGet<PestReport[]>('/field/pest/report');
         setPestHistory(historyData);
       } catch (err) {
-        console.error("History fetch error:", err);
+        logger.error("History fetch error:", err);
       } finally {
         setHistoryLoading(false);
       }

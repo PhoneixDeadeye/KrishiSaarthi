@@ -8,6 +8,7 @@ import { EEData } from "./EEData";
 import MapView from "./MapView";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 import { useWeather } from "@/hooks/useWeather";
 import { useHealthScore } from "@/hooks/useHealthScore";
 import { Loader2, AlertCircle } from "lucide-react";
@@ -80,7 +81,7 @@ export function FieldReport() {
       });
       setAiSoilAdvice(response.advice);
     } catch (err) {
-      console.error("Soil advice fetch error:", err);
+      logger.error("Soil advice fetch error:", err);
     } finally {
       setLoadingSoilAdvice(false);
     }

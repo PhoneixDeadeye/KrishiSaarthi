@@ -77,4 +77,4 @@ class LaborEntryView(APIView):
         """Delete a labor entry"""
         entry = get_object_or_404(LaborEntry, pk=pk, user=request.user)
         entry.delete()
-        return Response({'message': 'Entry deleted'}, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)

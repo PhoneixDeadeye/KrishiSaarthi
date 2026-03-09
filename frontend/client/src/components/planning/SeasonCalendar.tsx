@@ -18,6 +18,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 const ACTIVITY_TYPES = [
     { value: "sowing", label: "Sowing", icon: "grass", color: "bg-green-500" },
@@ -78,7 +79,7 @@ export function SeasonCalendar() {
             const response = await apiFetch<CalendarEvent[]>(`/planning/calendar?${params}`);
             setEvents(response);
         } catch (err) {
-            console.error("Failed to fetch events:", err);
+            logger.error("Failed to fetch events:", err);
         } finally {
             setLoading(false);
         }
@@ -117,7 +118,7 @@ export function SeasonCalendar() {
             setShowAddForm(false);
             fetchEvents();
         } catch (err) {
-            console.error("Failed to add event:", err);
+            logger.error("Failed to add event:", err);
         } finally {
             setSubmitting(false);
         }
@@ -131,7 +132,7 @@ export function SeasonCalendar() {
             });
             fetchEvents();
         } catch (err) {
-            console.error("Failed to update status:", err);
+            logger.error("Failed to update status:", err);
         }
     };
 
@@ -140,7 +141,7 @@ export function SeasonCalendar() {
             await apiFetch(`/planning/calendar/${id}`, { method: "DELETE" });
             fetchEvents();
         } catch (err) {
-            console.error("Failed to delete event:", err);
+            logger.error("Failed to delete event:", err);
         }
     };
 

@@ -17,6 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; icon: string }> = {
     available: { bg: "bg-primary/10", text: "text-primary", icon: "check_circle" },
@@ -86,7 +87,7 @@ export function EquipmentScheduler() {
             const response = await apiFetch<EquipmentResponse>("/planning/equipment");
             setData(response);
         } catch (err) {
-            console.error("Failed to fetch equipment:", err);
+            logger.error("Failed to fetch equipment:", err);
         } finally {
             setLoading(false);
         }
@@ -110,7 +111,7 @@ export function EquipmentScheduler() {
             setShowAddEquipment(false);
             fetchEquipment();
         } catch (err) {
-            console.error("Failed to add equipment:", err);
+            logger.error("Failed to add equipment:", err);
         } finally {
             setSubmitting(false);
         }
@@ -148,7 +149,7 @@ export function EquipmentScheduler() {
             setBookingEquipment(null);
             fetchEquipment();
         } catch (err) {
-            console.error("Failed to book equipment:", err);
+            logger.error("Failed to book equipment:", err);
         } finally {
             setSubmitting(false);
         }
@@ -162,7 +163,7 @@ export function EquipmentScheduler() {
             });
             fetchEquipment();
         } catch (err) {
-            console.error("Failed to update status:", err);
+            logger.error("Failed to update status:", err);
         }
     };
 
@@ -171,7 +172,7 @@ export function EquipmentScheduler() {
             await apiFetch(`/planning/equipment/${id}`, { method: "DELETE" });
             fetchEquipment();
         } catch (err) {
-            console.error("Failed to delete equipment:", err);
+            logger.error("Failed to delete equipment:", err);
         }
     };
 

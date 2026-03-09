@@ -9,6 +9,7 @@ import google.generativeai as genai
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
+from config.throttling import GeminiChatThrottle
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ class SoilAdviceView(APIView):
     Returns AI-generated soil management recommendations.
     """
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [GeminiChatThrottle]
 
     def post(self, request):
         data = request.data
@@ -31,11 +33,23 @@ class SoilAdviceView(APIView):
             potassium = float(data.get('K', 0))
             ph = float(data.get('pH', 7.0))
             crop = data.get('crop', 'general crops')
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             return Response(
                 {'error': 'Invalid soil values. N, P, K, pH must be numbers.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        # Validate ranges
+        if not (0 <= nitrogen <= 1000):
+            return Response({'error': 'N must be between 0 and 1000 kg/ha'}, status=status.HTTP_400_BAD_REQUEST)
+        if not (0 <= phosphorus <= 500):
+            return Response({'error': 'P must be between 0 and 500 kg/ha'}, status=status.HTTP_400_BAD_REQUEST)
+        if not (0 <= potassium <= 1000):
+            return Response({'error': 'K must be between 0 and 1000 kg/ha'}, status=status.HTTP_400_BAD_REQUEST)
+        if not (0 <= ph <= 14):
+            return Response({'error': 'pH must be between 0 and 14'}, status=status.HTTP_400_BAD_REQUEST)
+        if isinstance(crop, str) and len(crop) > 100:
+            return Response({'error': 'Crop name too long'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Build prompt for Gemini
         prompt = f"""You are an expert agricultural soil scientist. 
@@ -96,7 +110,7 @@ Be practical and region-agnostic. Focus on actionable steps the farmer can take.
             })
 
         except json.JSONDecodeError as e:
-            logger.warning(f"Gemini returned non-JSON response: {response.text}")
+            logger.warning("Gemini returned non-JSON response: %s", response.text)
             # Fallback: return the raw text
             return Response({
                 'success': True,
@@ -116,7 +130,7 @@ Be practical and region-agnostic. Focus on actionable steps the farmer can take.
                 }
             })
         except Exception as e:
-            logger.error(f"Gemini Soil Advice Error: {e}", exc_info=True)
+            logger.error("Gemini Soil Advice Error: %s", e, exc_info=True)
             return Response(
                 {'error': 'AI service temporarily unavailable'},
                 status=status.HTTP_502_BAD_GATEWAY

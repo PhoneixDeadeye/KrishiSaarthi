@@ -13,6 +13,7 @@ import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 import "./FieldLog.css";
 
 type ActivityType = "Watering" | "Fertilizer" | "Sowing" | "Pesticide" | "Harvest" | "Other";
@@ -90,7 +91,7 @@ export function FieldLog() {
         setLogs(logsData);
         setAlerts(alertsData);
       } catch (error) {
-        console.error("Error fetching field data:", error);
+        logger.error("Error fetching field data:", error);
         toast({ title: "Error fetching data", variant: "destructive" });
       } finally {
         setLoading(false);
@@ -127,7 +128,7 @@ export function FieldLog() {
       setShowModal(false);
       toast({ title: "Log saved", description: "Activity recorded successfully." });
     } catch (error) {
-      console.error("Error saving log:", error);
+      logger.error("Error saving log:", error);
       toast({ title: "Failed to save", variant: "destructive" });
     } finally {
       setSubmitting(false);
