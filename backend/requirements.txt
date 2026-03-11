@@ -44,6 +44,10 @@ requests==2.32.3
 # Utilities
 joblib==1.4.2
 psutil==5.9.8
+cryptography==44.0.0
+
+# API Documentation
+drf-spectacular==0.28.0
 
 # Development & Testing
 pytest==8.3.4

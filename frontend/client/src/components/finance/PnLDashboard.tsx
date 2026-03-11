@@ -67,7 +67,7 @@ const StatCard = ({
     </Card>
 );
 
-export function PnLDashboard() {
+export function PnLDashboard({ onNavigate }: { onNavigate?: (tab: string) => void }) {
     const { token } = useAuth();
     const { selectedField } = useField();
 
@@ -127,11 +127,11 @@ export function PnLDashboard() {
                         </p>
                     </div>
                     <div className="flex gap-4 justify-center">
-                        <Button variant="outline" className="gap-2">
+                        <Button variant="outline" className="gap-2" onClick={() => onNavigate?.('cost-calculator')}>
                             <span className="material-symbols-outlined text-lg">receipt_long</span>
                             Track Costs
                         </Button>
-                        <Button className="gap-2">
+                        <Button className="gap-2" onClick={() => onNavigate?.('cost-calculator')}>
                             <span className="material-symbols-outlined text-lg">add</span>
                             Add Revenue
                         </Button>
@@ -312,7 +312,7 @@ export function PnLDashboard() {
                             <div className="text-center py-8">
                                 <span className="material-symbols-outlined text-4xl text-muted-foreground mb-2">receipt</span>
                                 <p className="text-muted-foreground text-sm">No revenue recorded yet.</p>
-                                <Button variant="outline" className="mt-4 gap-2">
+                                <Button variant="outline" className="mt-4 gap-2" onClick={() => onNavigate?.('cost-calculator')}>
                                     <span className="material-symbols-outlined text-lg">add</span>
                                     Add Revenue
                                 </Button>

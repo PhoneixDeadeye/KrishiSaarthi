@@ -12,6 +12,7 @@ from django.db.models import Sum
 import logging
 
 from ..models import InsuranceClaim, Season
+from ..serializers import InsuranceClaimSerializer
 from field.models import FieldData
 
 logger = logging.getLogger(__name__)
@@ -97,58 +98,26 @@ class InsuranceClaimView(APIView):
     
     def post(self, request):
         """Create a new insurance claim"""
-        try:
-            data = request.data
-            
-            # Validate required fields
-            required_fields = ['field_id', 'crop', 'damage_type', 'damage_date', 
-                             'area_affected_acres', 'damage_description', 'estimated_loss']
-            for field in required_fields:
-                if field not in data:
-                    return Response(
-                        {'error': f'Missing required field: {field}'},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-            
-            # Get the field
-            field = get_object_or_404(FieldData, id=data['field_id'], user=request.user)
-            
-            # Get season if provided
-            season = None
-            if 'season_id' in data and data['season_id']:
-                season = get_object_or_404(Season, id=data['season_id'], user=request.user)
-            
-            # Create the claim
-            claim = InsuranceClaim.objects.create(
-                user=request.user,
-                field=field,
-                season=season,
-                policy_number=data.get('policy_number', ''),
-                crop=data['crop'],
-                area_affected_acres=data['area_affected_acres'],
-                damage_type=data['damage_type'],
-                damage_date=data['damage_date'],
-                damage_description=data['damage_description'],
-                estimated_loss=data['estimated_loss'],
-                bank_account=data.get('bank_account', ''),
-                ifsc_code=data.get('ifsc_code', ''),
-                status='draft'
-            )
-            
-            logger.info("Created insurance claim %d for user %s", claim.id, request.user.username)
-            
-            return Response({
-                'message': 'Claim created successfully',
-                'claim_id': claim.id,
-                'status': claim.status,
-            }, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
-            logger.error("Error creating insurance claim: %s", e, exc_info=True)
-            return Response(
-                {'error': 'Failed to create claim'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        serializer = InsuranceClaimSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Verify field belongs to user
+        field = get_object_or_404(FieldData, id=serializer.validated_data['field'].id, user=request.user)
+        
+        # Verify season belongs to user if provided
+        season = serializer.validated_data.get('season')
+        if season:
+            get_object_or_404(Season, id=season.id, user=request.user)
+        
+        claim = serializer.save(user=request.user, status='draft')
+        logger.info("Created insurance claim %d for user %s", claim.id, request.user.username)
+        
+        return Response({
+            'message': 'Claim created successfully',
+            'claim_id': claim.id,
+            'status': claim.status,
+        }, status=status.HTTP_201_CREATED)
 
 
 class InsuranceClaimDetailView(APIView):
@@ -193,13 +162,6 @@ class InsuranceClaimDetailView(APIView):
         claim = get_object_or_404(InsuranceClaim, id=claim_id, user=request.user)
         data = request.data
         
-        # Only allow editing draft claims
-        if claim.status != 'draft' and 'status' not in data:
-            return Response(
-                {'error': 'Only draft claims can be edited'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
         # Handle status change (submit claim)
         if 'status' in data:
             if data['status'] == 'submitted' and claim.status == 'draft':
@@ -211,17 +173,24 @@ class InsuranceClaimDetailView(APIView):
                     'claim_id': claim.id,
                     'status': claim.status,
                 })
+            elif claim.status != 'draft':
+                return Response(
+                    {'error': 'Only draft claims can be edited'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
-        # Update allowed fields
-        update_fields = ['crop', 'damage_type', 'damage_date', 'damage_description',
-                        'area_affected_acres', 'estimated_loss', 'policy_number',
-                        'bank_account', 'ifsc_code']
+        # Only allow editing draft claims
+        if claim.status != 'draft':
+            return Response(
+                {'error': 'Only draft claims can be edited'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
-        for field in update_fields:
-            if field in data:
-                setattr(claim, field, data[field])
+        serializer = InsuranceClaimSerializer(claim, data=data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-        claim.save()
+        serializer.save()
         
         return Response({
             'message': 'Claim updated successfully',

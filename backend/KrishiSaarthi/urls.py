@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 from . import views
 from .health import HealthCheckView, ReadinessCheckView, MetricsView
 
@@ -26,4 +27,9 @@ urlpatterns = [
     path('health', HealthCheckView.as_view(), name='health'),
     path('ready', ReadinessCheckView.as_view(), name='ready'),
     path('metrics', MetricsView.as_view(), name='metrics'),
+
+    # API Documentation
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -5,6 +5,7 @@ Tracks costs, revenues, and profit/loss per field and season.
 from django.db import models
 from django.contrib.auth.models import User
 from field.models import FieldData
+from config.encryption import EncryptedCharField
 
 
 class Season(models.Model):
@@ -184,8 +185,8 @@ class InsuranceClaim(models.Model):
     reviewed_at = models.DateTimeField(null=True, blank=True)
     reviewer_notes = models.TextField(blank=True)
     
-    bank_account = models.CharField(max_length=20, blank=True)
-    ifsc_code = models.CharField(max_length=11, blank=True)
+    bank_account = EncryptedCharField(max_length=200, blank=True)
+    ifsc_code = EncryptedCharField(max_length=200, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

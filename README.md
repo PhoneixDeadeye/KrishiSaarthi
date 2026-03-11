@@ -180,6 +180,9 @@ npm run dev
 | Frontend | http://localhost:5173 |
 | Backend API | http://localhost:8000 |
 | Admin Panel | http://localhost:8000/admin |
+| API Docs (Swagger) | http://localhost:8000/api/docs/ |
+| API Docs (ReDoc) | http://localhost:8000/api/redoc/ |
+| OpenAPI Schema | http://localhost:8000/api/schema/ |
 
 ---
 
@@ -396,6 +399,13 @@ Authorization: Token <your-token-here>
 | GET | `/health` | Liveness check |
 | GET | `/ready` | Readiness check |
 
+#### 📖 Documentation
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/schema/` | OpenAPI 3.0 JSON/YAML schema |
+| GET | `/api/docs/` | Swagger UI interactive explorer |
+| GET | `/api/redoc/` | ReDoc API documentation |
+
 ---
 
 ## 🔧 Configuration
@@ -413,6 +423,8 @@ Authorization: Token <your-token-here>
 | `OPENWEATHER_API_KEY` | ❌ | - | OpenWeather API key |
 | `DATABASE_URL` | ❌ | SQLite | PostgreSQL connection string |
 | `CORS_ALLOWED_ORIGINS` | ❌ | `http://localhost:5173` | Frontend origins |
+| `GEE_PROJECT` | ❌ | - | Google Earth Engine project ID |
+| `FIELD_ENCRYPTION_KEY` | ❌ | Derived from SECRET_KEY | Fernet key for PII encryption |
 
 #### Frontend (`frontend/client/.env`)
 
@@ -443,6 +455,8 @@ docker-compose -f docker-compose.prod.yml up -d
 # With SSL/TLS
 # Configure nginx/nginx.conf with your certificates
 ```
+
+> **Note:** The backend Docker image uses `entrypoint.sh` which automatically waits for the database, runs migrations, collects static files, and optionally creates a superuser from `DJANGO_SUPERUSER_*` env vars.
 
 ### Services
 
@@ -483,6 +497,8 @@ This project includes several production-grade security and performance measures
 - **User-scoped queries** — all data endpoints filter by `request.user`
 - **IDOR prevention** — chat sessions and claims verified against requesting user
 - **Input sanitization** — question length limits, coordinate validation
+- **PII encryption at rest** — bank account and IFSC fields use Fernet symmetric encryption
+- **Serializer-based validation** — insurance claims validate via DRF serializers, not manual checks
 
 ### Performance
 - **`select_related` / `prefetch_related`** — all FK-traversing querysets optimized
@@ -496,6 +512,17 @@ This project includes several production-grade security and performance measures
 - **Request logging middleware** — method, path, status, duration
 - **Health endpoints** — `/health` (liveness) and `/ready` (readiness with ML model checks)
 - **Prometheus/Grafana** — monitoring stack in `monitoring/`
+
+### CI/CD
+- **GitHub Actions** — automated pipeline in `.github/workflows/ci.yml`
+  - Backend: lint, Django checks, pytest with Redis service container
+  - Frontend: TypeScript type-check, production build
+  - Docker: validate both images build successfully
+
+### API Documentation
+- **OpenAPI 3.0** — auto-generated schema via `drf-spectacular`
+- **Swagger UI** — interactive API explorer at `/api/docs/`
+- **ReDoc** — alternative API docs at `/api/redoc/`
 
 ---
 
@@ -554,7 +581,8 @@ cnn_meta = model_registry.get("cnn_crop_health")
 | **Backend** | Django 5.1, Django REST Framework, PyTorch, Python 3.11+ |
 | **AI/ML** | Google Gemini 2.5 Flash, MobileNetV2, LSTM, Scikit-learn |
 | **Data** | Google Earth Engine, OpenWeather API, PostgreSQL/SQLite |
-| **DevOps** | Docker, Nginx, Gunicorn, GitHub Actions |
+| **DevOps** | Docker, Nginx, Gunicorn, GitHub Actions CI/CD |
+| **Security** | Fernet encryption, DRF-Spectacular OpenAPI docs |
 
 ---
 

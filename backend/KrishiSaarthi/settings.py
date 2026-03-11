@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'drf_spectacular',
     'field',
     'finance',
     'planning',
@@ -273,6 +274,17 @@ REST_FRAMEWORK = {
     'ALLOWED_VERSIONS': ['1.0'],
     'EXCEPTION_HANDLER': 'KrishiSaarthi.exceptions.custom_exception_handler',
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# ── drf-spectacular (OpenAPI docs) ────────────────────────────────────────────
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'AgriSmart (KrishiSaarthi) API',
+    'DESCRIPTION': 'Agricultural farm management platform API — field management, '
+                   'weather, ML predictions, finance tracking, and more.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
 }
 
 CORS_ALLOWED_ORIGINS = os.environ.get(
