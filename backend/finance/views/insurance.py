@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db.models import Sum
 import logging
+from config.pagination import get_optional_paginator
 
 from ..models import InsuranceClaim, Season
 from ..serializers import InsuranceClaimSerializer
@@ -35,9 +36,16 @@ class InsuranceClaimView(APIView):
         claim_status = request.query_params.get('status', None)
         if claim_status:
             claims = claims.filter(status=claim_status)
+
+        paginator = get_optional_paginator(request)
+        if paginator is not None:
+            page = paginator.paginate_queryset(claims, request)
+            claims_iterable = page
+        else:
+            claims_iterable = claims
         
         claims_data = []
-        for claim in claims:
+        for claim in claims_iterable:
             claims_data.append({
                 'id': claim.id,
                 'field_id': claim.field_id,
@@ -64,7 +72,7 @@ class InsuranceClaimView(APIView):
             total=Sum('claim_amount')
         )['total'] or 0
         
-        return Response({
+        payload = {
             'claims': claims_data,
             'summary': {
                 'total_claims': total_claims,
@@ -94,7 +102,10 @@ class InsuranceClaimView(APIView):
                     'text': 'Keep your policy number and bank details ready when filing claims.',
                 },
             ]
-        })
+        }
+        if paginator is not None:
+            return paginator.get_paginated_response(payload)
+        return Response(payload)
     
     def post(self, request):
         """Create a new insurance claim"""
@@ -128,9 +139,9 @@ class InsuranceClaimDetailView(APIView):
     """
     permission_classes = [IsAuthenticated]
     
-    def get(self, request, claim_id):
+    def get(self, request, pk):
         """Get claim details"""
-        claim = get_object_or_404(InsuranceClaim, id=claim_id, user=request.user)
+        claim = get_object_or_404(InsuranceClaim, id=pk, user=request.user)
         
         return Response({
             'id': claim.id,
@@ -157,9 +168,9 @@ class InsuranceClaimDetailView(APIView):
             'updated_at': claim.updated_at.isoformat(),
         })
     
-    def patch(self, request, claim_id):
+    def patch(self, request, pk):
         """Update a claim (only draft claims can be fully edited)"""
-        claim = get_object_or_404(InsuranceClaim, id=claim_id, user=request.user)
+        claim = get_object_or_404(InsuranceClaim, id=pk, user=request.user)
         data = request.data
         
         # Handle status change (submit claim)
@@ -197,9 +208,9 @@ class InsuranceClaimDetailView(APIView):
             'claim_id': claim.id,
         })
     
-    def delete(self, request, claim_id):
+    def delete(self, request, pk):
         """Delete a draft claim"""
-        claim = get_object_or_404(InsuranceClaim, id=claim_id, user=request.user)
+        claim = get_object_or_404(InsuranceClaim, id=pk, user=request.user)
         
         if claim.status != 'draft':
             return Response(

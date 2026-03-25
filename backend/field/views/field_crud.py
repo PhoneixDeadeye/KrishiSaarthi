@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from config.pagination import get_optional_paginator
 
 from ..models import FieldData
 from ..serializers import FieldDataSerializer
@@ -23,6 +24,11 @@ class FieldDataView(APIView):
     def get(self, request):
         try:
             fields = FieldData.objects.filter(user=request.user).order_by('-created_at')
+            paginator = get_optional_paginator(request)
+            if paginator is not None:
+                page = paginator.paginate_queryset(fields, request)
+                serializer = FieldDataSerializer(page, many=True)
+                return paginator.get_paginated_response(serializer.data)
             serializer = FieldDataSerializer(fields, many=True)
             return Response(serializer.data)
         except Exception as e:

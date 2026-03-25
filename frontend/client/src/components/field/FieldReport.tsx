@@ -146,7 +146,7 @@ export function FieldReport() {
           {/* Field Map */}
           <Card className="h-80 overflow-hidden relative">
             <div className="absolute inset-0">
-              <MapView readOnly={true} />
+              <MapView readOnly={true} externalMapType={mapLayer} />
             </div>
             {/* Map Overlay Controls */}
             <div className="absolute top-4 left-4 z-10 flex gap-2">

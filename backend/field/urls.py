@@ -1,8 +1,8 @@
 from django.urls import path
 from field.views import (
-    FieldDataView, SavePolygon, getCoord, AWDreport, CarbonCredit, 
+    FieldDataView, SavePolygon, GetCoordView, AWDreport, CarbonCredit,
     PestPrediction, HealthScore, WeatherView, FieldLogView, FieldAlertView,
-    EEAnalysisView, PestReport, SoilAdviceView
+    EEAnalysisView, PestReport, SoilAdviceView, BulkMarkAlertsReadView
 )
 from field.views.irrigation import IrrigationScheduleView, IrrigationLogView
 from field.views.yield_prediction import YieldPredictionView
@@ -12,7 +12,7 @@ urlpatterns = [
     path('data/<int:pk>', FieldDataView.as_view(), name='fieldDetail'),
     path('ee', EEAnalysisView.as_view(), name='fieldAnalysis'),
     path('set_polygon', SavePolygon.as_view(), name='savePolygon'),
-    path('coord', getCoord.as_view(), name='getCoord'),
+    path('coord', GetCoordView.as_view(), name='getCoord'),
     path('awd', AWDreport.as_view(), name='AWDreport'),
     path('cc', CarbonCredit.as_view(), name='CarbonCredit'),
     path('pestpredict', PestPrediction.as_view(), name='PestPrediction'),
@@ -25,6 +25,7 @@ urlpatterns = [
     # FieldAlert API
     path('alerts', FieldAlertView.as_view(), name='fieldAlerts'),
     path('alerts/all', FieldAlertView.as_view(), kwargs={'pk': 'all'}, name='fieldAlertBulkRead'),
+    path('alerts/mark-all-read', BulkMarkAlertsReadView.as_view(), name='fieldAlertBulkMarkRead'),
     path('alerts/<int:pk>', FieldAlertView.as_view(), name='fieldAlertDetail'),
     # Soil Advice API
     path('soil-advice', SoilAdviceView.as_view(), name='soilAdvice'),

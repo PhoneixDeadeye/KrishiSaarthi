@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from .validators import validate_polygon
 
 
 class FieldData(models.Model):
@@ -7,7 +8,7 @@ class FieldData(models.Model):
     name = models.CharField(max_length=100, default="My Field")
     cropType = models.CharField(max_length=32, db_column='cropType')  # kept for backwards-compat
     crop_type = None  # alias handled via property below
-    polygon = models.JSONField()
+    polygon = models.JSONField(validators=[validate_polygon])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -183,7 +183,12 @@ export function FieldLog() {
           <p className="text-muted-foreground text-sm mt-1">Track your farm activities</p>
         </div>
         <ExportButton
-          data={logs}
+          data={logs.map(log => ({
+            id: log.id,
+            date: log.date,
+            activity: log.activity,
+            details: log.details,
+          }))}
           filename="field_logs"
           title="Field Activity Log"
           columns={[

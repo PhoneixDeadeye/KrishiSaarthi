@@ -35,7 +35,12 @@ class IrrigationScheduleView(APIView):
             field = FieldData.objects.get(id=field_id, user=request.user)
         except FieldData.DoesNotExist:
             return Response({'error': 'Field not found'}, status=status.HTTP_404_NOT_FOUND)
-        
+
+        if not field.polygon or not isinstance(field.polygon, dict) or 'coordinates' not in field.polygon or not field.polygon['coordinates']:
+            return Response({
+                'error': 'Field location not set. Please save your field coordinates first.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         # Get weather data for 7 days
         weather_data = self._get_weather_forecast(field)
         
@@ -292,22 +297,15 @@ class IrrigationLogView(APIView):
         })
     
     def post(self, request):
-        field_id = request.data.get('field_id')
+        serializer = IrrigationLogSerializer(data=request.data, context={'request': request})
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-        try:
-            field = FieldData.objects.get(id=field_id, user=request.user)
-        except FieldData.DoesNotExist:
-            return Response({'error': 'Field not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-        log = IrrigationLog.objects.create(
-            user=request.user,
-            field=field,
-            date=request.data.get('date', timezone.now().date()),
-            water_amount=request.data.get('water_amount'),
-            duration_minutes=request.data.get('duration_minutes'),
-            source=request.data.get('source', 'other'),
-            notes=request.data.get('notes', '')
-        )
+        # We know field_id is validated because it's filtered by user in serializer's init
+        if not serializer.validated_data.get('field'):
+             return Response({'error': 'Field ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        log = serializer.save(user=request.user)
         
         return Response(IrrigationLogSerializer(log).data, status=status.HTTP_201_CREATED)
     

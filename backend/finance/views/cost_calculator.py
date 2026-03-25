@@ -8,6 +8,7 @@ from rest_framework import status, permissions
 from django.db.models import Sum, Count
 from django.db.models.functions import Coalesce
 from decimal import Decimal
+from config.pagination import get_optional_paginator
 
 from ..models import CostEntry, CostCategory
 from ..serializers import CostEntrySerializer, CostSummarySerializer
@@ -44,6 +45,12 @@ class CostEntryView(APIView):
         category = request.query_params.get('category')
         if category:
             queryset = queryset.filter(category=category)
+
+        paginator = get_optional_paginator(request)
+        if paginator is not None:
+            page = paginator.paginate_queryset(queryset, request)
+            serializer = CostEntrySerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         
         serializer = CostEntrySerializer(queryset, many=True)
         return Response(serializer.data)

@@ -4,6 +4,7 @@ Revenue management API views.
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
+from config.pagination import get_optional_paginator
 
 from ..models import Revenue
 from ..serializers import RevenueSerializer
@@ -35,6 +36,12 @@ class RevenueView(APIView):
         season_id = request.query_params.get('season_id')
         if season_id:
             queryset = queryset.filter(season_id=season_id)
+
+        paginator = get_optional_paginator(request)
+        if paginator is not None:
+            page = paginator.paginate_queryset(queryset, request)
+            serializer = RevenueSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         
         serializer = RevenueSerializer(queryset, many=True)
         return Response(serializer.data)

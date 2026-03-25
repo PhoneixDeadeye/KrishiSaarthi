@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from django.db.models import Sum
+from config.pagination import get_optional_paginator
 
 from ..models import Season
 from ..serializers import SeasonSerializer
@@ -47,6 +48,11 @@ class SeasonView(APIView):
             queryset = queryset.filter(is_active=is_active.lower() == 'true')
         
         queryset = self._annotated_queryset(queryset)
+        paginator = get_optional_paginator(request)
+        if paginator is not None:
+            page = paginator.paginate_queryset(queryset, request)
+            serializer = SeasonSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         serializer = SeasonSerializer(queryset, many=True)
         return Response(serializer.data)
 

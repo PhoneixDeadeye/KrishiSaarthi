@@ -58,7 +58,7 @@ export function PriceForecast() {
             setData(response as ForecastData);
         } catch (err) {
             setError('Failed to load price forecast');
-            logger.error(err);
+            logger.error('Failed to load price forecast', err);
         } finally {
             setLoading(false);
         }

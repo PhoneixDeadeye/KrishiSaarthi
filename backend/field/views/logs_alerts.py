@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from config.pagination import get_optional_paginator
 
 from ..models import FieldLog, FieldAlert
 from ..serializers import FieldLogSerializer, FieldAlertSerializer
@@ -31,6 +32,11 @@ class FieldLogView(APIView):
             logs = FieldLog.objects.filter(user=request.user)
         
         logs = logs.select_related('field').order_by('-date', '-created_at')
+        paginator = get_optional_paginator(request)
+        if paginator is not None:
+            page = paginator.paginate_queryset(logs, request)
+            serializer = FieldLogSerializer(page, many=True, context={'request': request})
+            return paginator.get_paginated_response(serializer.data)
         serializer = FieldLogSerializer(logs, many=True, context={'request': request})
         return Response(serializer.data)
 
@@ -89,6 +95,11 @@ class FieldAlertView(APIView):
             alerts = FieldAlert.objects.filter(user=request.user)
         
         alerts = alerts.select_related('field', 'log').order_by('-date', '-created_at')
+        paginator = get_optional_paginator(request)
+        if paginator is not None:
+            page = paginator.paginate_queryset(alerts, request)
+            serializer = FieldAlertSerializer(page, many=True, context={'request': request})
+            return paginator.get_paginated_response(serializer.data)
         serializer = FieldAlertSerializer(alerts, many=True, context={'request': request})
         return Response(serializer.data)
 
@@ -115,3 +126,17 @@ class FieldAlertView(APIView):
                 {"error": "Alert not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+
+class BulkMarkAlertsReadView(APIView):
+    """Bulk mark unread alerts as read for the authenticated user."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        field_id = request.data.get('field_id') or request.query_params.get('field_id')
+        alerts = FieldAlert.objects.filter(user=request.user, is_read=False)
+        if field_id:
+            alerts = alerts.filter(field_id=field_id)
+        marked = alerts.update(is_read=True)
+        return Response({'marked': marked}, status=status.HTTP_200_OK)

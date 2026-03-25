@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from config.pagination import get_optional_paginator
 from ..models import Equipment, EquipmentBooking, EquipmentStatus
 from ..serializers import EquipmentSerializer, EquipmentBookingSerializer
 
@@ -32,6 +33,12 @@ class EquipmentView(APIView):
         eq_type = request.query_params.get('type')
         if eq_type:
             equipment_list = equipment_list.filter(equipment_type__icontains=eq_type)
+
+        paginator = get_optional_paginator(request)
+        if paginator is not None:
+            page = paginator.paginate_queryset(equipment_list, request)
+            serializer = EquipmentSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         
         serializer = EquipmentSerializer(equipment_list, many=True)
         
@@ -93,6 +100,12 @@ class EquipmentBookingView(APIView):
         upcoming = request.query_params.get('upcoming')
         if upcoming == 'true':
             bookings = bookings.filter(start_datetime__gte=timezone.now())
+
+        paginator = get_optional_paginator(request)
+        if paginator is not None:
+            page = paginator.paginate_queryset(bookings, request)
+            serializer = EquipmentBookingSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         
         serializer = EquipmentBookingSerializer(bookings, many=True)
         return Response(serializer.data)

@@ -37,6 +37,15 @@ if not DEBUG:
 else:
     SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dev-key-for-testing-only')
 
+if os.environ.get('FERNET_KEY'):
+    FERNET_KEYS = [os.environ['FERNET_KEY']]
+elif DEBUG:
+    # Development-only fallback key. Never used in production.
+    FERNET_KEYS = ['django-insecure-dev-fernet-key-change-me']
+else:
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured('FERNET_KEY must be set in production')
+
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
@@ -51,6 +60,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'knox',
     'drf_spectacular',
     'field',
     'finance',
@@ -243,6 +253,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+        'knox.auth.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -275,6 +286,17 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'KrishiSaarthi.exceptions.custom_exception_handler',
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+from datetime import timedelta
+REST_KNOX = {
+    'SECURE_HASH_ALGORITHM': 'hashlib.sha512',
+    'AUTH_TOKEN_CHARACTER_LENGTH': 64,
+    'TOKEN_TTL': timedelta(hours=24),
+    'USER_SERIALIZER': 'KrishiSaarthi.serializers.UserSerializer',
+    'TOKEN_LIMIT_PER_USER': None,
+    'AUTO_REFRESH': True,
+    'MIN_REFRESH_INTERVAL': 60
 }
 
 # ── drf-spectacular (OpenAPI docs) ────────────────────────────────────────────
@@ -342,6 +364,9 @@ else:
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
+    # Auth feature flags
+    REQUIRE_EMAIL_VERIFICATION = os.environ.get('REQUIRE_EMAIL_VERIFICATION', 'False').lower() == 'true'
+
 # ──── Test overrides ──────────────────────────────────────────────
 # Disable throttling during test runs so rate limits don't interfere
 TESTING = 'test' in sys.argv or 'pytest' in sys.modules
@@ -354,3 +379,6 @@ if TESTING:
         'anon_sustained': '100000/day',
         'login': '10000/min',
     }
+
+APPEND_SLASH = False
+

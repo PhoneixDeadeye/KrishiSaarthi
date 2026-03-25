@@ -97,7 +97,7 @@ class InsuranceClaimSerializer(serializers.ModelSerializer):
             'damage_date', 'damage_description', 'estimated_loss',
             'claim_amount', 'status', 'status_display',
             'submitted_at', 'reviewed_at', 'reviewer_notes',
-            'masked_bank_account', 'ifsc_code',
+            'bank_account', 'masked_bank_account', 'ifsc_code',
             'created_at', 'updated_at',
         ]
         read_only_fields = [

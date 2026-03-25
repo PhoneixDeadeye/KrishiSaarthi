@@ -164,8 +164,8 @@ export function PnLDashboard({ onNavigate }: { onNavigate?: (tab: string) => voi
                             ...(data?.revenue_by_crop?.map(r => ({
                                 type: 'Revenue',
                                 category: r.crop,
-                                amount: r.amount,
-                                percentage: ((r.amount / (data?.summary.total_revenue || 1)) * 100).toFixed(1),
+                                amount: r.total,
+                                percentage: ((r.total / (data?.summary.total_revenue || 1)) * 100).toFixed(1),
                             })) || []),
                         ]}
                         columns={[

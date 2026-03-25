@@ -52,3 +52,4 @@ drf-spectacular==0.28.0
 # Development & Testing
 pytest==8.3.4
 pytest-django==4.9.0
+django-rest-knox==5.0.4

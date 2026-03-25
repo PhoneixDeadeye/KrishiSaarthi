@@ -76,7 +76,12 @@ export function FieldAlerts() {
 
     const markAllAsRead = async () => {
         try {
-            await apiFetch(`/field/alerts/all`, { method: "PATCH" });
+            const body = selectedField ? { field_id: selectedField.id } : {};
+            await apiFetch(`/field/alerts/mark-all-read`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            });
             setAlerts((prev) => prev.map((a) => ({ ...a, is_read: true })));
         } catch (err) {
             logger.error("Failed to mark all alerts as read:", err);

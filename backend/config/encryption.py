@@ -10,11 +10,22 @@ from cryptography.fernet import Fernet, InvalidToken
 
 
 def _get_fernet_key() -> bytes:
-    """Derive a Fernet-compatible key from Django's SECRET_KEY."""
-    secret = settings.SECRET_KEY.encode()
-    # SHA-256 produces 32 bytes, base64-encode for Fernet's 44-char requirement
-    digest = hashlib.sha256(secret).digest()
-    return base64.urlsafe_b64encode(digest)
+    """Get a Fernet-compatible key from settings.FERNET_KEYS.
+
+    Accepts either:
+    - A valid 44-char urlsafe base64 Fernet key.
+    - An arbitrary string, which is deterministically hashed into a Fernet key.
+    """
+    configured = getattr(settings, "FERNET_KEYS", []) or []
+    candidate = str(configured[0]).encode() if configured else settings.SECRET_KEY.encode()
+    try:
+        # Already a valid Fernet key
+        Fernet(candidate)
+        return candidate
+    except Exception:
+        # Convert arbitrary secret to Fernet-compatible key
+        digest = hashlib.sha256(candidate).digest()
+        return base64.urlsafe_b64encode(digest)
 
 
 def _get_fernet() -> Fernet:

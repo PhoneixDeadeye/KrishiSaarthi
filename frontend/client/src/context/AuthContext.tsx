@@ -1,7 +1,7 @@
 // src/context/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { API_BASE_URL, setUnauthorizedHandler } from "@/lib/api";
+import { apiGet, apiPost, setUnauthorizedHandler } from "@/lib/api";
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 interface User {
@@ -31,14 +31,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Use refs for timers and listeners to avoid stale closures
     const logoutTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    const logout = useCallback(() => {
-        // Attempt server-side token invalidation (fire-and-forget)
+    const logout = useCallback(async () => {
         const currentToken = token || localStorage.getItem("authToken");
         if (currentToken) {
-            fetch(`${API_BASE_URL}/logout`, {
-                method: "POST",
-                headers: { Authorization: `Token ${currentToken}` },
-            }).catch(() => { /* best-effort */ });
+            try {
+                await apiPost("/logout", {});
+            } catch { /* best-effort */ }
         }
         setToken(null);
         setUser(null);
@@ -76,42 +74,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Load token from localStorage on mount and validate with server
     useEffect(() => {
-        const storedToken = localStorage.getItem("authToken");
-        const storedUser = localStorage.getItem("authUser");
+        const validateToken = async () => {
+            const storedToken = localStorage.getItem("authToken");
+            const storedUser = localStorage.getItem("authUser");
 
-        if (storedToken && storedUser) {
-            // Optimistically set state for instant UI
-            try {
-                setUser(JSON.parse(storedUser));
-                setToken(storedToken);
-            } catch {
-                localStorage.removeItem("authToken");
-                localStorage.removeItem("authUser");
+            if (storedToken && storedUser) {
+                try {
+                    setUser(JSON.parse(storedUser));
+                    setToken(storedToken);
+                    
+                    await apiGet("/test_token");
+                } catch {
+                    // Network error or parse error, clear state if it's a parse error
+                    logout();
+                } finally {
+                    setIsLoading(false);
+                }
+            } else {
                 setIsLoading(false);
-                return;
             }
-
-            // Validate token server-side
-            fetch(`${API_BASE_URL}/test_token`, {
-                headers: { Authorization: `Token ${storedToken}` },
-            })
-                .then((res) => {
-                    if (!res.ok) {
-                        // Token expired or invalid — clear state
-                        setToken(null);
-                        setUser(null);
-                        localStorage.removeItem("authToken");
-                        localStorage.removeItem("authUser");
-                    }
-                })
-                .catch(() => {
-                    // Network error — keep optimistic state, don't log user out offline
-                })
-                .finally(() => setIsLoading(false));
-        } else {
-            setIsLoading(false);
-        }
-    }, []);
+        };
+        
+        validateToken();
+    }, [logout]);
 
     // Setup activity listeners when authenticated
     useEffect(() => {
@@ -143,23 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const login = async (username: string, password: string): Promise<{ success: boolean; error?: string }> => {
         try {
-            const response = await fetch(`${API_BASE_URL}/login`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ username, password }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                return {
-                    success: false,
-                    error: errorData.detail || "Invalid username or password"
-                };
-            }
-
-            const data = await response.json();
+            const data = await apiPost<{ token: string; user: User }>("/login", { username, password });
 
             // Store token and user
             setToken(data.token);
@@ -175,22 +144,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const signup = async (username: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
         try {
-            const response = await fetch(`${API_BASE_URL}/signup`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ username, email, password }),
-            });
+            const data = await apiPost<{ token?: string; user?: User; message?: string; email_verification_required?: boolean }>(
+                "/signup",
+                { username, email, password }
+            );
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                // Handle Django REST framework errors
-                const errorMessage = Object.values(errorData).flat().join(", ") || "Signup failed";
-                return { success: false, error: errorMessage };
+            if (data.email_verification_required) {
+                return { success: true };
             }
 
-            const data = await response.json();
+            if (!data.token || !data.user) {
+                return { success: false, error: data.message || "Signup failed" };
+            }
 
             // Auto-login after signup
             setToken(data.token);
@@ -199,8 +164,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem("authUser", JSON.stringify(data.user));
 
             return { success: true };
-        } catch {
-            return { success: false, error: "Network error. Please try again." };
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Network error. Please try again.";
+            return { success: false, error: message };
         }
     };
 
@@ -216,7 +182,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 logout,
             }}
         >
-            {children}
+            {isLoading ? (
+                <div className="min-h-screen flex items-center justify-center bg-background">
+                    <div className="w-8 h-8 rounded-full border-4 border-l-transparent border-green-600 animate-spin" />
+                </div>
+            ) : (
+                children
+            )}
         </AuthContext.Provider>
     );
 };

@@ -26,6 +26,8 @@ export function DataAnalytics() {
 
   const [location, setLocation] = useState("");
   const [mapCenter, setMapCenter] = useState<[number, number]>([20.5937, 78.9629]); // India center default
+  const [mapLayer, setMapLayer] = useState<"street" | "satellite">("street");
+  const [searchingLocation, setSearchingLocation] = useState(false);
   const [ccData, setCcData] = useState<CarbonCreditResponse | null>(null);
   const [ccLoading, setCcLoading] = useState(true);
   const [ccError, setCcError] = useState<unknown>(null);
@@ -81,6 +83,45 @@ export function DataAnalytics() {
         .catch(() => { /* Could not fetch coords for analytics map */ });
     }
   }, [token, selectedField]);
+
+  const handleLocationSearch = async () => {
+    const query = location.trim();
+    if (!query) return;
+
+    try {
+      setSearchingLocation(true);
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Geocoding failed with status ${response.status}`);
+      }
+
+      const results = await response.json() as Array<{ lat: string; lon: string; display_name: string }>;
+      if (!results.length) {
+        return;
+      }
+
+      const first = results[0];
+      const lat = Number(first.lat);
+      const lon = Number(first.lon);
+
+      if (Number.isFinite(lat) && Number.isFinite(lon)) {
+        setMapCenter([lat, lon]);
+        setLocation(first.display_name || query);
+      }
+    } catch (error) {
+      logger.error("Failed to search map location", error);
+    } finally {
+      setSearchingLocation(false);
+    }
+  };
+
+  const handleOpenDirections = () => {
+    const [lat, lon] = mapCenter;
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
@@ -288,8 +329,38 @@ export function DataAnalytics() {
                     className="w-full pl-9 pr-3 py-2 border rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleLocationSearch();
+                      }
+                    }}
                   />
                 </div>
+                <Button
+                  variant="outline"
+                  onClick={handleLocationSearch}
+                  disabled={searchingLocation || !location.trim()}
+                >
+                  {searchingLocation ? "Searching..." : "Go"}
+                </Button>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant={mapLayer === "street" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setMapLayer("street")}
+                >
+                  Street
+                </Button>
+                <Button
+                  variant={mapLayer === "satellite" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setMapLayer("satellite")}
+                >
+                  Satellite
+                </Button>
               </div>
 
               {/* Map */}
@@ -304,8 +375,16 @@ export function DataAnalytics() {
                   <MapUpdater center={mapCenter} />
                   {/* @ts-ignore */}
                   <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution={
+                      mapLayer === "street"
+                        ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                        : 'Tiles &copy; Esri'
+                    }
+                    url={
+                      mapLayer === "street"
+                        ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                    }
                   />
                   <Marker position={mapCenter}>
                     <Popup>{location}</Popup>
@@ -313,7 +392,7 @@ export function DataAnalytics() {
                 </MapContainer>
               </div>
 
-              <Button className="w-full gap-2" size="lg" variant="outline" disabled>
+              <Button className="w-full gap-2" size="lg" variant="outline" onClick={handleOpenDirections}>
                 <span className="material-symbols-outlined text-lg">
                   directions
                 </span>

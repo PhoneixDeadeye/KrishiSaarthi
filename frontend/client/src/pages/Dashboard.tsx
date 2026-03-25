@@ -90,7 +90,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTabState] = useState(getTabFromHash);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { user, token } = useAuth();
+  const { user, token, logout } = useAuth();
   const [unreadAlertCount, setUnreadAlertCount] = useState(0);
 
   const setActiveTab = useCallback((tab: string) => {
@@ -212,9 +212,9 @@ export default function Dashboard() {
           ))}
         </nav>
 
-        {/* User Profile Section */}
-        <div className="p-4 border-t border-border">
-          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer transition-colors">
+        {/* User Profile & Logout Section */}
+        <div className="p-4 border-t border-border flex flex-col gap-2">
+          <div className="flex items-center gap-3 p-2 rounded-lg transition-colors">
             <div className="size-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold">
               {user?.username?.charAt(0) || 'U'}
             </div>
@@ -222,8 +222,14 @@ export default function Dashboard() {
               <p className="text-sm font-medium truncate">{user?.username || 'User'}</p>
               <p className="text-xs text-muted-foreground truncate">{user?.email || 'user@example.com'}</p>
             </div>
-            <span className="material-symbols-outlined text-muted-foreground text-lg"></span>
           </div>
+          <button 
+            onClick={logout}
+            className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors mt-2 font-medium"
+          >
+            <span className="material-symbols-outlined text-sm">logout</span>
+            Logout
+          </button>
         </div>
       </aside>
 

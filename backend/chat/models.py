@@ -20,7 +20,7 @@ class ChatMessage(models.Model):
 
     session = models.ForeignKey(ChatSession, related_name='messages', on_delete=models.CASCADE)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
-    text = models.TextField(max_length=50000, help_text='Message content, max 50k chars')
+    text = models.TextField(max_length=10000, help_text='Message content, max 10k chars')
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
