@@ -65,6 +65,7 @@ export function FieldReport() {
   };
   const [aiSoilAdvice, setAiSoilAdvice] = useState<SoilAdviceData | null>(null);
   const [loadingSoilAdvice, setLoadingSoilAdvice] = useState(false);
+  const [mapLayer, setMapLayer] = useState<'satellite' | 'ndvi'>('ndvi');
 
   const handleSoilSubmit = async () => {
     setSoilSubmitted(true);
@@ -145,14 +146,30 @@ export function FieldReport() {
           {/* Field Map */}
           <Card className="h-80 overflow-hidden relative">
             <div className="absolute inset-0">
-              <MapView readOnly={true} />
+              <MapView readOnly={true} externalMapType={mapLayer} />
             </div>
             {/* Map Overlay Controls */}
             <div className="absolute top-4 left-4 z-10 flex gap-2">
-              <button className="px-3 py-1.5 bg-card/90 backdrop-blur-sm rounded-lg text-xs font-medium border shadow-sm hover:bg-card transition-colors">
+              <button
+                onClick={() => setMapLayer('satellite')}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-medium border shadow-sm transition-colors",
+                  mapLayer === 'satellite'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card/90 backdrop-blur-sm hover:bg-card"
+                )}
+              >
                 Satellite
               </button>
-              <button className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium shadow-sm">
+              <button
+                onClick={() => setMapLayer('ndvi')}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-medium shadow-sm transition-colors",
+                  mapLayer === 'ndvi'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card/90 backdrop-blur-sm border hover:bg-card"
+                )}
+              >
                 NDVI Layer
               </button>
             </div>

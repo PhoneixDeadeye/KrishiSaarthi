@@ -34,11 +34,10 @@ urlpatterns = [
     
     # Government Schemes
     path('schemes', SchemesView.as_view(), name='schemesList'),
-    path('schemes/<int:scheme_id>', SchemeDetailView.as_view(), name='schemeDetail'),
-    
+    path('schemes/<int:pk>', SchemeDetailView.as_view(), name='schemeDetail'),
+
     # Insurance Claims
     path('insurance', InsuranceClaimView.as_view(), name='insuranceList'),
-    path('insurance/<int:claim_id>', InsuranceClaimDetailView.as_view(), name='insuranceDetail'),
+    path('insurance/<int:pk>', InsuranceClaimDetailView.as_view(), name='insuranceDetail'),
+
 ]
-
-

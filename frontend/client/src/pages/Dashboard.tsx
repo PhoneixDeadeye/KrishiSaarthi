@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { FieldReport } from '@/components/field/FieldReport';
 import { MyField } from '@/components/field/MyField';
 import { DataAnalytics } from '@/components/analytics/DataAnalytics';
@@ -8,6 +8,8 @@ import { FieldLog } from '@/components/field/FieldLog';
 import { FieldAlerts } from '@/components/field/FieldAlerts';
 import { CostCalculator } from "@/components/finance/CostCalculator";
 import { PnLDashboard } from "@/components/finance/PnLDashboard";
+import { apiFetch } from "@/lib/api";
+import { logger } from "@/lib/logger";
 import { SeasonCalendar } from "@/components/planning/SeasonCalendar";
 import { InventoryTracker } from "@/components/planning/InventoryTracker";
 import { LaborManager } from "@/components/planning/LaborManager";
@@ -77,11 +79,47 @@ const tabTitles: Record<string, string> = {
   'settings': 'Settings',
 };
 
+const validTabIds = new Set(navItems.map(item => item.id));
+
+function getTabFromHash(): string {
+  const hash = window.location.hash.replace('#', '');
+  return validTabIds.has(hash) ? hash : 'home';
+}
+
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTabState] = useState(getTabFromHash);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { user } = useAuth();
+  const { user, token, logout } = useAuth();
+  const [unreadAlertCount, setUnreadAlertCount] = useState(0);
+
+  const setActiveTab = useCallback((tab: string) => {
+    setActiveTabState(tab);
+    window.history.pushState(null, '', `#${tab}`);
+  }, []);
+
+  // Sync with browser back/forward
+  useEffect(() => {
+    const onHashChange = () => setActiveTabState(getTabFromHash());
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  // Fetch unread alert count
+  useEffect(() => {
+    if (!token) return;
+    const fetchUnread = async () => {
+      try {
+        const alerts = await apiFetch<Array<{ is_read: boolean }>>('/field/alerts');
+        setUnreadAlertCount(alerts.filter(a => !a.is_read).length);
+      } catch {
+        // Silently ignore - non-critical
+      }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 60_000); // Refresh every minute
+    return () => clearInterval(interval);
+  }, [token]);
 
   // Filter nav items based on search query
   const filteredNavItems = useMemo(() => {
@@ -102,7 +140,7 @@ export default function Dashboard() {
       case 'pest': return <Pest />
       case 'field-log': return <FieldLog />
       case 'cost-calculator': return <CostCalculator />
-      case 'pnl-dashboard': return <PnLDashboard />
+      case 'pnl-dashboard': return <PnLDashboard onNavigate={setActiveTab} />
       case 'season-calendar': return <SeasonCalendar />
       case 'inventory': return <InventoryTracker />
       case 'labor': return <LaborManager />
@@ -174,9 +212,9 @@ export default function Dashboard() {
           ))}
         </nav>
 
-        {/* User Profile Section */}
-        <div className="p-4 border-t border-border">
-          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer transition-colors">
+        {/* User Profile & Logout Section */}
+        <div className="p-4 border-t border-border flex flex-col gap-2">
+          <div className="flex items-center gap-3 p-2 rounded-lg transition-colors">
             <div className="size-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold">
               {user?.username?.charAt(0) || 'U'}
             </div>
@@ -184,8 +222,14 @@ export default function Dashboard() {
               <p className="text-sm font-medium truncate">{user?.username || 'User'}</p>
               <p className="text-xs text-muted-foreground truncate">{user?.email || 'user@example.com'}</p>
             </div>
-            <span className="material-symbols-outlined text-muted-foreground text-lg"></span>
           </div>
+          <button 
+            onClick={logout}
+            className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors mt-2 font-medium"
+          >
+            <span className="material-symbols-outlined text-sm">logout</span>
+            Logout
+          </button>
         </div>
       </aside>
 
@@ -250,6 +294,11 @@ export default function Dashboard() {
               title="View alerts"
             >
               <span className="material-symbols-outlined">notifications</span>
+              {unreadAlertCount > 0 && (
+                <span className="absolute top-1 right-1 size-4 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {unreadAlertCount > 9 ? '9+' : unreadAlertCount}
+                </span>
+              )}
             </button>
 
             {/* Mobile Search Button */}

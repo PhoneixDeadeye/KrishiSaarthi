@@ -274,8 +274,8 @@ class SchemeDetailView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, scheme_id):
-        scheme = get_object_or_404(GovernmentScheme, id=scheme_id)
+    def get(self, request, pk):
+        scheme = get_object_or_404(GovernmentScheme, id=pk)
 
         return Response({
             'id': scheme.id,

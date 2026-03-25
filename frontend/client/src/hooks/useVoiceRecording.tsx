@@ -11,17 +11,16 @@ type UseVoiceRecordingReturn = {
   setLanguage: (l: string) => void;
 };
 
-/** Extended SpeechRecognition with a custom flag for auto-restart */
-interface ExtendedSpeechRecognition extends SpeechRecognition {
-  __shouldKeepRecording?: boolean;
-}
-
 export function useVoiceRecording(): UseVoiceRecordingReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [language, setLanguage] = useState<string>('en-US'); // default
+  const [language, setLanguage] = useState<string>(() => localStorage.getItem('voice_language') || 'en-US');
 
-  const recognitionRef = useRef<ExtendedSpeechRecognition | null>(null);
+  useEffect(() => {
+    localStorage.setItem('voice_language', language);
+  }, [language]);
+
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const restartingRef = useRef(false);
 
   useEffect(() => {
@@ -82,9 +81,12 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
         if (!restartingRef.current) {
           restartingRef.current = true;
           setTimeout(() => {
+            const currentRecognition = recognitionRef.current;
             try {
-              recognitionRef.current.start();
-              setIsRecording(true);
+              currentRecognition?.start();
+              if (currentRecognition) {
+                setIsRecording(true);
+              }
             } catch (err) {
               logger.warn('recognition restart failed', err);
             } finally {

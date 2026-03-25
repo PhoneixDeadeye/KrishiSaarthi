@@ -83,7 +83,7 @@ export function InsuranceClaims() {
             setData(response as ClaimsData);
         } catch (err) {
             setError('Failed to load insurance claims');
-            logger.error(err);
+            logger.error('Failed to load insurance claims', err);
         } finally {
             setLoading(false);
         }

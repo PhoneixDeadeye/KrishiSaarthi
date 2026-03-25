@@ -14,6 +14,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.core import signing
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
 from django.utils.encoding import force_str, smart_bytes
@@ -65,11 +66,15 @@ class Login(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        from rest_framework.authtoken.models import Token
-        token, _created = Token.objects.get_or_create(user=user)
+        from knox.models import AuthToken
+        instance, token = AuthToken.objects.create(user)
         serializer = UserSerializer(instance=user)
         logger.info("User %s logged in successfully", username)
-        return Response({"token": token.key, "user": serializer.data})
+        return Response({
+            "token": token, 
+            "expiry": instance.expiry.isoformat() if instance.expiry else None,
+            "user": serializer.data
+        })
 
 
 class Signup(APIView):
@@ -85,12 +90,44 @@ class Signup(APIView):
         # create_user() is handled inside UserSerializer.create() — no double-save
         user = serializer.save()
 
-        from rest_framework.authtoken.models import Token
-        token = Token.objects.create(user=user)
+        if getattr(settings, "REQUIRE_EMAIL_VERIFICATION", False):
+            user.is_active = False
+            user.save(update_fields=["is_active"])
+            self._send_verification_email(user)
+            return Response(
+                {
+                    "message": "Signup successful. Please verify your email before logging in.",
+                    "email_verification_required": True,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+        from knox.models import AuthToken
+        instance, token = AuthToken.objects.create(user)
         logger.info("New user registered: %s", user.username)
         return Response(
-            {"token": token.key, "user": UserSerializer(instance=user).data},
+            {
+                "token": token, 
+                "expiry": instance.expiry.isoformat() if instance.expiry else None,
+                "user": UserSerializer(instance=user).data
+            },
             status=status.HTTP_201_CREATED,
+        )
+
+    def _send_verification_email(self, user: User) -> None:
+        token = signing.dumps({"uid": user.id}, salt="email-verification")
+        frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+        verify_link = f"{frontend_url}/verify-email/{token}"
+        send_mail(
+            subject="Verify your KrishiSaarthi account",
+            message=(
+                "Welcome to KrishiSaarthi.\n\n"
+                f"Please verify your email by opening this link:\n{verify_link}\n\n"
+                "If you did not create this account, you can ignore this email."
+            ),
+            from_email="noreply@krishisaarthi.com",
+            recipient_list=[user.email],
+            fail_silently=False,
         )
 
 
@@ -105,9 +142,8 @@ class TestToken(APIView):
 class Logout(APIView):
     def post(self, request) -> Response:
         try:
-            request.user.auth_token.delete()
+            request._auth.delete()
         except AttributeError:
-            # Token may not exist if user signed in via another method
             pass
         except Exception:
             logger.warning("Unexpected error during logout for user %s", request.user.username)
@@ -204,3 +240,92 @@ class ResetPassword(APIView):
             {"success": "Password reset successful."},
             status=status.HTTP_200_OK,
         )
+
+
+class VerifyEmail(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [LoginRateThrottle]
+
+    def post(self, request) -> Response:
+        if not getattr(settings, "REQUIRE_EMAIL_VERIFICATION", False):
+            return Response(
+                {"message": "Email verification is not required in this environment."},
+                status=status.HTTP_200_OK,
+            )
+
+        token = request.data.get("token", "")
+        if not token:
+            return Response(
+                {"error": "Verification token is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            payload = signing.loads(token, max_age=60 * 60 * 24, salt="email-verification")
+            user = User.objects.get(id=payload.get("uid"))
+        except (signing.BadSignature, signing.SignatureExpired, User.DoesNotExist):
+            return Response(
+                {"error": "Invalid or expired verification token."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not user.is_active:
+            user.is_active = True
+            user.save(update_fields=["is_active"])
+
+        return Response({"message": "Email verified successfully."}, status=status.HTTP_200_OK)
+
+
+class ResendVerification(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [LoginRateThrottle]
+
+    def post(self, request) -> Response:
+        if not getattr(settings, "REQUIRE_EMAIL_VERIFICATION", False):
+            return Response(
+                {"message": "Email verification is not required in this environment."},
+                status=status.HTTP_200_OK,
+            )
+
+        email = request.data.get("email", "").strip().lower()
+        if not email:
+            return Response(
+                {"error": "Email is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Enumeration-safe response.
+        success_msg = {"message": "If an account exists, a verification email has been sent."}
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(success_msg, status=status.HTTP_200_OK)
+
+        if user.is_active:
+            return Response(
+                {"message": "Email already verified."},
+                status=status.HTTP_200_OK,
+            )
+
+        try:
+            token = signing.dumps({"uid": user.id}, salt="email-verification")
+            frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+            verify_link = f"{frontend_url}/verify-email/{token}"
+            send_mail(
+                subject="Verify your KrishiSaarthi account",
+                message=(
+                    "Please verify your email by opening this link:\n"
+                    f"{verify_link}"
+                ),
+                from_email="noreply@krishisaarthi.com",
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+        except Exception as exc:
+            logger.error("Failed to resend verification email for %s: %s", email, exc)
+            return Response(
+                {"error": "Failed to send verification email. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(success_msg, status=status.HTTP_200_OK)

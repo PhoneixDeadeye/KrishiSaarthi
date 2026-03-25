@@ -88,3 +88,19 @@ class IrrigationLogSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request and hasattr(request, 'user'):
             self.fields['field_id'].queryset = FieldData.objects.filter(user=request.user)
+
+    def validate_water_amount(self, value):
+        if value is not None and value <= 0:
+            raise serializers.ValidationError("Water amount must be positive.")
+        return value
+        
+    def validate_duration_minutes(self, value):
+        if value is not None and value <= 0:
+            raise serializers.ValidationError("Duration must be positive.")
+        return value
+        
+    def validate_date(self, value):
+        from django.utils import timezone
+        if value > timezone.now().date():
+            raise serializers.ValidationError("Date cannot be in the future.")
+        return value

@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from config.pagination import get_optional_paginator
 from ..models import SeasonCalendar
 from ..serializers import SeasonCalendarSerializer
 
@@ -33,6 +34,12 @@ class SeasonCalendarView(APIView):
         event_status = request.query_params.get('status')
         if event_status:
             events = events.filter(status=event_status)
+
+        paginator = get_optional_paginator(request)
+        if paginator is not None:
+            page = paginator.paginate_queryset(events, request)
+            serializer = SeasonCalendarSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         
         serializer = SeasonCalendarSerializer(events, many=True)
         return Response(serializer.data)

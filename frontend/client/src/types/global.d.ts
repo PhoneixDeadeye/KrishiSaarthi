@@ -32,9 +32,11 @@ declare global {
         start(): void;
         stop(): void;
         abort(): void;
-        onresult: (event: SpeechRecognitionEvent) => void;
-        onerror: (event: Event) => void;
-        onend: (event: Event) => void;
+        onstart: ((event: Event) => void) | null;
+        onresult: ((event: SpeechRecognitionEvent) => void) | null;
+        onerror: ((event: Event) => void) | null;
+        onend: ((event: Event) => void) | null;
+        __shouldKeepRecording?: boolean;
     }
 
     var SpeechRecognition: {

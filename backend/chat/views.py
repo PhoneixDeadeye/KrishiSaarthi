@@ -21,6 +21,7 @@ if _gemini_api_key:
 MAX_CONTEXT_MESSAGES = 20
 # Maximum question length (characters)
 MAX_QUESTION_LENGTH = 4000
+MAX_SESSIONS_PER_USER = 50
 
 
 class ChatView(APIView):
@@ -51,6 +52,11 @@ class ChatView(APIView):
 
         # Get or Create Session — always scoped to the requesting user
         if not session_id:
+            session_count = ChatSession.objects.filter(user=request.user).count()
+            if session_count >= MAX_SESSIONS_PER_USER:
+                oldest = ChatSession.objects.filter(user=request.user).order_by('created_at').first()
+                if oldest:
+                    oldest.delete()
             session_id = f"session_{uuid.uuid4().hex[:16]}"
 
         session, created = ChatSession.objects.get_or_create(

@@ -40,6 +40,26 @@ export interface AWDResponse {
     awd_detected: boolean;
     cycles_count: number;
     dry_days_detected: number;
+    wet_days_detected: number;
+    total_observations: number;
+    dry_ratio: number;
+    estimated_water_savings_percent: number;
+    estimated_methane_reduction_percent: number;
+    statistics: {
+        avg_ndwi: number;
+        ndwi_variance: number;
+        thresholds: { wet: number; dry: number };
+    };
+    periods: {
+        wet: Array<{ start: string; end: string; type: string }>;
+        dry: Array<{ start: string; end: string; type: string }>;
+    };
+    recommendation: string;
+    benefits: {
+        water_savings: string;
+        emissions: string;
+        yield: string;
+    };
 }
 
 export interface HealthScoreResponse {

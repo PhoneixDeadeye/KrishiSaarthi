@@ -103,11 +103,13 @@ export default function MapView({
   soilType,
   irrigationType,
   readOnly = false,
+  externalMapType,
 }: {
   cropType?: string;
   soilType?: string;
   irrigationType?: string;
   readOnly?: boolean;
+  externalMapType?: string;
 }) {
   const { token } = useAuth();
   const { selectedField, refreshFields } = useField();
@@ -120,6 +122,12 @@ export default function MapView({
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (externalMapType) {
+      setMapType(externalMapType);
+    }
+  }, [externalMapType]);
 
   // Geolocation states
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
@@ -172,7 +180,7 @@ export default function MapView({
           try {
             const area = Number((turf.area(selectedField.polygon) / 10000).toFixed(2));
             setFarmArea(area);
-          } catch (e) { logger.error(e); }
+          } catch (e) { logger.error("Failed to compute polygon area", e); }
 
           // Center map on the selected field
           if (latlngs.length > 0) {
@@ -381,10 +389,15 @@ export default function MapView({
             url={
               mapType === "street"
                 ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                : mapType === "ndvi"
+                ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" // Fallback to satellite or a custom NDVI WMS if available
                 : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
             }
             attribution={mapType === "street" ? "" : "Tiles © Esri"}
           />
+          {mapType === "ndvi" && farmPolygon.length > 0 && (
+             <Polygon positions={farmPolygon as L.LatLngExpression[]} pathOptions={{ color: '#00ff00', fillColor: '#00ff00', fillOpacity: 0.4 }} />
+          )}
           <MapClickHandler onMapClick={handleMapClick} isDrawing={isDrawing} />
 
           {farmPolygon.map((point, idx) => (

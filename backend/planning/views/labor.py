@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db.models import Sum
+from config.pagination import get_optional_paginator
 from ..models import LaborEntry
 from ..serializers import LaborEntrySerializer
 
@@ -40,6 +41,12 @@ class LaborEntryView(APIView):
         is_paid = request.query_params.get('is_paid')
         if is_paid is not None:
             entries = entries.filter(is_paid=is_paid == 'true')
+
+        paginator = get_optional_paginator(request)
+        if paginator is not None:
+            page = paginator.paginate_queryset(entries, request)
+            serializer = LaborEntrySerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         
         serializer = LaborEntrySerializer(entries, many=True)
         

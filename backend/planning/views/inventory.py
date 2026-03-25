@@ -8,6 +8,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db import models
 from django.db.models import Sum, F
+from config.pagination import get_optional_paginator
 from ..models import InventoryItem, InventoryTransaction
 from ..serializers import InventoryItemSerializer, InventoryTransactionSerializer
 
@@ -34,6 +35,12 @@ class InventoryItemView(APIView):
         if low_stock == 'true':
             from django.db.models import F
             items = items.filter(quantity__lte=F('reorder_level'))
+
+        paginator = get_optional_paginator(request)
+        if paginator is not None:
+            page = paginator.paginate_queryset(items, request)
+            serializer = InventoryItemSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         
         serializer = InventoryItemSerializer(items, many=True)
         
@@ -84,6 +91,12 @@ class InventoryTransactionView(APIView):
             transactions = item.transactions.select_related('item').all()
         else:
             transactions = InventoryTransaction.objects.filter(item__user=request.user).select_related('item')
+
+        paginator = get_optional_paginator(request)
+        if paginator is not None:
+            page = paginator.paginate_queryset(transactions, request)
+            serializer = InventoryTransactionSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         
         serializer = InventoryTransactionSerializer(transactions, many=True)
         return Response(serializer.data)

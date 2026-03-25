@@ -75,7 +75,7 @@ export function ExportButton({ data, filename = "export", columns, title = "Repo
             const tableRows: string[][] = [];
 
             data.forEach(item => {
-                const rowData = columns.map(col => item[col.accessorKey] || "");
+                const rowData = columns.map(col => String(item[col.accessorKey] ?? ""));
                 tableRows.push(rowData);
             });
 

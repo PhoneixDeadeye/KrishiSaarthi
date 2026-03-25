@@ -4,6 +4,7 @@ Serializers for finance module.
 from rest_framework import serializers
 from django.db.models import Sum
 from .models import Season, CostEntry, Revenue, CostCategory, InsuranceClaim
+from field.models import FieldData
 
 
 class SeasonSerializer(serializers.ModelSerializer):
@@ -82,16 +83,21 @@ class InsuranceClaimSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     field_name = serializers.CharField(source='field.name', read_only=True)
     masked_bank_account = serializers.SerializerMethodField()
+    # Accept field_id from frontend as an alias for the 'field' FK
+    field_id = serializers.PrimaryKeyRelatedField(
+        queryset=FieldData.objects.all(),
+        source='field', write_only=True, required=False,
+    )
 
     class Meta:
         model = InsuranceClaim
         fields = [
-            'id', 'field', 'field_name', 'season', 'policy_number', 'crop',
+            'id', 'field', 'field_id', 'field_name', 'season', 'policy_number', 'crop',
             'area_affected_acres', 'damage_type', 'damage_type_display',
             'damage_date', 'damage_description', 'estimated_loss',
             'claim_amount', 'status', 'status_display',
             'submitted_at', 'reviewed_at', 'reviewer_notes',
-            'masked_bank_account', 'ifsc_code',
+            'bank_account', 'masked_bank_account', 'ifsc_code',
             'created_at', 'updated_at',
         ]
         read_only_fields = [
@@ -103,6 +109,7 @@ class InsuranceClaimSerializer(serializers.ModelSerializer):
         # bank_account is write-only (masked on read via get_masked_bank_account)
         extra_kwargs = {
             'bank_account': {'write_only': True, 'required': False},
+            'field': {'required': False},
         }
 
     def get_masked_bank_account(self, obj):

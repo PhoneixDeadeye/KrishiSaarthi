@@ -71,7 +71,7 @@ export function SchemeMatcher() {
             setData(response as SchemesData);
         } catch (err) {
             setError('Failed to load government schemes');
-            logger.error(err);
+            logger.error('Failed to load government schemes', err);
         } finally {
             setLoading(false);
         }
