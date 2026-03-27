@@ -12,6 +12,7 @@ import { PredictionData } from "@/types/field";
 import { logger } from "@/lib/logger";
 import { WeatherWidget } from "./WeatherWidget";
 import { HealthGauge } from "./HealthGauge";
+import { FarmMap3D } from "./FarmMap3D";
 import { useWeather } from "@/hooks/useWeather";
 import { useHealthScore } from "@/hooks/useHealthScore";
 

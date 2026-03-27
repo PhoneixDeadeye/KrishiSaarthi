@@ -1,6 +1,7 @@
 """
 Validation utilities for field data
 """
+
 from typing import Dict, List, Any, Tuple
 import logging
 import math
@@ -37,16 +38,20 @@ def validate_polygon(polygon: Any) -> None:
         raise DjangoValidationError("Polygon must be a dictionary")
 
     # GeoJSON type is required and must be 'Polygon'
-    geo_type = polygon.get('type')
+    geo_type = polygon.get("type")
     if geo_type is None:
-        raise DjangoValidationError("Missing required 'type' field. Expected 'Polygon'.")
-    if geo_type != 'Polygon':
-        raise DjangoValidationError(f"Expected GeoJSON type 'Polygon', got '{geo_type}'")
+        raise DjangoValidationError(
+            "Missing required 'type' field. Expected 'Polygon'."
+        )
+    if geo_type != "Polygon":
+        raise DjangoValidationError(
+            f"Expected GeoJSON type 'Polygon', got '{geo_type}'"
+        )
 
-    if 'coordinates' not in polygon:
+    if "coordinates" not in polygon:
         raise DjangoValidationError("Polygon must contain 'coordinates' key")
 
-    coords = polygon.get('coordinates')
+    coords = polygon.get("coordinates")
     if not coords or not isinstance(coords, list):
         raise DjangoValidationError("Coordinates must be a non-empty list")
 
@@ -55,7 +60,9 @@ def validate_polygon(polygon: Any) -> None:
 
     # A valid polygon ring needs at least 4 points (3 unique + closure)
     if not isinstance(coords[0], list) or len(coords[0]) < 4:
-        raise DjangoValidationError("Polygon must have at least 4 points (3 vertices + closure)")
+        raise DjangoValidationError(
+            "Polygon must have at least 4 points (3 vertices + closure)"
+        )
 
     # Validate coordinate format
     for ring_idx, ring in enumerate(coords):
@@ -74,60 +81,70 @@ def validate_polygon(polygon: Any) -> None:
         # Validate ring closure (first point must equal last point)
         if len(ring) >= 3:
             first, last = ring[0], ring[-1]
-            if (float(first[0]) != float(last[0])) or (float(first[1]) != float(last[1])):
-                raise DjangoValidationError(f"Ring {ring_idx} is not closed (first and last points must match)")
+            if (float(first[0]) != float(last[0])) or (
+                float(first[1]) != float(last[1])
+            ):
+                raise DjangoValidationError(
+                    f"Ring {ring_idx} is not closed (first and last points must match)"
+                )
 
     # Check that polygon area is reasonable (not unreasonably large)
     exterior = coords[0]
     area = _ring_area([[float(p[0]), float(p[1])] for p in exterior])
     if area > MAX_FIELD_AREA_SQ_DEG:
-        raise DjangoValidationError(f"Polygon area too large ({area:.4f} sq degrees). Max allowed: {MAX_FIELD_AREA_SQ_DEG}")
+        raise DjangoValidationError(
+            f"Polygon area too large ({area:.4f} sq degrees). Max allowed: {MAX_FIELD_AREA_SQ_DEG}"
+        )
 
     # Check for self-intersection (simplified check: no duplicate consecutive points)
     for ring in coords:
         for i in range(len(ring) - 1):
-            if (float(ring[i][0]) == float(ring[i + 1][0]) and
-                    float(ring[i][1]) == float(ring[i + 1][1])):
-                raise DjangoValidationError("Ring contains duplicate consecutive points")
+            if float(ring[i][0]) == float(ring[i + 1][0]) and float(
+                ring[i][1]
+            ) == float(ring[i + 1][1]):
+                raise DjangoValidationError(
+                    "Ring contains duplicate consecutive points"
+                )
 
 
 def validate_field_data(data: Dict[str, Any]) -> Tuple[bool, str]:
     """
     Validate field creation/update data.
-    
+
     Args:
         data: Dictionary containing field data
-        
+
     Returns:
         Tuple of (is_valid, error_message)
     """
-    required_fields = ['polygon']
-    
+    required_fields = ["polygon"]
+
     for field in required_fields:
         if field not in data:
             return False, f"Missing required field: {field}"
-    
+
     # Validate polygon
     from django.core.exceptions import ValidationError as DjangoValidationError
+
     try:
-        validate_polygon(data['polygon'])
+        validate_polygon(data["polygon"])
     except DjangoValidationError as e:
         return False, f"Invalid polygon: {e.message}"
-    
+
     # Validate crop type if provided
-    if 'cropType' in data and data['cropType']:
-        if not isinstance(data['cropType'], str):
+    if "cropType" in data and data["cropType"]:
+        if not isinstance(data["cropType"], str):
             return False, "Crop type must be a string"
-        if len(data['cropType']) > 32:
+        if len(data["cropType"]) > 32:
             return False, "Crop type too long (max 32 characters)"
-    
+
     # Validate name if provided
-    if 'name' in data and data['name']:
-        if not isinstance(data['name'], str):
+    if "name" in data and data["name"]:
+        if not isinstance(data["name"], str):
             return False, "Name must be a string"
-        if len(data['name']) > 100:
+        if len(data["name"]) > 100:
             return False, "Name too long (max 100 characters)"
-    
+
     return True, ""
 
 
@@ -135,13 +152,13 @@ def sanitize_coordinates(coords: List) -> List:
     """
     Sanitize and validate coordinate values.
     Rejects invalid coordinates instead of silently clamping them.
-    
+
     Args:
         coords: List of coordinate rings
-        
+
     Returns:
         Sanitized coordinates
-        
+
     Raises:
         ValueError: If any coordinate is out of valid range
     """
@@ -161,5 +178,5 @@ def sanitize_coordinates(coords: List) -> List:
                 logger.warning("Invalid point in coordinates: %s — %s", point, exc)
                 raise ValueError(f"Invalid coordinate point: {point}") from exc
         sanitized.append(sanitized_ring)
-    
+
     return sanitized

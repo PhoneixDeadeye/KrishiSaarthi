@@ -19,11 +19,12 @@ class FieldDataView(APIView):
     GET: List all fields for the user
     DELETE: Delete a specific field by ID
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
-            fields = FieldData.objects.filter(user=request.user).order_by('-created_at')
+            fields = FieldData.objects.filter(user=request.user).order_by("-created_at")
             paginator = get_optional_paginator(request)
             if paginator is not None:
                 page = paginator.paginate_queryset(fields, request)
@@ -33,14 +34,16 @@ class FieldDataView(APIView):
             return Response(serializer.data)
         except Exception as e:
             logger.error("Error listing fields: %s", e)
-            return Response({"error": "Failed to retrieve fields"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": "Failed to retrieve fields"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def delete(self, request, pk=None):
         """Delete a field by ID"""
         if not pk:
             return Response(
-                {"error": "Field ID is required"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Field ID is required"}, status=status.HTTP_400_BAD_REQUEST
             )
         try:
             field = FieldData.objects.get(pk=pk, user=request.user)
@@ -48,8 +51,7 @@ class FieldDataView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except FieldData.DoesNotExist:
             return Response(
-                {"error": "Field not found"},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Field not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
 
@@ -77,7 +79,7 @@ class SavePolygon(APIView):
 
             # Sanitize coordinates (now raises ValueError on invalid data)
             try:
-                polygon['coordinates'] = sanitize_coordinates(polygon['coordinates'])
+                polygon["coordinates"] = sanitize_coordinates(polygon["coordinates"])
             except ValueError as exc:
                 return Response(
                     {"error": str(exc)},
@@ -86,23 +88,28 @@ class SavePolygon(APIView):
 
             if field_id:
                 # Update existing field
-                field_data = get_object_or_404(FieldData, id=field_id, user=request.user)
+                field_data = get_object_or_404(
+                    FieldData, id=field_id, user=request.user
+                )
                 field_data.polygon = polygon
                 field_data.cropType = crop_type
                 field_data.name = name
                 field_data.save()
                 created = False
-                logger.info("Updated field %s for user %s", field_id, request.user.username)
+                logger.info(
+                    "Updated field %s for user %s", field_id, request.user.username
+                )
             else:
                 # Create new field
                 field_data = FieldData.objects.create(
-                    user=request.user,
-                    polygon=polygon,
-                    cropType=crop_type,
-                    name=name
+                    user=request.user, polygon=polygon, cropType=crop_type, name=name
                 )
                 created = True
-                logger.info("Created new field %s for user %s", field_data.id, request.user.username)
+                logger.info(
+                    "Created new field %s for user %s",
+                    field_data.id,
+                    request.user.username,
+                )
 
             return Response(
                 {
@@ -117,10 +124,12 @@ class SavePolygon(APIView):
             )
 
         except Exception as e:
-            logger.error("Error saving polygon for user %s: %s", request.user.username, e)
+            logger.error(
+                "Error saving polygon for user %s: %s", request.user.username, e
+            )
             return Response(
                 {"error": "Failed to save field"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
@@ -130,7 +139,7 @@ class GetCoordView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        field_id = request.query_params.get('field_id')
+        field_id = request.query_params.get("field_id")
         if field_id:
             field_data = get_object_or_404(FieldData, id=field_id, user=request.user)
         else:

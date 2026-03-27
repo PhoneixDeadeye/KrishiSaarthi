@@ -1,43 +1,56 @@
 """
 Finance module URL configuration.
 """
+
 from django.urls import path
 from .views import (
-    CostEntryView, CostSummaryView, PnLDashboardView, SeasonView, RevenueView,
-    PriceForecastView, SchemesView, SchemeDetailView,
-    InsuranceClaimView, InsuranceClaimDetailView
+    CostEntryView,
+    CostSummaryView,
+    PnLDashboardView,
+    SeasonView,
+    RevenueView,
+    PriceForecastView,
+    SchemesView,
+    SchemeDetailView,
+    InsuranceClaimView,
+    InsuranceClaimDetailView,
 )
 from .views.market_prices import MarketPricesView
+from rest_framework.routers import DefaultRouter
+from .views.transactions import FinanceTransactionViewSet
+
+router = DefaultRouter(trailing_slash=False)
+router.register(r'transactions', FinanceTransactionViewSet, basename='transaction')
+
+from django.urls import include, path
 
 urlpatterns = [
+    path("", include(router.urls)),
     # Cost entries
-    path('costs', CostEntryView.as_view(), name='costList'),
-    path('costs/<int:pk>', CostEntryView.as_view(), name='costDetail'),
-    path('costs/summary', CostSummaryView.as_view(), name='costSummary'),
-    
+    path("costs", CostEntryView.as_view(), name="costList"),
+    path("costs/<int:pk>", CostEntryView.as_view(), name="costDetail"),
+    path("costs/summary", CostSummaryView.as_view(), name="costSummary"),
     # Revenue entries
-    path('revenue', RevenueView.as_view(), name='revenueList'),
-    path('revenue/<int:pk>', RevenueView.as_view(), name='revenueDetail'),
-    
+    path("revenue", RevenueView.as_view(), name="revenueList"),
+    path("revenue/<int:pk>", RevenueView.as_view(), name="revenueDetail"),
     # Seasons
-    path('seasons', SeasonView.as_view(), name='seasonList'),
-    path('seasons/<int:pk>', SeasonView.as_view(), name='seasonDetail'),
-    
+    path("seasons", SeasonView.as_view(), name="seasonList"),
+    path("seasons/<int:pk>", SeasonView.as_view(), name="seasonDetail"),
     # P&L Dashboard
-    path('pnl', PnLDashboardView.as_view(), name='pnlDashboard'),
-    
+    path("pnl", PnLDashboardView.as_view(), name="pnlDashboard"),
     # Market Prices
-    path('market-prices', MarketPricesView.as_view(), name='marketPrices'),
-    
+    path("market-prices", MarketPricesView.as_view(), name="marketPrices"),
     # Price Forecast
-    path('price-forecast', PriceForecastView.as_view(), name='priceForecast'),
-    
+    path("price-forecast", PriceForecastView.as_view(), name="priceForecast"),
     # Government Schemes
-    path('schemes', SchemesView.as_view(), name='schemesList'),
-    path('schemes/<int:pk>', SchemeDetailView.as_view(), name='schemeDetail'),
-
+    path("schemes", SchemesView.as_view(), name="schemesList"),
+    path("schemes/<int:pk>", SchemeDetailView.as_view(), name="schemeDetail"),
     # Insurance Claims
-    path('insurance', InsuranceClaimView.as_view(), name='insuranceList'),
-    path('insurance/<int:pk>', InsuranceClaimDetailView.as_view(), name='insuranceDetail'),
-
+    path("insurance", InsuranceClaimView.as_view(), name="insuranceList"),
+    path(
+        "insurance/<int:pk>", InsuranceClaimDetailView.as_view(), name="insuranceDetail"
+    ),
 ]
+
+from rest_framework.routers import DefaultViewSet
+

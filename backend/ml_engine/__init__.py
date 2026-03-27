@@ -27,28 +27,23 @@ from .registry import registry as model_registry
 
 __all__ = [
     # AWD Detection
-    'detect_awd_from_ndwi',
-    'calculate_awd_score',
-    
+    "detect_awd_from_ndwi",
+    "calculate_awd_score",
     # Carbon Credits
-    'calculate_carbon_metrics',
-    
+    "calculate_carbon_metrics",
     # CNN (Image-based health detection)
-    'predict_health',
-    'predict_health_batch',
-    'get_cnn_model',
-    
+    "predict_health",
+    "predict_health_batch",
+    "get_cnn_model",
     # LSTM (Time-series risk prediction)
-    'predict_risk_from_values',
-    'get_lstm_model',
-    
+    "predict_risk_from_values",
+    "get_lstm_model",
     # Health Score (Fusion)
-    'get_health_score',
-    'compute_health_score',
-    'get_health_rating',
-    
+    "get_health_score",
+    "compute_health_score",
+    "get_health_rating",
     # Model Registry
-    'model_registry',
+    "model_registry",
 ]
 
-__version__ = '2.1.0'
+__version__ = "2.1.0"

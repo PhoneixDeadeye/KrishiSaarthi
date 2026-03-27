@@ -1,10 +1,32 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   plugins: [
     react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      devOptions: { enabled: true },
+      manifest: {
+        name: 'KrishiSaarthi',
+        short_name: 'Krishi',
+        description: 'AI-driven farm and crop management ecosystem',
+        theme_color: '#f9fafb',
+        icons: [{ src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' }]
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,glb,gltf}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: { cacheName: 'google-fonts-cache', expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 } }
+          }
+        ]
+      }
+    })
   ],
   resolve: {
     alias: {

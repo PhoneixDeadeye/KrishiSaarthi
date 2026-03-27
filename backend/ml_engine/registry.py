@@ -4,6 +4,7 @@ ML Model Registry for KrishiSaarthi
 Provides centralized model versioning, metadata tracking, and health checks.
 Ensures reproducibility and auditability of all ML model predictions.
 """
+
 import os
 import hashlib
 import json
@@ -22,6 +23,7 @@ _MODELS_DIR = os.path.join(os.path.dirname(_MODULE_DIR), "ml_models")
 @dataclass
 class ModelMetadata:
     """Immutable metadata for a registered ML model."""
+
     name: str
     version: str
     architecture: str
@@ -39,25 +41,25 @@ class ModelMetadata:
 class ModelRegistry:
     """
     Singleton registry for all ML models used in the system.
-    
+
     Provides:
     - Centralized model metadata and versioning
     - File integrity checks (SHA-256 hashes)
     - Model health status reporting
     - Lazy loading coordination
-    
+
     Usage:
         from ml_engine.registry import registry
-        
+
         # Check status of all models
         status = registry.status()
-        
+
         # Get metadata for a specific model
         meta = registry.get("cnn_crop_health")
     """
-    
+
     _instance: Optional["ModelRegistry"] = None
-    
+
     def __new__(cls) -> "ModelRegistry":
         if cls._instance is None:
             cls._instance = super().__new__(cls)
@@ -65,13 +67,13 @@ class ModelRegistry:
             cls._instance._loaders: Dict[str, Callable] = {}
             cls._instance._initialized = False
         return cls._instance
-    
+
     def _ensure_initialized(self) -> None:
         """Register all known models on first access."""
         if self._initialized:
             return
         self._initialized = True
-        
+
         # Register CNN model
         self._register_builtin(
             name="cnn_crop_health",
@@ -82,7 +84,7 @@ class ModelRegistry:
             model_path=os.path.join(_MODELS_DIR, "crop_health_model.pth"),
             description="Binary crop health classifier trained on pest/disease imagery.",
         )
-        
+
         # Register LSTM model
         self._register_builtin(
             name="lstm_risk",
@@ -94,7 +96,7 @@ class ModelRegistry:
             description="LSTM for crop pest/disease risk from NDVI and weather time series.",
             extra={"scaler_path": os.path.join(_MODELS_DIR, "risk_scaler.save")},
         )
-        
+
         # Register scaler as a tracked artifact
         self._register_builtin(
             name="lstm_risk_scaler",
@@ -105,20 +107,28 @@ class ModelRegistry:
             model_path=os.path.join(_MODELS_DIR, "risk_scaler.save"),
             description="Feature scaler for LSTM risk model inputs.",
         )
-    
-    def _register_builtin(self, name: str, version: str, architecture: str,
-                          input_spec: str, output_spec: str, model_path: str,
-                          description: str = "", extra: Optional[Dict] = None) -> None:
+
+    def _register_builtin(
+        self,
+        name: str,
+        version: str,
+        architecture: str,
+        input_spec: str,
+        output_spec: str,
+        model_path: str,
+        description: str = "",
+        extra: Optional[Dict] = None,
+    ) -> None:
         """Register a built-in model with automatic file hash computation."""
         file_hash = None
         file_size = None
-        
+
         if os.path.exists(model_path):
             file_size = os.path.getsize(model_path)
             # Only hash files under 500MB to avoid blocking startup
             if file_size < 500 * 1024 * 1024:
                 file_hash = self._sha256(model_path)
-        
+
         self._models[name] = ModelMetadata(
             name=name,
             version=version,
@@ -131,7 +141,7 @@ class ModelRegistry:
             description=description,
             extra=extra or {},
         )
-    
+
     @staticmethod
     def _sha256(path: str) -> str:
         """Compute SHA-256 hash of a file."""
@@ -140,21 +150,21 @@ class ModelRegistry:
             for chunk in iter(lambda: f.read(8192), b""):
                 h.update(chunk)
         return h.hexdigest()
-    
+
     def get(self, name: str) -> Optional[ModelMetadata]:
         """Get metadata for a registered model."""
         self._ensure_initialized()
         return self._models.get(name)
-    
+
     def list_models(self) -> Dict[str, ModelMetadata]:
         """Return all registered models."""
         self._ensure_initialized()
         return dict(self._models)
-    
+
     def status(self) -> Dict[str, Any]:
         """
         Return health/status report for all registered models.
-        
+
         Returns:
             Dict with model names as keys, each containing:
             - registered: True
@@ -165,7 +175,7 @@ class ModelRegistry:
         """
         self._ensure_initialized()
         report: Dict[str, Any] = {}
-        
+
         for name, meta in self._models.items():
             exists = os.path.exists(meta.model_path)
             report[name] = {
@@ -177,38 +187,38 @@ class ModelRegistry:
                 "file_size_bytes": meta.file_size_bytes,
                 "model_path": meta.model_path,
             }
-        
+
         return report
-    
+
     def verify_integrity(self) -> Dict[str, bool]:
         """
         Verify file integrity of all registered models by re-computing hashes.
-        
+
         Returns:
             Dict of {model_name: integrity_ok}
         """
         self._ensure_initialized()
         results: Dict[str, bool] = {}
-        
+
         for name, meta in self._models.items():
             if not os.path.exists(meta.model_path):
                 results[name] = False
                 continue
-            
+
             if meta.file_hash is None:
                 # No hash recorded — can't verify, treat as OK
                 results[name] = True
                 continue
-            
+
             current_hash = self._sha256(meta.model_path)
-            results[name] = (current_hash == meta.file_hash)
-            
+            results[name] = current_hash == meta.file_hash
+
             if not results[name]:
                 logger.warning(
                     f"Model integrity check FAILED for {name}: "
                     f"expected {meta.file_hash[:16]}..., got {current_hash[:16]}..."
                 )
-        
+
         return results
 
 

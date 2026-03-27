@@ -2,6 +2,7 @@
 Field-level encryption utilities using Fernet symmetric encryption.
 Used to encrypt sensitive data at rest (bank accounts, IFSC codes).
 """
+
 import base64
 import hashlib
 from django.conf import settings
@@ -17,7 +18,9 @@ def _get_fernet_key() -> bytes:
     - An arbitrary string, which is deterministically hashed into a Fernet key.
     """
     configured = getattr(settings, "FERNET_KEYS", []) or []
-    candidate = str(configured[0]).encode() if configured else settings.SECRET_KEY.encode()
+    candidate = (
+        str(configured[0]).encode() if configured else settings.SECRET_KEY.encode()
+    )
     try:
         # Already a valid Fernet key
         Fernet(candidate)

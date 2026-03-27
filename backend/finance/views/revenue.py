@@ -1,6 +1,7 @@
 """
 Revenue management API views.
 """
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
@@ -17,6 +18,7 @@ class RevenueView(APIView):
     PUT /finance/revenue/{id} - Update revenue entry
     DELETE /finance/revenue/{id} - Delete revenue entry
     """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, pk=None):
@@ -25,15 +27,22 @@ class RevenueView(APIView):
                 revenue = Revenue.objects.get(pk=pk, user=request.user)
                 return Response(RevenueSerializer(revenue).data)
             except Revenue.DoesNotExist:
-                return Response({'error': 'Revenue entry not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-        queryset = Revenue.objects.filter(user=request.user).select_related('field', 'season').order_by('-date')
-        
-        field_id = request.query_params.get('field_id')
+                return Response(
+                    {"error": "Revenue entry not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+        queryset = (
+            Revenue.objects.filter(user=request.user)
+            .select_related("field", "season")
+            .order_by("-date")
+        )
+
+        field_id = request.query_params.get("field_id")
         if field_id:
             queryset = queryset.filter(field_id=field_id)
-        
-        season_id = request.query_params.get('season_id')
+
+        season_id = request.query_params.get("season_id")
         if season_id:
             queryset = queryset.filter(season_id=season_id)
 
@@ -42,7 +51,7 @@ class RevenueView(APIView):
             page = paginator.paginate_queryset(queryset, request)
             serializer = RevenueSerializer(page, many=True)
             return paginator.get_paginated_response(serializer.data)
-        
+
         serializer = RevenueSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -57,8 +66,10 @@ class RevenueView(APIView):
         try:
             revenue = Revenue.objects.get(pk=pk, user=request.user)
         except Revenue.DoesNotExist:
-            return Response({'error': 'Revenue entry not found'}, status=status.HTTP_404_NOT_FOUND)
-        
+            return Response(
+                {"error": "Revenue entry not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
         serializer = RevenueSerializer(revenue, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -71,4 +82,6 @@ class RevenueView(APIView):
             revenue.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Revenue.DoesNotExist:
-            return Response({'error': 'Revenue entry not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Revenue entry not found"}, status=status.HTTP_404_NOT_FOUND
+            )

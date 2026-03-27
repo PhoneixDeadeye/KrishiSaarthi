@@ -8,6 +8,7 @@ from ..models import FieldData
 
 logger = logging.getLogger(__name__)
 
+
 class CircuitBreaker:
     def __init__(self, failure_threshold=3, recovery_timeout=60):
         self.failure_threshold = failure_threshold
@@ -40,10 +41,14 @@ class CircuitBreaker:
         elif self.state == "CLOSED":
             self.failure_count = 0
 
+
 # Global circuit breaker instance
 ee_breaker = CircuitBreaker()
 
-def fetchEEData_safe(user=None, field_id=None, field_instance=None, start_date=None, end_date=None):
+
+def fetchEEData_safe(
+    user=None, field_id=None, field_instance=None, start_date=None, end_date=None
+):
     """
     Wrapper for fetchEEData that strictly enforces circuit breaker logic.
     """
@@ -52,7 +57,7 @@ def fetchEEData_safe(user=None, field_id=None, field_instance=None, start_date=N
         return {
             "error": "Service temporarily unavailable",
             "details": "Please try again later",
-            "fallback": True
+            "fallback": True,
         }
 
     try:
@@ -65,8 +70,9 @@ def fetchEEData_safe(user=None, field_id=None, field_instance=None, start_date=N
         return {
             "error": "Satellite data unavailable",
             "details": "Please try again later",
-            "fallback": True
+            "fallback": True,
         }
+
 
 def _fetch_ee_data_impl(user, field_id, field_instance, start_date, end_date):
     """
@@ -74,9 +80,9 @@ def _fetch_ee_data_impl(user, field_id, field_instance, start_date, end_date):
     """
     # Initialize date range - default to last 90 days
     if end_date is None:
-        end_date = datetime.now().strftime('%Y-%m-%d')
+        end_date = datetime.now().strftime("%Y-%m-%d")
     if start_date is None:
-        start_date = (datetime.now() - timedelta(days=90)).strftime('%Y-%m-%d')
+        start_date = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")
 
     # Fetch polygon for the user
     if field_instance:
@@ -87,17 +93,17 @@ def _fetch_ee_data_impl(user, field_id, field_instance, start_date, end_date):
         # Fallback to first field if no specific field requested
         field_data = FieldData.objects.filter(user=user).first()
         if not field_data:
-            return {"error": "No fields found"} 
+            return {"error": "No fields found"}
     else:
         return {"error": "User or field required"}
 
     coords = field_data.polygon
     # Ensure coords is a valid geometry or list of lists
-    if isinstance(coords, dict) and 'coordinates' in coords:
-        geom = coords['coordinates']
+    if isinstance(coords, dict) and "coordinates" in coords:
+        geom = coords["coordinates"]
     else:
         geom = coords
-        
+
     aoi = ee.Geometry.Polygon(geom)
 
     # --- Vegetation Indices ---
@@ -203,9 +209,7 @@ def _fetch_ee_data_impl(user, field_id, field_instance, start_date, end_date):
             None,
             {
                 "date": img.get("date"),
-                "NDVI": img.reduceRegion(
-                    ee.Reducer.mean(), aoi, 10
-                ).get("NDVI"),
+                "NDVI": img.reduceRegion(ee.Reducer.mean(), aoi, 10).get("NDVI"),
             },
         )
     )
@@ -236,9 +240,7 @@ def _fetch_ee_data_impl(user, field_id, field_instance, start_date, end_date):
             None,
             {
                 "date": img.get("date"),
-                "NDWI": img.reduceRegion(
-                    ee.Reducer.mean(), aoi, 10
-                ).get("NDWI"),
+                "NDWI": img.reduceRegion(ee.Reducer.mean(), aoi, 10).get("NDWI"),
             },
         )
     )

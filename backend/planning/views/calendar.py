@@ -1,6 +1,7 @@
 """
 Calendar views for season planning.
 """
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -13,25 +14,29 @@ from ..serializers import SeasonCalendarSerializer
 
 class SeasonCalendarView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         """List calendar events for user, optionally filtered by field"""
-        events = SeasonCalendar.objects.filter(user=request.user).select_related('field').order_by('start_date')
-        
-        field_id = request.query_params.get('field_id')
+        events = (
+            SeasonCalendar.objects.filter(user=request.user)
+            .select_related("field")
+            .order_by("start_date")
+        )
+
+        field_id = request.query_params.get("field_id")
         if field_id:
             events = events.filter(field_id=field_id)
-        
+
         # Filter by date range
-        start_date = request.query_params.get('start_date')
-        end_date = request.query_params.get('end_date')
+        start_date = request.query_params.get("start_date")
+        end_date = request.query_params.get("end_date")
         if start_date:
             events = events.filter(end_date__gte=start_date)
         if end_date:
             events = events.filter(start_date__lte=end_date)
-        
+
         # Filter by status
-        event_status = request.query_params.get('status')
+        event_status = request.query_params.get("status")
         if event_status:
             events = events.filter(status=event_status)
 
@@ -40,10 +45,10 @@ class SeasonCalendarView(APIView):
             page = paginator.paginate_queryset(events, request)
             serializer = SeasonCalendarSerializer(page, many=True)
             return paginator.get_paginated_response(serializer.data)
-        
+
         serializer = SeasonCalendarSerializer(events, many=True)
         return Response(serializer.data)
-    
+
     def post(self, request):
         """Create a new calendar event"""
         serializer = SeasonCalendarSerializer(data=request.data)
@@ -51,7 +56,7 @@ class SeasonCalendarView(APIView):
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def put(self, request, pk=None):
         """Update an existing calendar event"""
         event = get_object_or_404(SeasonCalendar, pk=pk, user=request.user)
@@ -60,7 +65,7 @@ class SeasonCalendarView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def delete(self, request, pk=None):
         """Delete a calendar event"""
         event = get_object_or_404(SeasonCalendar, pk=pk, user=request.user)

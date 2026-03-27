@@ -10,10 +10,10 @@ import { logger } from "@/lib/logger";
 interface ForecastDay {
     date: string;
     day: number;
-    predicted_price: number;
+    projected_price: number;
     lower_bound: number;
     upper_bound: number;
-    confidence: number;
+    confidence_pct: number;
 }
 
 interface Recommendation {
@@ -29,14 +29,13 @@ interface ForecastData {
     forecast_days: number;
     forecast: ForecastDay[];
     summary: {
-        current_price: number;
+        start_price: number;
         end_price: number;
         min_price: number;
         max_price: number;
         avg_price: number;
         trend: string;
         volatility: string;
-        confidence: string;
     };
     recommendation: Recommendation[];
 }
@@ -70,16 +69,16 @@ export function PriceForecast() {
 
     const getTrendIcon = (trend: string) => {
         switch (trend) {
-            case 'bullish': return <TrendingUp className="h-5 w-5 text-green-500" />;
-            case 'bearish': return <TrendingDown className="h-5 w-5 text-red-500" />;
+            case 'rising': return <TrendingUp className="h-5 w-5 text-green-500" />;
+            case 'falling': return <TrendingDown className="h-5 w-5 text-red-500" />;
             default: return <Minus className="h-5 w-5 text-gray-500" />;
         }
     };
 
     const getTrendColor = (trend: string) => {
         switch (trend) {
-            case 'bullish': return 'text-green-600 bg-green-50';
-            case 'bearish': return 'text-red-600 bg-red-50';
+            case 'rising': return 'text-green-600 bg-green-50';
+            case 'falling': return 'text-red-600 bg-red-50';
             default: return 'text-gray-600 bg-gray-50';
         }
     };
@@ -97,7 +96,7 @@ export function PriceForecast() {
     const chartData = useMemo(() => {
         if (!data?.forecast?.length) return null;
 
-        const prices = data.forecast.map(d => d.predicted_price);
+        const prices = data.forecast.map(d => d.projected_price);
         const minPrice = Math.min(...prices) * 0.95;
         const maxPrice = Math.max(...prices) * 1.05;
         const range = maxPrice - minPrice;
@@ -108,7 +107,7 @@ export function PriceForecast() {
             range,
             points: data.forecast.map((day, i) => ({
                 x: (i / (data.forecast.length - 1)) * 100,
-                y: 100 - ((day.predicted_price - minPrice) / range) * 100,
+                y: 100 - ((day.projected_price - minPrice) / range) * 100,
                 ...day
             }))
         };
@@ -116,8 +115,8 @@ export function PriceForecast() {
 
     const formatPrice = (price: number) => `₹${price.toLocaleString('en-IN')}`;
 
-    const priceChange = data ? data.summary.end_price - data.summary.current_price : 0;
-    const priceChangePercent = data ? ((priceChange / data.summary.current_price) * 100).toFixed(1) : '0';
+    const priceChange = data ? data.summary.end_price - data.summary.start_price : 0;
+    const priceChangePercent = data ? ((priceChange / data.summary.start_price) * 100).toFixed(1) : '0';
 
     return (
         <div className="p-6 space-y-6">
@@ -177,7 +176,7 @@ export function PriceForecast() {
                         <Card>
                             <CardContent className="p-4">
                                 <div className="text-sm text-muted-foreground">Current Price</div>
-                                <div className="text-2xl font-bold">{formatPrice(data.summary.current_price)}</div>
+                                <div className="text-2xl font-bold">{formatPrice(data.summary.start_price)}</div>
                                 <div className="text-xs text-muted-foreground">per quintal</div>
                             </CardContent>
                         </Card>

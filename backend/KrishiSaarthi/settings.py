@@ -19,106 +19,113 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables
-load_dotenv(os.path.join(BASE_DIR, '.env'))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
+DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 if not DEBUG:
     try:
-        SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+        SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
     except KeyError:
         from django.core.exceptions import ImproperlyConfigured
-        raise ImproperlyConfigured("DJANGO_SECRET_KEY environment variable is not set in production!")
-else:
-    SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dev-key-for-testing-only')
 
-if os.environ.get('FERNET_KEY'):
-    FERNET_KEYS = [os.environ['FERNET_KEY']]
+        raise ImproperlyConfigured(
+            "DJANGO_SECRET_KEY environment variable is not set in production!"
+        )
+else:
+    SECRET_KEY = os.environ.get(
+        "DJANGO_SECRET_KEY", "django-insecure-dev-key-for-testing-only"
+    )
+
+if os.environ.get("FERNET_KEY"):
+    FERNET_KEYS = [os.environ["FERNET_KEY"]]
 elif DEBUG:
     # Development-only fallback key. Never used in production.
-    FERNET_KEYS = ['django-insecure-dev-fernet-key-change-me']
+    FERNET_KEYS = ["django-insecure-dev-fernet-key-change-me"]
 else:
     from django.core.exceptions import ImproperlyConfigured
-    raise ImproperlyConfigured('FERNET_KEY must be set in production')
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    raise ImproperlyConfigured("FERNET_KEY must be set in production")
+
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'knox',
-    'drf_spectacular',
-    'field',
-    'finance',
-    'planning',
-    'chat',
-    'corsheaders',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "knox",
+    "drf_spectacular",
+    "field",
+    "finance",
+    "planning",
+    "chat",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'middleware.request_logging.RequestLoggingMiddleware',  # Custom request logging
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "middleware.request_logging.RequestLoggingMiddleware",  # Custom request logging
 ]
 
-ROOT_URLCONF = 'KrishiSaarthi.urls'
+ROOT_URLCONF = "KrishiSaarthi.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'KrishiSaarthi.wsgi.application'
+WSGI_APPLICATION = "KrishiSaarthi.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        'CONN_MAX_AGE': 600,  # Connection pooling (10 minutes)
-        'OPTIONS': {
-            'timeout': 20,  # SQLite specific: lock timeout
-        }
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+        "CONN_MAX_AGE": 600,  # Connection pooling (10 minutes)
+        "OPTIONS": {
+            "timeout": 20,  # SQLite specific: lock timeout
+        },
     }
 }
 
 # Use PostgreSQL in production (from DATABASE_URL)
-if os.environ.get('DATABASE_URL'):
+if os.environ.get("DATABASE_URL"):
     import dj_database_url
-    DATABASES['default'] = dj_database_url.config(
+
+    DATABASES["default"] = dj_database_url.config(
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -129,22 +136,22 @@ if os.environ.get('DATABASE_URL'):
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 # Internationalization
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Asia/Kolkata'
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
 
@@ -152,36 +159,37 @@ USE_TZ = True
 # Cache Configuration
 try:
     import django_redis
+
     CACHES = {
-        'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/0'),
-            'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-                'SOCKET_CONNECT_TIMEOUT': 5,
-                'SOCKET_TIMEOUT': 5,
-                'CONNECTION_POOL_KWARGS': {'max_connections': 50}
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/0"),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "SOCKET_CONNECT_TIMEOUT": 5,
+                "SOCKET_TIMEOUT": 5,
+                "CONNECTION_POOL_KWARGS": {"max_connections": 50},
             },
-            'KEY_PREFIX': 'krishisaarthi',
-            'TIMEOUT': 300,
+            "KEY_PREFIX": "krishisaarthi",
+            "TIMEOUT": 300,
         }
     }
 except ImportError:
     # Fallback to local memory cache if django-redis is not installed
     CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'unique-snowflake',
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
         }
     }
 
 # Celery Configuration
-CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/0')
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_CACHE_BACKEND = 'default'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/0")
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_CACHE_BACKEND = "default"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 1800  # 30 minutes
@@ -190,30 +198,32 @@ CELERY_TASK_TIME_LIMIT = 1800  # 30 minutes
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {
-    'update-weather-data': {
-        'task': 'field.tasks.update_weather_data',
-        'schedule': crontab(minute=0, hour='*/6'),  # Every 6 hours
-        'options': {'expires': 3600},
+    "update-weather-data": {
+        "task": "field.tasks.update_weather_data",
+        "schedule": crontab(minute=0, hour="*/6"),  # Every 6 hours
+        "options": {"expires": 3600},
     },
-    'update-satellite-data': {
-        'task': 'field.tasks.update_satellite_data',
-        'schedule': crontab(minute=0, hour=2),  # Daily at 2 AM IST
-        'options': {'expires': 7200},
+    "update-satellite-data": {
+        "task": "field.tasks.update_satellite_data",
+        "schedule": crontab(minute=0, hour=2),  # Daily at 2 AM IST
+        "options": {"expires": 7200},
     },
-    'calculate-risk-scores': {
-        'task': 'field.tasks.calculate_risk_scores',
-        'schedule': crontab(minute=0, hour=3),  # Daily at 3 AM IST
-        'options': {'expires': 7200},
+    "calculate-risk-scores": {
+        "task": "field.tasks.calculate_risk_scores",
+        "schedule": crontab(minute=0, hour=3),  # Daily at 3 AM IST
+        "options": {"expires": 7200},
     },
-    'generate-daily-reports': {
-        'task': 'field.tasks.generate_daily_reports',
-        'schedule': crontab(minute=0, hour=6),  # Daily at 6 AM IST
-        'options': {'expires': 3600},
+    "generate-daily-reports": {
+        "task": "field.tasks.generate_daily_reports",
+        "schedule": crontab(minute=0, hour=6),  # Daily at 6 AM IST
+        "options": {"expires": 3600},
     },
-    'cleanup-old-logs': {
-        'task': 'field.tasks.cleanup_old_logs',
-        'schedule': crontab(minute=0, hour=1, day_of_week='sunday'),  # Weekly on Sunday 1 AM
-        'options': {'expires': 7200},
+    "cleanup-old-logs": {
+        "task": "field.tasks.cleanup_old_logs",
+        "schedule": crontab(
+            minute=0, hour=1, day_of_week="sunday"
+        ),  # Weekly on Sunday 1 AM
+        "options": {"expires": 7200},
     },
 }
 
@@ -221,11 +231,11 @@ CELERY_BEAT_SCHEDULE = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Security settings — always-on hardening
-X_FRAME_OPTIONS = 'DENY'
+X_FRAME_OPTIONS = "DENY"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
@@ -240,95 +250,101 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = (
+        os.environ.get("SECURE_SSL_REDIRECT", "False").lower() == "true"
+    )
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     CSRF_COOKIE_HTTPONLY = False  # Must be readable by JS in SPA
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # REST Framework Configuration
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'knox.auth.TokenAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+        "knox.auth.TokenAuthentication",
     ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
     ],
-    'DEFAULT_THROTTLE_CLASSES': [
-        'config.throttling.BurstRateThrottle',
-        'config.throttling.SustainedRateThrottle',
-        'config.throttling.AnonymousBurstRateThrottle',
-        'config.throttling.AnonymousSustainedRateThrottle',
+    "DEFAULT_THROTTLE_CLASSES": [
+        "config.throttling.BurstRateThrottle",
+        "config.throttling.SustainedRateThrottle",
+        "config.throttling.AnonymousBurstRateThrottle",
+        "config.throttling.AnonymousSustainedRateThrottle",
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'burst': '60/min',
-        'sustained': '1000/day',
-        'anon_burst': '20/min',
-        'anon_sustained': '100/day',
-        'login': '5/min',
-        'password_reset': '3/hour',
-        'ml_inference': '30/hour',
-        'gemini_chat': '60/hour',
-        'earth_engine': '20/hour',
+    "DEFAULT_THROTTLE_RATES": {
+        "burst": "60/min",
+        "sustained": "1000/day",
+        "anon_burst": "20/min",
+        "anon_sustained": "100/day",
+        "login": "5/min",
+        "password_reset": "3/hour",
+        "ml_inference": "30/hour",
+        "gemini_chat": "60/hour",
+        "earth_engine": "20/hour",
     },
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 50,
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-    ] + (['rest_framework.renderers.BrowsableAPIRenderer'] if DEBUG else []),
-    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.AcceptHeaderVersioning',
-    'DEFAULT_VERSION': '1.0',
-    'ALLOWED_VERSIONS': ['1.0'],
-    'EXCEPTION_HANDLER': 'KrishiSaarthi.exceptions.custom_exception_handler',
-    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 50,
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ]
+    + (["rest_framework.renderers.BrowsableAPIRenderer"] if DEBUG else []),
+    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",
+    "DEFAULT_VERSION": "1.0",
+    "ALLOWED_VERSIONS": ["1.0"],
+    "EXCEPTION_HANDLER": "KrishiSaarthi.exceptions.custom_exception_handler",
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 from datetime import timedelta
+
 REST_KNOX = {
-    'SECURE_HASH_ALGORITHM': 'hashlib.sha512',
-    'AUTH_TOKEN_CHARACTER_LENGTH': 64,
-    'TOKEN_TTL': timedelta(hours=24),
-    'USER_SERIALIZER': 'KrishiSaarthi.serializers.UserSerializer',
-    'TOKEN_LIMIT_PER_USER': None,
-    'AUTO_REFRESH': True,
-    'MIN_REFRESH_INTERVAL': 60
+    "SECURE_HASH_ALGORITHM": "hashlib.sha512",
+    "AUTH_TOKEN_CHARACTER_LENGTH": 64,
+    "TOKEN_TTL": timedelta(hours=24),
+    "USER_SERIALIZER": "KrishiSaarthi.serializers.UserSerializer",
+    "TOKEN_LIMIT_PER_USER": None,
+    "AUTO_REFRESH": True,
+    "MIN_REFRESH_INTERVAL": 60,
 }
 
 # ── drf-spectacular (OpenAPI docs) ────────────────────────────────────────────
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'AgriSmart (KrishiSaarthi) API',
-    'DESCRIPTION': 'Agricultural farm management platform API — field management, '
-                   'weather, ML predictions, finance tracking, and more.',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-    'COMPONENT_SPLIT_REQUEST': True,
+    "TITLE": "AgriSmart (KrishiSaarthi) API",
+    "DESCRIPTION": "Agricultural farm management platform API — field management, "
+    "weather, ML predictions, finance tracking, and more.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
 }
 
 CORS_ALLOWED_ORIGINS = os.environ.get(
-    'CORS_ALLOWED_ORIGINS',
-    'http://localhost:5000,http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:5000'
-).split(',')
-CORS_ALLOW_ALL_ORIGINS = False  # Never allow all origins — use CORS_ALLOWED_ORIGINS instead
+    "CORS_ALLOWED_ORIGINS",
+    "http://localhost:5000,http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:5000",
+).split(",")
+CORS_ALLOW_ALL_ORIGINS = (
+    False  # Never allow all origins — use CORS_ALLOWED_ORIGINS instead
+)
 CORS_ALLOWED_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
 ]
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Logging Configuration
 try:
@@ -336,49 +352,52 @@ try:
 except ImportError:
     # Default logging if config not found
     LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
             },
         },
-        'root': {
-            'handlers': ['console'],
-            'level': 'INFO',
+        "root": {
+            "handlers": ["console"],
+            "level": "INFO",
         },
     }
 
 # Create logs directory if it doesn't exist
-LOGS_DIR = os.path.join(BASE_DIR, 'logs')
+LOGS_DIR = os.path.join(BASE_DIR, "logs")
 os.makedirs(LOGS_DIR, exist_ok=True)
 
 # Email Configuration
 if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
-    EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
-    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+    EMAIL_BACKEND = os.environ.get(
+        "EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
+    )
+    EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
+    EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+    EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() == "true"
+    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 
     # Auth feature flags
-    REQUIRE_EMAIL_VERIFICATION = os.environ.get('REQUIRE_EMAIL_VERIFICATION', 'False').lower() == 'true'
+    REQUIRE_EMAIL_VERIFICATION = (
+        os.environ.get("REQUIRE_EMAIL_VERIFICATION", "False").lower() == "true"
+    )
 
 # ──── Test overrides ──────────────────────────────────────────────
 # Disable throttling during test runs so rate limits don't interfere
-TESTING = 'test' in sys.argv or 'pytest' in sys.modules
+TESTING = "test" in sys.argv or "pytest" in sys.modules
 if TESTING:
-    REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = []
-    REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
-        'burst': '10000/min',
-        'sustained': '100000/day',
-        'anon_burst': '10000/min',
-        'anon_sustained': '100000/day',
-        'login': '10000/min',
+    REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = []
+    REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
+        "burst": "10000/min",
+        "sustained": "100000/day",
+        "anon_burst": "10000/min",
+        "anon_sustained": "100000/day",
+        "login": "10000/min",
     }
 
 APPEND_SLASH = False
-

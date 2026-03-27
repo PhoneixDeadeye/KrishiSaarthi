@@ -5,4 +5,3 @@ from .revenue import RevenueView
 from .price_forecast import PriceForecastView
 from .schemes import SchemesView, SchemeDetailView
 from .insurance import InsuranceClaimView, InsuranceClaimDetailView
-
