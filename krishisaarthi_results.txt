@@ -1,0 +1,1186 @@
+
+============================================================
+1. COMPOSITE HEALTH SCORE SCENARIOS
+  Formula : H = 0.40*CNN + 0.35*NDVI_norm + 0.25*(1 - risk_prob)
+  Source  : ml_engine/health_score.py
+
+  Scenario                                 CNN  NDVI  Risk  H(0-1)     H%  Rating
+  ---------------------------------------------------------------------------
+  A — Healthy crop, good weather          0.85  0.72  0.18  0.7970  79.7%  Good
+  B — Early pest risk, moderate NDVI      0.42  0.54  0.64  0.4470  44.7%  Fair
+  C — High risk, poor NDVI                0.22  0.31  0.82  0.2415  24.2%  Poor
+  D — CNN unavailable (NDVI proxy)        0.66  0.66  0.30  0.6700  67.0%  Good
+
+============================================================
+2. AWD CARBON CREDIT ESTIMATION
+  Source  : ml_engine/cc.py + ml_engine/awd.py
+  Inputs  : area=0.5 ha, crop_days=90, 3 AWD cycles, $15/tonne
+
+  awd_result:
+    awd_detected: True
+    cycles_count: 3
+    dry_days_detected: 3
+    wet_days_detected: 4
+    total_observations: 7
+    dry_ratio: 0.429
+    estimated_water_savings_percent: 20.7
+    estimated_methane_reduction_percent: 31.1
+    statistics: {'avg_ndwi': 0.2714, 'ndwi_variance': 0.022, 'thresholds': {'wet': 0.3, 'dry': 0.2}}
+    periods: {'wet': [{'start': 'day_0', 'end': 'day_1', 'type': 'wet'}, {'start': 'day_2', 'end': 'day_3', 'type': 'wet'}, {'start': 'day_4', 'end': 'day_5', 'type': 'wet'}], 'dry': [{'start': 'day_1', 'end': 'day_2', 'type': 'dry'}, {'start': 'day_3', 'end': 'day_4', 'type': 'dry'}, {'start': 'day_5', 'end': 'day_6', 'type': 'dry'}]}
+    recommendation: Excellent AWD practice detected! Your irrigation management shows regular wet-dry cycles, maximizing water savings and reducing emissions.
+    benefits: {'water_savings': '~21% reduction in irrigation water', 'emissions': '~31% reduction in methane emissions', 'yield': 'Studies show AWD maintains or improves yields when properly managed'}
+  area_hectare: 0.5
+  awd_effective_fraction: 1.0
+  actual_water_mm: 780.0
+  water_saved_mm: 420.0
+  water_saved_cubic_m: 2100.0
+  methane_reduction_kg: 20.47
+  co2e_reduction_ton: 0.557
+  carbon_credits: 0.557
+  estimated_value_inr: 693.37
+  awd_detected: True
+
+============================================================
+3. CNN MODEL (MobileNetV2) — SPECS & INFERENCE LATENCY
+  NOT FOUND: c:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\backend\ml_engine\crop_health_model.pth
+
+============================================================
+4. LSTM MODEL — SPECS & INFERENCE LATENCY
+  NOT FOUND: c:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\backend\ml_engine\risk_lstm_final.pth
+  Scaler   : NOT FOUND — c:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\backend\ml_engine\risk_scaler.save
+
+============================================================
+5. API ENDPOINT AUDIT
+
+  [chat\urls.py]
+    path("", ChatView.as_view(), name="chat_action"),
+    path("history/<str:session_id>", ChatHistoryView.as_view(), name="chat_history"),
+    path("chat", ChatView.as_view(), name="chat_action_legacy"),
+    path(
+
+  [field\urls.py]
+    path("diagnose", DiagnoseHealthView.as_view(), name="diagnoseHealth"),
+    path("data", FieldDataView.as_view(), name="fieldList"),
+    path("data/<int:pk>", FieldDataView.as_view(), name="fieldDetail"),
+    path("ee", EEAnalysisView.as_view(), name="fieldAnalysis"),
+    path("set_polygon", SavePolygon.as_view(), name="savePolygon"),
+    path("coord", GetCoordView.as_view(), name="getCoord"),
+    path("awd", AWDreport.as_view(), name="AWDreport"),
+    path("cc", CarbonCredit.as_view(), name="CarbonCredit"),
+    path("pestpredict", PestPrediction.as_view(), name="PestPrediction"),
+    path("pest/report", PestReport.as_view(), name="PestReport"),
+    path("healthscore", HealthScore.as_view(), name="HealthScore"),
+    path("weather", WeatherView.as_view(), name="weather"),
+    path("logs", FieldLogView.as_view(), name="fieldLogs"),
+    path("logs/<int:pk>", FieldLogView.as_view(), name="fieldLogDetail"),
+    path("alerts", FieldAlertView.as_view(), name="fieldAlerts"),
+    path(
+    path(
+    path("alerts/<int:pk>", FieldAlertView.as_view(), name="fieldAlertDetail"),
+    path("soil-advice", SoilAdviceView.as_view(), name="soilAdvice"),
+    path(
+    path("irrigation-logs", IrrigationLogView.as_view(), name="irrigationLogs"),
+    path(
+    path("yield-prediction", YieldPredictionView.as_view(), name="yieldPrediction"),
+
+  [finance\urls.py]
+    path("", include(router.urls)),
+    path("costs", CostEntryView.as_view(), name="costList"),
+    path("costs/<int:pk>", CostEntryView.as_view(), name="costDetail"),
+    path("costs/summary", CostSummaryView.as_view(), name="costSummary"),
+    path("revenue", RevenueView.as_view(), name="revenueList"),
+    path("revenue/<int:pk>", RevenueView.as_view(), name="revenueDetail"),
+    path("seasons", SeasonView.as_view(), name="seasonList"),
+    path("seasons/<int:pk>", SeasonView.as_view(), name="seasonDetail"),
+    path("pnl", PnLDashboardView.as_view(), name="pnlDashboard"),
+    path("market-prices", MarketPricesView.as_view(), name="marketPrices"),
+    path("price-forecast", PriceForecastView.as_view(), name="priceForecast"),
+    path("schemes", SchemesView.as_view(), name="schemesList"),
+    path("schemes/<int:pk>", SchemeDetailView.as_view(), name="schemeDetail"),
+    path("insurance", InsuranceClaimView.as_view(), name="insuranceList"),
+    path(
+
+  [KrishiSaarthi\urls.py]
+    path("admin/", admin.site.urls),
+    path("field/", include("field.urls")),
+    path("finance/", include("finance.urls")),
+    path("planning/", include("planning.urls")),
+    path("api/", include("chat.urls")),
+    path("api/v1/field/", include("field.urls")),
+    path("api/v1/finance/", include("finance.urls")),
+    path("api/v1/planning/", include("planning.urls")),
+    path("api/v1/chat/", include("chat.urls")),
+    path("login", views.Login.as_view(), name="login"),
+    path("signup", views.Signup.as_view(), name="signup"),
+    path("test_token", views.TestToken.as_view(), name="test_token"),
+    path("logout", views.Logout.as_view(), name="logout"),
+    path("password-reset", views.RequestPasswordReset.as_view(), name="password-reset"),
+    path(
+    path("verify-email", views.VerifyEmail.as_view(), name="verify-email"),
+    path(
+    path("api/v1/auth/login", views.Login.as_view(), name="v1-login"),
+    path("api/v1/auth/signup", views.Signup.as_view(), name="v1-signup"),
+    path("api/v1/auth/test-token", views.TestToken.as_view(), name="v1-test-token"),
+    path("api/v1/auth/logout", views.Logout.as_view(), name="v1-logout"),
+    path(
+    path(
+    path(
+    path(
+    path("health", HealthCheckView.as_view(), name="health"),
+    path("ready", ReadinessCheckView.as_view(), name="ready"),
+    path("metrics", MetricsView.as_view(), name="metrics"),
+    path("api/v1/health", HealthCheckView.as_view(), name="v1-health"),
+    path("api/v1/ready", ReadinessCheckView.as_view(), name="v1-ready"),
+    path("api/v1/metrics", MetricsView.as_view(), name="v1-metrics"),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+
+  [planning\urls.py]
+    path("", include(router.urls)),
+    path("calendar", SeasonCalendarView.as_view(), name="calendarList"),
+    path("calendar/<int:pk>", SeasonCalendarView.as_view(), name="calendarDetail"),
+    path("inventory", InventoryItemView.as_view(), name="inventoryList"),
+    path("inventory/<int:pk>", InventoryItemView.as_view(), name="inventoryDetail"),
+    path(
+    path("transactions", InventoryTransactionView.as_view(), name="transactionList"),
+    path("labor", LaborEntryView.as_view(), name="laborList"),
+    path("labor/<int:pk>", LaborEntryView.as_view(), name="laborDetail"),
+    path("equipment", EquipmentView.as_view(), name="equipmentList"),
+    path("equipment/<int:pk>", EquipmentView.as_view(), name="equipmentDetail"),
+    path(
+    path("bookings", EquipmentBookingView.as_view(), name="bookingList"),
+    path("bookings/<int:pk>", EquipmentBookingView.as_view(), name="bookingDetail"),
+    path("rotation", RotationPlannerView.as_view(), name="rotationPlanner"),
+
+  >>> TOTAL endpoints: 91
+
+============================================================
+6. EARTH ENGINE — INDEX FORMULAS & THRESHOLDS
+
+  config\encryption.py
+      62:     Values are encrypted before saving to DB and decrypted on retrieval.
+      66:         """Encrypt before saving to database."""
+
+  field\serializers.py
+      21:     NDVI = serializers.FloatField(allow_null=True)
+      22:     EVI = serializers.FloatField(allow_null=True)
+      23:     SAVI = serializers.FloatField(allow_null=True)
+      28:     ndvi_time_series = serializers.ListField(
+      31:     ndwi_time_series = serializers.ListField(
+
+  field\tasks.py
+     198:             ndvi_series = ee_data.get("ndvi_time_series", [])
+     199:             if len(ndvi_series) >= 7:
+
+  field\tests.py
+      83:             "ndvi_time_series": [{"date": "2023-01-01", "NDVI": 0.5}],
+      84:             "ndwi_time_series": [{"date": "2023-01-01", "NDWI": 0.2}],
+      85:             "NDVI": 0.5,
+      86:             "EVI": 0.4,
+      99:         self.assertEqual(response.data["NDVI"], 0.5)
+     102:     @patch("field.views.detect_awd_from_ndwi")
+
+  field\urls.py
+      15:     SoilAdviceView,
+      18: from field.views.irrigation import IrrigationScheduleView, IrrigationLogView
+      53:     path("soil-advice", SoilAdviceView.as_view(), name="soilAdvice"),
+      57:         IrrigationScheduleView.as_view(),
+
+  field\services\ee_service.py
+      13:     def __init__(self, failure_threshold=3, recovery_timeout=60):
+      14:         self.failure_threshold = failure_threshold
+      32:         if self.failure_count >= self.failure_threshold:
+     117:     ndvi = sentinel.normalizedDifference(["B8", "B4"]).rename("NDVI")
+     118:     evi = sentinel.expression(
+     121:             "NIR": sentinel.select("B8"),
+     122:             "RED": sentinel.select("B4"),
+     123:             "BLUE": sentinel.select("B2"),
+     125:     ).rename("EVI")
+     126:     savi = sentinel.expression(
+     127:         "((NIR - RED) / (NIR + RED + 0.5)) * (1.5)",
+     128:         {"NIR": sentinel.select("B8"), "RED": sentinel.select("B4")},
+     129:     ).rename("SAVI")
+     132:         ee.Image.cat([ndvi, evi, savi])
+     194:     # --- NDVI Time Series ---
+
+  field\views\analysis.py
+      19:     detect_awd_from_ndwi,
+     224:         ndwi_data = data.get("ndwi_time_series", [])
+     227:         report = detect_awd_from_ndwi(ndwi_series=ndwi_data)
+     257:         ndwi_series = []
+     258:         ndwi_dates = []
+     263:                 # Extract NDWI values and dates from time series: [{"date": "...", "NDWI": val}, ...] -> [val, ...], [date, ...]
+     264:                 ndwi_time_series = ee_data.get("ndwi_time_series", [])
+     265:                 for entry in ndwi_time_series:
+     266:                     if isinstance(entry, dict) and "NDWI" in entry:
+     267:                         ndwi_series.append(entry["NDWI"])
+     268:                         ndwi_dates.append(entry.get("date", ""))
+     277:             area_hectare=area, ndwi_series=ndwi_series, ndwi_dates=ndwi_dates
+     328:             # Extract latest NDVI value from time series
+     329:             ndvi_time_series = data.get("ndvi_time_series", [])
+     330:             ndvi_latest = 0.5  # Default fallback
+
+  field\views\field_crud.py
+     128:                 "Error saving polygon for user %s: %s", request.user.username, e
+
+  field\views\irrigation.py
+      23: class IrrigationScheduleView(APIView):
+
+  field\views\soil_advice.py
+      18: class SoilAdviceView(APIView):
+
+  field\views\yield_prediction.py
+       7:   1. Fetching real NDVI time series from Google Earth Engine (when available).
+       8:   2. Applying published crop-specific base yields (ICAR data) scaled by NDVI.
+      12: the response is marked with `ndvi_source: 'estimated'`.
+      30: # Crop yield models: base yield (kg/hectare) at optimal NDVI (0.7)
+      32:     "Rice": {"base_yield": 4500, "ndvi_factor": 1.2, "water_sensitive": True},
+      33:     "Wheat": {"base_yield": 3500, "ndvi_factor": 1.1, "water_sensitive": False},
+      34:     "Cotton": {"base_yield": 1800, "ndvi_factor": 1.0, "water_sensitive": False},
+      35:     "Sugarcane": {"base_yield": 70000, "ndvi_factor": 0.9, "water_sensitive": True},
+      36:     "Maize": {"base_yield": 5000, "ndvi_factor": 1.15, "water_sensitive": True},
+      37:     "Soybean": {"base_yield": 2000, "ndvi_factor": 1.1, "water_sensitive": False},
+      38:     "Groundnut": {"base_yield": 1500, "ndvi_factor": 1.0, "water_sensitive": False},
+      39:     "Potato": {"base_yield": 25000, "ndvi_factor": 1.1, "water_sensitive": True},
+      40:     "Onion": {"base_yield": 20000, "ndvi_factor": 1.0, "water_sensitive": True},
+      41:     "Tomato": {"base_yield": 30000, "ndvi_factor": 1.15, "water_sensitive": True},
+      42:     "default": {"base_yield": 3000, "ndvi_factor": 1.0, "water_sensitive": False},
+
+  field\views\__init__.py
+      17: from .soil_advice import SoilAdviceView
+
+  finance\models.py
+     191:         ("under_review", "Under Review"),
+     224:     reviewed_at = models.DateTimeField(null=True, blank=True)
+     225:     reviewer_notes = models.TextField(blank=True)
+
+  finance\models_tmp.py
+     191:         ("under_review", "Under Review"),
+     224:     reviewed_at = models.DateTimeField(null=True, blank=True)
+     225:     reviewer_notes = models.TextField(blank=True)
+
+  finance\serializers.py
+     160:             "reviewed_at",
+     161:             "reviewer_notes",
+     173:             "reviewed_at",
+     174:             "reviewer_notes",
+
+  finance\urls.py
+      11:     RevenueView,
+      31:     path("costs/<int:pk>", CostEntryView.as_view(), name="costDetail"),
+      34:     path("revenue", RevenueView.as_view(), name="revenueList"),
+      35:     path("revenue/<int:pk>", RevenueView.as_view(), name="revenueDetail"),
+
+  finance\management\commands\seed_schemes.py
+     141:             self.stdout.write(
+     146:             self.stdout.write(
+     170:         self.stdout.write(
+
+  finance\views\insurance.py
+      77:             status__in=["draft", "submitted", "under_review"]
+     105:                     "text": "Take photos of crop damage as soon as possible for evidence.",
+     187:                 "reviewed_at": (
+     188:                     claim.reviewed_at.isoformat() if claim.reviewed_at else None
+     190:                 "reviewer_notes": claim.reviewer_notes,
+
+  finance\views\revenue.py
+      14: class RevenueView(APIView):
+
+  finance\views\__init__.py
+       4: from .revenue import RevenueView
+
+  management\commands\seed_data.py
+      28:         self.stdout.write(self.style.SUCCESS("Starting database seeding..."))
+      43:                 self.stdout.write(f"  Created user: {username}")
+     113:         self.stdout.write(self.style.SUCCESS(f"\nSeeding complete!"))
+     114:         self.stdout.write(f"  Users created: {len(users)}")
+     115:         self.stdout.write(f"  Fields created: {fields_created}")
+     116:         self.stdout.write(f"  Field logs created: ~{fields_created * 3}")
+     117:         self.stdout.write(self.style.SUCCESS("\nTest credentials:"))
+     118:         self.stdout.write("  Username: farmer1, farmer2, etc.")
+     119:         self.stdout.write("  Password: TestFarmer@2026")
+
+  management\commands\seed_schemes.py
+     141:             self.stdout.write(
+     146:             self.stdout.write(
+     170:         self.stdout.write(
+
+  management\commands\validate_environment.py
+      27:         self.stdout.write(self.style.SUCCESS("🔍 Environment Validation\n"))
+      28:         self.stdout.write("=" * 60)
+      31:         self.stdout.write("\n1. SECRET_KEY")
+      34:             self.stdout.write(self.style.ERROR("   ✗ Not configured"))
+      36:             self.stdout.write(self.style.SUCCESS("   ✓ Configured"))
+      39:         self.stdout.write("\n2. DEBUG Mode")
+      42:             self.stdout.write(self.style.WARNING("   ⚠ True (development mode)"))
+      44:             self.stdout.write(self.style.SUCCESS("   ✓ False (production mode)"))
+      47:         self.stdout.write("\n3. ALLOWED_HOSTS")
+      50:             self.stdout.write(self.style.WARNING("   ⚠ Too permissive"))
+      52:             self.stdout.write(
+      57:         self.stdout.write("\n4. Database")
+      61:             self.stdout.write(
+      65:             self.stdout.write(self.style.SUCCESS(f"   ✓ {db_engine}"))
+      68:         self.stdout.write("\n5. API Keys")
+
+  management\commands\wait_for_db.py
+      33:         self.stdout.write("Waiting for database...")
+      41:                 self.stdout.write(self.style.SUCCESS("✓ Database available!"))
+      46:                     self.stdout.write(
+      53:                 self.stdout.write(f"Database unavailable, waiting... ({int(elapsed)}s)")
+
+  ml_engine\awd.py
+       4: Analyzes NDWI time series to detect AWD irrigation patterns
+       5: and estimate water savings potential.
+      16: def detect_awd_from_ndwi(
+      17:     ndwi_series: List[Dict],
+      18:     wet_threshold: float = 0.3,
+      19:     dry_threshold: float = 0.2,
+      23:     Detect AWD (Alternate Wetting and Drying) patterns from NDWI time series.
+      25:     AWD is a water-saving irrigation technique for rice paddies where fields are
+      29:         ndwi_series: List of dicts with 'date' and 'NDWI' keys
+      30:                      e.g., [{"date": "2026-01-01", "NDWI": 0.35}, ...]
+      31:         wet_threshold: NDWI value above which field is considered wet/flooded
+      32:         dry_threshold: NDWI value below which field is considered dry
+      38:     if not ndwi_series or len(ndwi_series) < 3:
+      55:     for i, entry in enumerate(ndwi_series):
+      56:         val = entry.get("NDWI", 0)
+
+  ml_engine\cc.py
+       5: from ml_engine.awd import detect_awd_from_ndwi
+      12:     ndwi_series: List[float],
+      13:     ndwi_dates: List[str] = None,
+      20:     ndwi_params: dict = None,
+      23:     Compute water saved, methane reduction and carbon credits using NDWI-based AWD detection.
+      25:     if ndwi_params is None:
+      26:         ndwi_params = {}
+      28:     if not ndwi_series:
+      29:         ndwi_series = []
+      31:     # Convert raw float list + dates list into [{date, NDWI}] format for awd.detect_awd_from_ndwi
+      32:     ndwi_dicts = []
+      33:     for i, val in enumerate(ndwi_series):
+      34:         entry = {"NDWI": float(val)}
+      35:         if ndwi_dates and i < len(ndwi_dates):
+      36:             entry["date"] = ndwi_dates[i]
+
+  ml_engine\cnn.py
+      36: DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+      40:     model_path: str = _DEFAULT_MODEL_PATH, device: str = DEVICE
+      47:         device: Device to load model on ('cpu' or 'cuda')
+      63:             torch.load(model_path, map_location=device, weights_only=True)
+      67:         return model.to(device)
+      80:         _model = load_model(_DEFAULT_MODEL_PATH, DEVICE)
+      86: def predict_health(img_path: str, device: str = DEVICE) -> Dict[str, Any]:
+      92:         device: Device to run inference on
+     125:         img_tensor = transform(img).unsqueeze(0).to(device)
+     144:             "device": device,
+     163:     img_paths: List[str], device: str = DEVICE
+     170:         device: Device to run inference on
+     216:             batch = torch.stack(tensors).to(device)
+     237:                     "device": device,
+
+  ml_engine\health_score.py
+       4: Fuses CNN image analysis, NDVI data, and LSTM risk prediction
+      17:     ndvi_raw: float,
+      28:         ndvi_raw: Raw NDVI value (typically -1 to 1, clamped to 0-1)
+      31:         w2: Weight for NDVI score
+      37:     # Normalize NDVI to 0-1 range
+      38:     ndvi_norm = float(np.clip(ndvi_raw, 0.0, 1.0))
+      44:     health_score = w1 * p_cnn_healthy + w2 * ndvi_norm + w3 * risk_health
+      86:     image_path: Optional[str], ndvi_latest: float, sequence: Any
+      93:         ndvi_latest: Latest NDVI value
+     129:         # No image provided - use NDVI as proxy
+     130:         if ndvi_latest is not None:
+     131:             p_cnn_healthy = max(0.0, min(1.0, ndvi_latest))
+     132:             breakdown["cnn"] = {"value": p_cnn_healthy, "status": "estimated_from_ndvi"}
+     137:     # NDVI Score
+     138:     ndvi_clamped = max(0.0, min(1.0, ndvi_latest)) if ndvi_latest else 0.5
+
+  ml_engine\lstm.py
+      23: DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+      63:     device: str = DEVICE,
+      71:         device: Device to load model on
+      93:         model = RiskLSTM(input_size=4, hidden_size=64, num_layers=2).to(device)
+      94:         ckpt = torch.load(model_path, map_location=device, weights_only=True)
+     121:     sequence: Union[List, Dict], device: str = DEVICE
+     128:             - List of [ndvi, rainfall, temp, humidity] arrays
+     129:             - Dict with keys: ndvi_time_series, rainfall_mm, temperature_K, soil_moisture
+     130:         device: Device to run inference on
+     175:         input_tensor = torch.tensor(seq_scaled).unsqueeze(0).to(device)
+     217:         "ndvi_time_series": [{"NDVI": 0.5}, ...],
+     223:     ndvi_series = payload.get("ndvi_time_series", [])
+     225:     if not ndvi_series:
+     237:     for row in ndvi_series:
+     239:             ndvi = row.get("NDVI", 0.0) or 0.0
+
+  ml_engine\registry.py
+      36:     device: Optional[str] = None
+      93:             input_spec="Sequence of [NDVI, rainfall_mm, temp_C, soil_moisture], scaled",
+      96:             description="LSTM for crop pest/disease risk from NDVI and weather time series.",
+     105:             input_spec="4-feature array [NDVI, rainfall, temp, humidity]",
+
+  ml_engine\__init__.py
+       7: - LSTM: Risk prediction from NDVI/weather time series
+      17:     from ml_engine import detect_awd_from_ndwi, calculate_carbon_metrics
+      21: from .awd import detect_awd_from_ndwi, calculate_awd_score
+      30:     "detect_awd_from_ndwi",
+
+  tests\test_chat.py
+      23:             json.dumps({"question": "What is NDVI?"}),
+
+  tests\test_improvements.py
+     407:     def test_negative_ndvi(self):
+     410:         # Negative NDVI should be clamped to 0
+     437:         ndwi_series = [0.35, 0.32, 0.15, 0.12, 0.35, 0.38, 0.14, 0.36]
+     440:             ndwi_series=ndwi_series,
+     453:             ndwi_series=[],
+
+  tests\test_insurance_serializer.py
+      88:             "area_affected_acres": 1.5,
+
+  tests\test_ml_engine.py
+       6:     detect_awd_from_ndwi,
+      23:         empty_data = {"ndvi_time_series": [], "rainfall_mm": 0, "temperature_K": 300}
+      33:         # Case 1: Increasing NDWI (Flooding)
+      34:         ndwi_series = [
+      35:             {"date": "2023-01-01", "NDWI": -0.2},
+      36:             {"date": "2023-01-05", "NDWI": 0.1},
+      37:             {"date": "2023-01-10", "NDWI": 0.4},
+      39:         report = detect_awd_from_ndwi(ndwi_series)
+      44:         report = detect_awd_from_ndwi([])
+      50:         score = get_health_score(image_path=None, ndvi_latest=None, sequence={})
+      56:         # Perfect health: CNN=1.0, NDVI=1.0, risk=0.0
+      60:         # Worst health: CNN=0.0, NDVI=0.0, risk=1.0
+      64:         # Neutral: CNN=0.5, NDVI=0.5, risk=0.5
+
+============================================================
+7. HEALTH SCORE SOURCE (ml_engine/health_score.py)
+"""
+Health Score Module
+====================
+Fuses CNN image analysis, NDVI data, and LSTM risk prediction
+into a comprehensive crop health score.
+"""
+
+import numpy as np
+import logging
+from typing import Dict, Any, Optional
+
+logger = logging.getLogger(__name__)
+
+
+def compute_health_score(
+    p_cnn_healthy: float,
+    ndvi_raw: float,
+    risk_prob: float,
+    w1: float = 0.4,
+    w2: float = 0.35,
+    w3: float = 0.25,
+) -> float:
+    """
+    Compute weighted health score from multiple indicators.
+
+    Args:
+        p_cnn_healthy: CNN model probability (0-1, 1=healthy)
+        ndvi_raw: Raw NDVI value (typically -1 to 1, clamped to 0-1)
+        risk_prob: LSTM risk probability (0-1, 1=high risk)
+        w1: Weight for CNN score
+        w2: Weight for NDVI score
+        w3: Weight for risk score
+
+    Returns:
+        Composite health score (0-1, 1=excellent health)
+    """
+    # Normalize NDVI to 0-1 range
+    ndvi_norm = float(np.clip(ndvi_raw, 0.0, 1.0))
+
+    # Invert risk probability (high risk = low health)
+    risk_health = 1.0 - float(risk_prob)
+
+    # Weighted combination
+    health_score = w1 * p_cnn_healthy + w2 * ndvi_norm + w3 * risk_health
+
+    return float(np.clip(health_score, 0, 1))
+
+
+def get_health_rating(score: float) -> Dict[str, Any]:
+    """
+    Convert numeric score to rating and recommendations.
+    """
+    if score >= 0.8:
+        return {
+            "rating": "Excellent",
+            "color": "green",
+            "recommendation": "Crops are thriving. Continue current practices.",
+        }
+    elif score >= 0.6:
+        return {
+            "rating": "Good",
+            "color": "lightgreen",
+            "recommendation": "Crops are healthy. Monitor for any changes.",
+        }
+    elif score >= 0.4:
+        return {
+            "rating": "Fair",
+            "color": "yellow",
+            "recommendation": "Some stress detected. Consider irrigation or nutrient adjustments.",
+        }
+    elif score >= 0.2:
+        return {
+            "rating": "Poor",
+            "color": "orange",
+            "recommendation": "Significant stress. Inspect for pests/disease and take corrective action.",
+        }
+    else:
+        return {
+            "rating": "Critical",
+            "color": "red",
+            "recommendation": "Urgent attention needed. Crops show severe stress indicators.",
+        }
+
+
+def get_health_score(
+    image_path: Optional[str], ndvi_latest: float, sequence: Any
+) -> Dict[str, Any]:
+    """
+    Calculate comprehensive health score from multiple data sources.
+
+    Args:
+        image_path: Path to crop image (optional, can be None)
+        ndvi_latest: Latest NDVI value
+        sequence: Time series data for LSTM (list or dict format)
+
+    Returns:
+        Dictionary with:
+        - score: float (0-1)
+        - rating: str (Excellent/Good/Fair/Poor/Critical)
+        - breakdown: dict with individual scores
+        - recommendation: str
+    """
+    from ml_engine.cnn import predict_health
+    from ml_engine.lstm import predict_risk_from_values
+
+    breakdown = {}
+
+    # CNN Health Score (if image provided)
+    if image_path:
+        cnn_result = predict_health(image_path)
+        if "error" in cnn_result and not cnn_result.get("fallback"):
+            # Hard error - but continue with other metrics
+            logger.warning("CNN prediction error: %s", cnn_result["error"])
+            p_cnn_healthy = 0.5  # Neutral value
+            breakdown["cnn"] = {
+                "value": 0.5,
+                "status": "unavailable",
+                "error": cnn_result["error"],
+            }
+        else:
+            p_cnn_healthy = cnn_result.get("probability", 0.5)
+            breakdown["cnn"] = {
+                "value": p_cnn_healthy,
+                "class": cnn_result.get("class", "Unknown"),
+                "confidence": cnn_result.get("confidence", "Unknown"),
+                "status": "available",
+            }
+    else:
+        # No image provided - use NDVI as proxy
+        if ndvi_latest is not None:
+            p_cnn_healthy = max(0.0, min(1.0, ndvi_latest))
+            breakdown["cnn"] = {"value": p_cnn_healthy, "status": "estimated_from_ndvi"}
+        else:
+            p_cnn_healthy = 0.5
+            breakdown["cnn"] = {"value": 0.5, "status": "unavailable"}
+
+    # NDVI Score
+    ndvi_clamped = max(0.0, min(1.0, ndvi_latest)) if ndvi_latest else 0.5
+    breakdown["ndvi"] = {
+        "value": ndvi_clamped,
+        "raw": ndvi_latest,
+        "status": "available" if ndvi_latest is not None else "unavailable",
+    }
+
+    # LSTM Risk Score
+    if sequence:
+        risk_result = predict_risk_from_values(sequence)
+        if "error" in risk_result and not risk_result.get("fallback"):
+            logger.warning("LSTM prediction error: %s", risk_result["error"])
+            risk_prob = 0.5
+            breakdown["risk"] = {
+                "value": 0.5,
+                "status": "unavailable",
+                "error": risk_result["error"],
+            }
+        else:
+            risk_prob = risk_result.get("risk_probability", 0.5)
+            breakdown["risk"] = {
+                "value": risk_prob,
+                "level": risk_result.get("risk_level", "Unknown"),
+                "recommendation": risk_result.get("recommendation"),
+                "status": "available",
+            }
+    else:
+        risk_prob = 0.5
+        breakdown["risk"] = {"value": 0.5, "status": "no_sequence_data"}
+
+    # Calculate composite score
+    final_score = compute_health_score(p_cnn_healthy, ndvi_clamped, risk_prob)
+    rating_info = get_health_rating(final_score)
+
+    return {
+        "score": round(final_score, 4),
+        "score_percent": round(final_score * 100, 1),
+        "rating": rating_info["rating"],
+        "color": rating_info["color"],
+        "recommendation": rating_info["recommendation"],
+        "breakdown": breakdown,
+        "weights": {"cnn": 0.4, "ndvi": 0.35, "risk": 0.25},
+    }
+
+
+============================================================
+8. CARBON CREDIT SOURCE (ml_engine/cc.py)
+import numpy as np
+import logging
+from typing import List, Dict, Any, Optional
+
+from ml_engine.awd import detect_awd_from_ndwi
+
+logger = logging.getLogger(__name__)
+
+
+def calculate_carbon_metrics(
+    area_hectare: float,
+    ndwi_series: List[float],
+    ndwi_dates: List[str] = None,
+    crop_days: int = 100,
+    baseline_water_mm: float = 1200.0,
+    ch4_baseline_kg_per_ha_per_day: float = 1.3,
+    awd_reduction_factor: float = 0.35,
+    ch4_to_co2e: float = 27.2,
+    credit_price_inr: float = 900.0,
+    ndwi_params: dict = None,
+) -> Dict[str, Any]:
+    """
+    Compute water saved, methane reduction and carbon credits using NDWI-based AWD detection.
+    """
+    if ndwi_params is None:
+        ndwi_params = {}
+
+    if not ndwi_series:
+        ndwi_series = []
+
+    # Convert raw float list + dates list into [{date, NDWI}] format for awd.detect_awd_from_ndwi
+    ndwi_dicts = []
+    for i, val in enumerate(ndwi_series):
+        entry = {"NDWI": float(val)}
+        if ndwi_dates and i < len(ndwi_dates):
+            entry["date"] = ndwi_dates[i]
+        else:
+            entry["date"] = f"day_{i}"
+        ndwi_dicts.append(entry)
+
+    # Filter ndwi_params to only pass supported kwargs (wet_threshold, dry_threshold, min_cycles)
+    supported_params = {
+        k: v
+        for k, v in ndwi_params.items()
+        if k in ("wet_threshold", "dry_threshold", "min_cycles")
+    }
+    awd_result = detect_awd_from_ndwi(ndwi_dicts, **supported_params)
+
+    eff = 0.0
+    if awd_result.get("awd_detected"):
+        cycles = awd_result.get("cycles_count", 0)
+        dry_ratio = awd_result.get("dry_ratio", awd_result.get("dry_fraction", 0))
+        if cycles >= 2 and dry_ratio >= 0.2:
+            eff = 1.0
+        else:
+            eff = 0.5
+
+    water_saving_fraction = 0.35
+    actual_water_mm = baseline_water_mm * (1 - eff * water_saving_fraction)
+    water_saved_mm = baseline_water_mm - actual_water_mm
+    water_saved_cubic_m = water_saved_mm * area_hectare * 10.0
+
+    methane_baseline_total_kg = (
+        ch4_baseline_kg_per_ha_per_day * area_hectare * crop_days
+    )
+    methane_reduction_kg = methane_baseline_total_kg * (eff * awd_reduction_factor)
+
+    co2e_reduction_kg = methane_reduction_kg * ch4_to_co2e
+    co2e_reduction_ton = co2e_reduction_kg / 1000.0
+
+    carbon_credits = co2e_reduction_ton
+    estimated_value_inr = carbon_credits * credit_price_inr
+
+    return {
+        "awd_result": awd_result,
+        "area_hectare": round(area_hectare, 4),
+        "awd_effective_fraction": round(eff, 3),
+        "actual_water_mm": round(actual_water_mm, 2),
+        "water_saved_mm": round(water_saved_mm, 2),
+        "water_saved_cubic_m": round(water_saved_cubic_m, 2),
+        "methane_reduction_kg": round(methane_reduction_kg, 2),
+        "co2e_reduction_ton": round(co2e_reduction_ton, 3),
+        "carbon_credits": round(carbon_credits, 3),
+        "estimated_value_inr": round(estimated_value_inr, 2),
+        "awd_detected": awd_result["awd_detected"],
+    }
+
+
+============================================================
+9. DEPLOYMENT CONFIG (Docker / Prometheus)
+
+  [docker-compose.prod.yml] → c:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\docker-compose.prod.yml
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: krishisaarthi-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-krishisaarthi}
+      POSTGRES_USER: ${DB_USER:-krishisaarthi}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-krishisaarthi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - krishisaarthi-network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: krishisaarthi-redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $REDIS_PASSWORD ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - krishisaarthi-network
+    restart: unless-stopped
+
+  # Django Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: 3.11
+    container_name: krishisaarthi-backend
+    command: gunicorn KrishiSaarthi.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 2 --timeout 60
+    environment:
+      - DEBUG=False
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DATABASE_URL=postgresql://${DB_USER:-krishisaarthi}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-krishisaarthi}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/service-account.json
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+      - ./service-account.json:/app/service-account.json:ro
+      - ./backend/ml_models:/app/ml_models:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - krishisaarthi-network
+    restart: unless-stopped
+
+  # Celery Worker
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: krishisaarthi-celery-worker
+    command: celery -A KrishiSaarthi worker -l info --concurrency=2
+    environment:
+      - DEBUG=False
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DATABASE_URL=postgresql://${DB_USER:-krishisaarthi}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-krishisaarthi}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+    volumes:
+      - media_volume:/app/media
+    depends_on:
+      - postgres
+      - redis
+      - backend
+    networks:
+      - krishisaarthi-network
+    restart: unless-stopped
+
+  # Celery Beat (Scheduled Tasks)
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: krishisaarthi-celery-beat
+    command: celery -A KrishiSaarthi beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      - DEBUG=False
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DATABASE_URL=postgresql://${DB_USER:-krishisaarthi}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-krishisaarthi}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+    depends_on:
+      - postgres
+      - redis
+      - backend
+    networks:
+      - krishisaarthi-network
+    restart: unless-stopped
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    container_name: krishisaarthi-frontend
+    volumes:
+      - frontend_build:/app/dist
+    networks:
+      - krishisaarthi-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: krishisaarthi-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - static_volume:/var/www/static:ro
+      - media_volume:/var/www/media:ro
+      - frontend_build:/var/www/frontend:ro
+    depends_on:
+      - backend
+      - frontend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - krishisaarthi-network
+    restart: unless-stopped
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: krishisaarthi-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - krishisaarthi-network
+    restart: unless-stopped
+
+  # Grafana Dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: krishisaarthi-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:?GRAFANA_PASSWORD must be set}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - krishisaarthi-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  media_volume:
+  frontend_build:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  krishisaarthi-network:
+    driver: bridge
+
+
+  [docker-compose.yml] → c:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\docker-compose.yml
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: krishisaarthi-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=${DEBUG:-True}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:5173,http://localhost:80}
+      - DATABASE_URL=${DATABASE_URL:-postgres://${POSTGRES_USER:-krishiuser}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-krishisaarthi}}
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    networks:
+      - krishisaarthi-network
+
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: krishisaarthi-celery-worker
+    command: celery -A KrishiSaarthi worker -l info --concurrency=2
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL:-postgres://${POSTGRES_USER:-krishiuser}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-krishisaarthi}}
+      - REDIS_URL=redis://redis:6379/0
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+      - backend
+    networks:
+      - krishisaarthi-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: krishisaarthi-frontend
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - krishisaarthi-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: krishisaarthi-db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-krishisaarthi}
+      - POSTGRES_USER=${POSTGRES_USER:-krishiuser}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - krishisaarthi-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: krishisaarthi-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - krishisaarthi-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+
+  [prometheus.yml] → c:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\monitoring\prometheus.yml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'krishisaarthi-monitor'
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Django Backend Metrics
+  - job_name: 'django-backend'
+    static_configs:
+      - targets: ['backend:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # PostgreSQL Metrics
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 30s
+
+  # Redis Metrics
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 30s
+
+  # Nginx Metrics
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:9113']
+    scrape_interval: 30s
+
+  # Node Exporter (System Metrics)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Load alerting rules
+rule_files:
+  - 'alerts.yml'
+
+
+  [prometheus.yml] → c:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\monitoring\grafana\datasources\prometheus.yml
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+
+
+============================================================
+10. FRONTEND AUDIT
+  .tsx: 92   .ts: 15   Total: 107
+
+  /src/pages/ (7 items):
+    - Dashboard.tsx
+    - ForgotPassword.tsx
+    - LandingPage.tsx
+    - LoginPage.tsx
+    - ResetPassword.tsx
+    - SignupPage.tsx
+    - not-found.tsx
+
+  /src/components/ (9 items):
+    - analytics
+    - chat
+    - common
+    - dashboard
+    - field
+    - finance
+    - layout
+    - planning
+    - ui
+
+  i18n file: c:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\frontend\client\src\lib\translations.ts
+export const translations = {
+  en: {
+    // Navigation
+    home: "Home",
+    field_report: "Field Report",
+    my_field: "My Field",
+    data_analytics: "Income and Sustainability",
+    language: "Language",
+    farmer: "Farmer",
+    online: "Online",
+    field_log: "Event Log Calender",
+    pest: "Pest Section",
+    cost_calculator: "Cost Calculator",
+    pnl_dashboard: "Profit & Loss",
+    season_calendar: "Season Calendar",
+    inventory: "Inventory",
+    labor: "Labor",
+    equipment: "Equipment",
+    irrigation: "Irrigation",
+    yield_prediction: "Yield Prediction",
+    crop_rotation: "Crop Rotation",
+    market_prices: "Market Prices",
+    price_forecast: "Price Forecast",
+    govt_schemes: "Govt. Schemes",
+    insurance: "Insurance",
+    alerts: "Alerts",
+    experts: "Expert Conn
+
+  Voice hook: c:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\frontend\client\src\hooks\useVoiceRecording.tsx
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { logger } from '@/lib/logger';
+
+type UseVoiceRecordingReturn = {
+  isRecording: boolean;
+  transcript: string;
+  startRecording: () => void;
+  stopRecording: () => void;
+  setTranscript: (t: string) => void;
+  language: string;
+  setLanguage: (l: string) => void;
+};
+
+export function useVoiceRecording(): UseVoiceRecordingReturn {
+  const [isRecording, setIsRecording] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [language, setLanguage] = useState<string>(() => localStorage.getItem('voice_l
+
+============================================================
+EXTRACTION COMPLETE
+Saved to: C:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\krishisaarthi_results.txt

@@ -190,31 +190,46 @@ export function FieldReport() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Health Score */}
-                <div className="flex items-center justify-center">
-                  <div className="relative size-32">
-                    <svg className="size-full -rotate-90" viewBox="0 0 36 36">
-                      <path
-                        className="text-muted"
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                      />
-                      <path
-                        className="text-primary"
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeDasharray={`${healthData?.score_percent || 0}, 100`}
-                        strokeLinecap="round"
-                        strokeWidth="3"
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center flex-col">
-                      <span className="text-2xl font-bold">{healthData?.score_percent || "--"}%</span>
-                      <span className="text-xs text-muted-foreground">Health</span>
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <div className="flex items-center justify-center">
+                    <div className="relative size-32">
+                      <svg className="size-full -rotate-90" viewBox="0 0 36 36">
+                        <path
+                          className="text-muted"
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                        />
+                        <path
+                          className="text-primary"
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeDasharray={`${healthData?.score_percent || 0}, 100`}
+                          strokeLinecap="round"
+                          strokeWidth="3"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center flex-col">
+                        <span className="text-2xl font-bold">{healthData?.score_percent || "--"}%</span>
+                        <span className="text-xs text-muted-foreground">Health</span>
+                      </div>
                     </div>
                   </div>
+                  {/* Fallback Badges */}
+                  {healthData?.breakdown?.cnn?.status === "estimated_from_ndvi" && (
+                    <div className="text-[10px] flex items-center gap-1 bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-full border border-amber-500/20">
+                      <AlertCircle className="size-3" />
+                      Estimated
+                    </div>
+                  )}
+                  {healthData?.breakdown?.cnn?.status === "unavailable" && (
+                    <div className="text-[10px] flex items-center gap-1 bg-red-500/10 text-red-600 px-2 py-0.5 rounded-full border border-red-500/20">
+                      <AlertCircle className="size-3" />
+                      Model Offline
+                    </div>
+                  )}
                 </div>
 
                 {/* Insights */}
