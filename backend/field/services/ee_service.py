@@ -58,6 +58,7 @@ def fetchEEData_safe(
             "error": "Service temporarily unavailable",
             "details": "Please try again later",
             "fallback": True,
+            "ee_status": "circuit_open",
         }
 
     try:

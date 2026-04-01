@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "knox",
     "drf_spectacular",
+    "django_prometheus",
     "field",
     "finance",
     "planning",
@@ -76,6 +77,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -85,6 +87,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "middleware.request_logging.RequestLoggingMiddleware",  # Custom request logging
+    "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 ROOT_URLCONF = "KrishiSaarthi.urls"
@@ -112,7 +115,7 @@ WSGI_APPLICATION = "KrishiSaarthi.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
+        "ENGINE": "django_prometheus.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
         "CONN_MAX_AGE": 600,  # Connection pooling (10 minutes)
         "OPTIONS": {
@@ -129,6 +132,7 @@ if os.environ.get("DATABASE_URL"):
         conn_max_age=600,
         conn_health_checks=True,
     )
+    DATABASES["default"]["ENGINE"] = "django_prometheus.db.backends.postgresql"
 
 
 # Password validation

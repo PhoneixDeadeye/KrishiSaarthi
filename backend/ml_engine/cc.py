@@ -16,7 +16,8 @@ def calculate_carbon_metrics(
     ch4_baseline_kg_per_ha_per_day: float = 1.3,
     awd_reduction_factor: float = 0.35,
     ch4_to_co2e: float = 27.2,
-    credit_price_inr: float = 900.0,
+    # 15 USD/tonne CO2e * ~83 INR/USD = 1245 INR/tonne (or 900 INR based on local market discount)
+    credit_price_inr: float = 1245.0,
     ndwi_params: dict = None,
 ) -> Dict[str, Any]:
     """

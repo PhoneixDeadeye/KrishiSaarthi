@@ -123,7 +123,7 @@ def get_health_score(
                 "value": p_cnn_healthy,
                 "class": cnn_result.get("class", "Unknown"),
                 "confidence": cnn_result.get("confidence", "Unknown"),
-                "status": "available",
+                "status": "unavailable" if cnn_result.get("fallback") else "available",
             }
     else:
         # No image provided - use NDVI as proxy
@@ -159,7 +159,7 @@ def get_health_score(
                 "value": risk_prob,
                 "level": risk_result.get("risk_level", "Unknown"),
                 "recommendation": risk_result.get("recommendation"),
-                "status": "available",
+                "status": "unavailable" if risk_result.get("fallback") else "available",
             }
     else:
         risk_prob = 0.5

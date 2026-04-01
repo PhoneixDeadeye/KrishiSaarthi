@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from field.models import FieldData, FieldLog
 from datetime import datetime, timedelta
 import random
+import os
 
 
 class Command(BaseCommand):
@@ -27,6 +28,8 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Starting database seeding..."))
 
+        seed_password = os.environ.get("SEED_PASSWORD", "TestFarmer@2026")
+        
         # Create test users
         users = []
         for i in range(num_users):
@@ -35,7 +38,7 @@ class Command(BaseCommand):
                 user = User.objects.create_user(
                     username=username,
                     email=f"{username}@example.com",
-                    password="TestFarmer@2026",
+                    password=seed_password,
                     first_name=f"Farmer",
                     last_name=f"{i+1}",
                 )
@@ -116,4 +119,4 @@ class Command(BaseCommand):
         self.stdout.write(f"  Field logs created: ~{fields_created * 3}")
         self.stdout.write(self.style.SUCCESS("\nTest credentials:"))
         self.stdout.write("  Username: farmer1, farmer2, etc.")
-        self.stdout.write("  Password: TestFarmer@2026")
+        self.stdout.write(f"  Password: {seed_password}")

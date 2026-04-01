@@ -37,32 +37,15 @@ urlpatterns = [
     path("logs/<int:pk>", FieldLogView.as_view(), name="fieldLogDetail"),
     # FieldAlert API
     path("alerts", FieldAlertView.as_view(), name="fieldAlerts"),
-    path(
-        "alerts/all",
-        FieldAlertView.as_view(),
-        kwargs={"pk": "all"},
-        name="fieldAlertBulkRead",
-    ),
-    path(
-        "alerts/mark-all-read",
-        BulkMarkAlertsReadView.as_view(),
-        name="fieldAlertBulkMarkRead",
-    ),
+    path("alerts/all", FieldAlertView.as_view(), kwargs={"pk": "all"}, name="fieldAlertBulkRead"),
+    path("alerts/mark-all-read", BulkMarkAlertsReadView.as_view(), name="fieldAlertBulkMarkRead"),
     path("alerts/<int:pk>", FieldAlertView.as_view(), name="fieldAlertDetail"),
     # Soil Advice API
     path("soil-advice", SoilAdviceView.as_view(), name="soilAdvice"),
     # Irrigation API
-    path(
-        "irrigation-schedule",
-        IrrigationScheduleView.as_view(),
-        name="irrigationSchedule",
-    ),
+    path("irrigation-schedule", IrrigationScheduleView.as_view(), name="irrigationSchedule"),
     path("irrigation-logs", IrrigationLogView.as_view(), name="irrigationLogs"),
-    path(
-        "irrigation-logs/<int:pk>",
-        IrrigationLogView.as_view(),
-        name="irrigationLogDetail",
-    ),
+    path("irrigation-logs/<int:pk>", IrrigationLogView.as_view(), name="irrigationLogDetail"),
     # Yield Prediction API
     path("yield-prediction", YieldPredictionView.as_view(), name="yieldPrediction"),
 ]
