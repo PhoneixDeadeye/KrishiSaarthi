@@ -160,29 +160,36 @@ class RotationPlannerView(APIView):
                 {"error": "Field not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-        current_crop = field.cropType
+        try:
+            current_crop = field.cropType
 
-        # Get rotation suggestions
-        suggestions = self._get_rotation_suggestions(current_crop)
+            # Get rotation suggestions
+            suggestions = self._get_rotation_suggestions(current_crop)
 
-        # Get current season
-        current_season = self._get_current_season()
+            # Get current season
+            current_season = self._get_current_season()
 
-        # Build rotation timeline (3 seasons ahead)
-        timeline = self._build_rotation_timeline(current_crop, current_season)
+            # Build rotation timeline (3 seasons ahead)
+            timeline = self._build_rotation_timeline(current_crop, current_season)
 
-        return Response(
-            {
-                "field_id": field.id,
-                "field_name": field.name,
-                "current_crop": current_crop,
-                "current_season": current_season,
-                "crop_history": self._get_crop_history(field, request.user),
-                "suggestions": suggestions,
-                "timeline": timeline,
-                "soil_health_tips": self._get_soil_tips(current_crop),
-            }
-        )
+            return Response(
+                {
+                    "field_id": field.id,
+                    "field_name": field.name,
+                    "current_crop": current_crop,
+                    "current_season": current_season,
+                    "crop_history": self._get_crop_history(field, request.user),
+                    "suggestions": suggestions,
+                    "timeline": timeline,
+                    "soil_health_tips": self._get_soil_tips(current_crop),
+                }
+            )
+        except Exception as e:
+            logger.error("Error generating rotation plan: %s", e)
+            return Response(
+                {"error": "Failed to generate rotation plan"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def _get_rotation_suggestions(self, current_crop):
         """Get ranked rotation suggestions for next crop"""

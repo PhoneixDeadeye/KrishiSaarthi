@@ -87,24 +87,32 @@ class FieldAlertView(APIView):
 
     def get(self, request):
         """Get all alerts for the authenticated user"""
-        field_id = request.query_params.get("field_id")
-        if field_id:
-            alerts = FieldAlert.objects.filter(user=request.user, field_id=field_id)
-        else:
-            alerts = FieldAlert.objects.filter(user=request.user)
+        try:
+            field_id = request.query_params.get("field_id")
+            if field_id:
+                alerts = FieldAlert.objects.filter(user=request.user, field_id=field_id)
+            else:
+                alerts = FieldAlert.objects.filter(user=request.user)
 
-        alerts = alerts.select_related("field", "log").order_by("-date", "-created_at")
-        paginator = get_optional_paginator(request)
-        if paginator is not None:
-            page = paginator.paginate_queryset(alerts, request)
+            alerts = alerts.select_related("field", "log").order_by("-date", "-created_at")
+            paginator = get_optional_paginator(request)
+            if paginator is not None:
+                page = paginator.paginate_queryset(alerts, request)
+                serializer = FieldAlertSerializer(
+                    page, many=True, context={"request": request}
+                )
+                return paginator.get_paginated_response(serializer.data)
             serializer = FieldAlertSerializer(
-                page, many=True, context={"request": request}
+                alerts, many=True, context={"request": request}
             )
-            return paginator.get_paginated_response(serializer.data)
-        serializer = FieldAlertSerializer(
-            alerts, many=True, context={"request": request}
-        )
-        return Response(serializer.data)
+            return Response(serializer.data)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error("Error fetching alerts: %s", e)
+            return Response(
+                {"error": "Failed to fetch alerts"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def patch(self, request, pk=None):
         """Mark a single alert as read, or mark all alerts read when pk='all'"""

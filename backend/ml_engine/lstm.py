@@ -22,6 +22,16 @@ _DEFAULT_SCALER_PATH = os.path.join(_MODELS_DIR, "risk_scaler.save")
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
+# ── Architecture Constants ────────────────────────────────────────
+SEQ_LEN       = 14
+N_FEATURES    = 9   # target full-feature set (current checkpoint uses 4)
+HIDDEN_SIZE   = 64
+N_LAYERS      = 2
+FEATURE_NAMES = [
+    "ndvi", "t_max", "t_min", "t_mean",
+    "precip", "rh", "irrig_flag", "pest_flag", "delta_ndvi",
+]
+
 
 class RiskLSTM(nn.Module):
     """LSTM model for predicting crop disease/pest risk."""
@@ -29,8 +39,8 @@ class RiskLSTM(nn.Module):
     def __init__(
         self,
         input_size: int = 4,
-        hidden_size: int = 64,
-        num_layers: int = 2,
+        hidden_size: int = HIDDEN_SIZE,
+        num_layers: int = N_LAYERS,
         dropout: float = 0.1,
     ):
         super().__init__()
@@ -90,7 +100,7 @@ def load_risk_model(
         return None, None
 
     try:
-        model = RiskLSTM(input_size=4, hidden_size=64, num_layers=2).to(device)
+        model = RiskLSTM(input_size=4, hidden_size=HIDDEN_SIZE, num_layers=N_LAYERS).to(device)
         ckpt = torch.load(model_path, map_location=device, weights_only=True)
         model.load_state_dict(ckpt["state_dict"])
         model.eval()

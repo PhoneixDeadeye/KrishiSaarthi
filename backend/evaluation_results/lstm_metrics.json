@@ -1,0 +1,83 @@
+{
+  "model_info": {
+    "architecture": "LSTM(input=4, hidden=64, layers=2, dropout=0.1) -> Linear(1) -> Sigmoid",
+    "input_features": [
+      "NDVI",
+      "rainfall_mm",
+      "temperature_C",
+      "soil_moisture"
+    ],
+    "output": "Risk probability [0,1]",
+    "total_params": 51265,
+    "trainable_params": 51265,
+    "hidden_size": 64,
+    "num_layers": 2,
+    "dropout": 0.1,
+    "scaler_type": "StandardScaler"
+  },
+  "prediction_metrics": {
+    "accuracy": 33.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1_score": 0.0,
+    "auc_roc": 0.1858,
+    "confusion_matrix": [
+      [
+        66,
+        0
+      ],
+      [
+        134,
+        0
+      ]
+    ],
+    "probability_distribution": {
+      "mean": 0.0013,
+      "std": 0.0001,
+      "min": 0.0012,
+      "max": 0.0018,
+      "median": 0.0013
+    },
+    "risk_level_counts": {
+      "low": 200,
+      "medium": 0,
+      "high": 0
+    },
+    "total_samples": 200
+  },
+  "inference_latency": {
+    "avg_ms": 0.839,
+    "min_ms": 0.353,
+    "max_ms": 2.496,
+    "p95_ms": 1.036,
+    "p99_ms": 1.585,
+    "total_inferences": 150
+  },
+  "api_test_results": [
+    {
+      "risk_probability": 0.0092,
+      "risk_level": "Low",
+      "recommendation": "Conditions appear favorable. Continue regular maintenance.",
+      "data_points": 4,
+      "test_name": "Healthy field (high NDVI, good moisture)",
+      "inference_ms": 6.27
+    },
+    {
+      "risk_probability": 0.0023,
+      "risk_level": "Low",
+      "recommendation": "Conditions appear favorable. Continue regular maintenance.",
+      "data_points": 4,
+      "test_name": "Stressed field (low NDVI, dry)",
+      "inference_ms": 0.94
+    },
+    {
+      "risk_probability": 0.0061,
+      "risk_level": "Low",
+      "recommendation": "Conditions appear favorable. Continue regular maintenance.",
+      "data_points": 4,
+      "test_name": "Moderate conditions",
+      "inference_ms": 0.77
+    }
+  ],
+  "device": "cpu"
+}

@@ -1,0 +1,213 @@
+{
+  "formula": "health_score = w1 * p_cnn_healthy + w2 * ndvi_norm + w3 * (1 - risk_prob)",
+  "default_weights": {
+    "w1_cnn": 0.4,
+    "w2_ndvi": 0.35,
+    "w3_risk_inv": 0.25
+  },
+  "score_tests": [
+    {
+      "description": "Healthy crop, low risk",
+      "inputs": {
+        "p_cnn_healthy": 0.92,
+        "ndvi_raw": 0.75,
+        "risk_prob": 0.15
+      },
+      "health_score": 0.843,
+      "score_percent": 84.3,
+      "rating": "Excellent",
+      "color": "green"
+    },
+    {
+      "description": "Good crop, medium risk",
+      "inputs": {
+        "p_cnn_healthy": 0.85,
+        "ndvi_raw": 0.68,
+        "risk_prob": 0.35
+      },
+      "health_score": 0.7405,
+      "score_percent": 74.1,
+      "rating": "Good",
+      "color": "lightgreen"
+    },
+    {
+      "description": "Stressed crop, high risk",
+      "inputs": {
+        "p_cnn_healthy": 0.45,
+        "ndvi_raw": 0.42,
+        "risk_prob": 0.72
+      },
+      "health_score": 0.397,
+      "score_percent": 39.7,
+      "rating": "Poor",
+      "color": "orange"
+    },
+    {
+      "description": "Severely stressed, very high risk",
+      "inputs": {
+        "p_cnn_healthy": 0.2,
+        "ndvi_raw": 0.25,
+        "risk_prob": 0.88
+      },
+      "health_score": 0.1975,
+      "score_percent": 19.8,
+      "rating": "Critical",
+      "color": "red"
+    },
+    {
+      "description": "Neutral/uncertain all inputs",
+      "inputs": {
+        "p_cnn_healthy": 0.5,
+        "ndvi_raw": 0.6,
+        "risk_prob": 0.5
+      },
+      "health_score": 0.535,
+      "score_percent": 53.5,
+      "rating": "Fair",
+      "color": "yellow"
+    },
+    {
+      "description": "Optimal conditions",
+      "inputs": {
+        "p_cnn_healthy": 0.95,
+        "ndvi_raw": 0.85,
+        "risk_prob": 0.05
+      },
+      "health_score": 0.915,
+      "score_percent": 91.5,
+      "rating": "Excellent",
+      "color": "green"
+    },
+    {
+      "description": "Critical conditions",
+      "inputs": {
+        "p_cnn_healthy": 0.1,
+        "ndvi_raw": 0.15,
+        "risk_prob": 0.95
+      },
+      "health_score": 0.105,
+      "score_percent": 10.5,
+      "rating": "Critical",
+      "color": "red"
+    }
+  ],
+  "source_comparison": [
+    {
+      "input_type": "Crop image + NDVI + LSTM",
+      "cnn_available": true,
+      "health_score": 0.8,
+      "score_percent": 79.9,
+      "rating": "Good",
+      "source": "CNN + NDVI + LSTM blend",
+      "weights_used": {
+        "cnn": 0.4,
+        "ndvi": 0.35,
+        "risk_inv": 0.25
+      }
+    },
+    {
+      "input_type": "NDVI + LSTM only",
+      "cnn_available": false,
+      "health_score": 0.64,
+      "score_percent": 63.7,
+      "rating": "Good",
+      "source": "NDVI estimate (no image)",
+      "weights_used": {
+        "cnn": 0.4,
+        "ndvi": 0.35,
+        "risk_inv": 0.25
+      }
+    },
+    {
+      "input_type": "NDVI only (no LSTM, no image)",
+      "cnn_available": false,
+      "health_score": 0.56,
+      "score_percent": 56.0,
+      "rating": "Fair",
+      "source": "NDVI-only fallback",
+      "weights_used": {
+        "cnn": 0.4,
+        "ndvi": 0.35,
+        "risk_inv": 0.25
+      }
+    },
+    {
+      "input_type": "Image + NDVI (no LSTM)",
+      "cnn_available": true,
+      "health_score": 0.7,
+      "score_percent": 69.8,
+      "rating": "Good",
+      "source": "CNN + NDVI (no risk data)",
+      "weights_used": {
+        "cnn": 0.4,
+        "ndvi": 0.35,
+        "risk_inv": 0.25
+      }
+    },
+    {
+      "input_type": "All data - stressed field",
+      "cnn_available": true,
+      "health_score": 0.3,
+      "score_percent": 30.0,
+      "rating": "Poor",
+      "source": "CNN + NDVI + LSTM blend",
+      "weights_used": {
+        "cnn": 0.4,
+        "ndvi": 0.35,
+        "risk_inv": 0.25
+      }
+    }
+  ],
+  "weight_sensitivity": [
+    {
+      "config_name": "Default (CNN-heavy)",
+      "weights": {
+        "cnn": 0.4,
+        "ndvi": 0.35,
+        "risk_inv": 0.25
+      },
+      "health_score": 0.66,
+      "score_percent": 66.0
+    },
+    {
+      "config_name": "Equal weights",
+      "weights": {
+        "cnn": 0.33,
+        "ndvi": 0.34,
+        "risk_inv": 0.33
+      },
+      "health_score": 0.6495,
+      "score_percent": 65.0
+    },
+    {
+      "config_name": "NDVI-heavy",
+      "weights": {
+        "cnn": 0.2,
+        "ndvi": 0.5,
+        "risk_inv": 0.3
+      },
+      "health_score": 0.63,
+      "score_percent": 63.0
+    },
+    {
+      "config_name": "CNN-dominant",
+      "weights": {
+        "cnn": 0.5,
+        "ndvi": 0.25,
+        "risk_inv": 0.25
+      },
+      "health_score": 0.675,
+      "score_percent": 67.5
+    },
+    {
+      "config_name": "Risk-heavy",
+      "weights": {
+        "cnn": 0.25,
+        "ndvi": 0.25,
+        "risk_inv": 0.5
+      },
+      "health_score": 0.6375,
+      "score_percent": 63.7
+    }
+  ]
+}

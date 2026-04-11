@@ -1,0 +1,530 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{placeins}
+\usepackage{caption}
+\captionsetup{font=footnotesize}   % <-- ONLY CHANGE: smaller caption font for all figures
+\usepackage{stfloats}
+\usepackage{float}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{KrishiSaarthi: An Integrated AI Platform for Smallholder Farm Management}
+
+\author{
+\IEEEauthorblockN{Gautam Chandra Giri}
+\IEEEauthorblockA{\textit{CSE, Lovely Professional University}\\
+Phagwara, Punjab\\
+gautamgiri672@gmail.com}
+\and
+\IEEEauthorblockN{Rohan Agarwal}
+\IEEEauthorblockA{\textit{CSE, Lovely Professional University}\\
+Phagwara, Punjab\\
+agarwalrohan2004@gmail.com}
+\and
+\IEEEauthorblockN{Subodh Katana}
+\IEEEauthorblockA{\textit{CSE, Lovely Professional University}\\
+Phagwara, Punjab\\
+subodhkatna@gmail.com}
+\and
+\IEEEauthorblockN{Biswajeet Ray}
+\IEEEauthorblockA{\textit{CSE, Lovely Professional University}\\
+Phagwara, Punjab\\
+rajusrivastav73444@gmail.com}
+\and
+\IEEEauthorblockN{Abhishek Bhardwaj}
+\IEEEauthorblockA{\textit{CSE, Lovely Professional University}\\
+Phagwara, Punjab\\
+raj08obra@gmail.com}
+\and
+\IEEEauthorblockN{Aditya Pandey}
+\IEEEauthorblockA{\textit{CSE, Lovely Professional University}\\
+Phagwara, Punjab\\
+pandeyaditya2804@gmail.com}
+\and
+\IEEEauthorblockN{Anzah Bashir}
+\IEEEauthorblockA{\textit{CSE, Lovely Professional University}\\
+Phagwara, Punjab\\
+bhatanzah710@gmail.com}
+}
+
+\maketitle
+
+\begin{abstract}
+Financial fragmentation, insect outbreaks, and climate instability are just a few of the major issues that small farmers confront globally. These issues are made worse by the lack of access to agricultural advisory services. Due to expensive license fees and technology requirements, smallholders are still mostly unable to utilize current precision agriculture solutions. This paper introduces KrishiSaarthi, an open-source, production-ready intelligent farm management platform that combines deep learning, large language models, and satellite remote sensing into a single end-to-end full-stack solution. The platform consists of a Django REST Framework backend with 45 REST endpoints, a React~18/TypeScript frontend with 21 dashboard modules, a PyTorch ML engine with a 208~KB two-layer LSTM risk forecasting model (97.56\% accuracy, AUC-ROC~0.9983 on ERA5 reanalysis data spanning 25 Indian districts) and a 9.1~MB MobileNetV2 38-class crop disease classifier (99.03\% top-1 accuracy on PlantVillage). Google Earth Engine provides satellite analytics (NDVI, EVI, SAVI, NDWI), and the IPCC Tier~2 technique with AWD cycle identification is used for carbon credit estimation. The system introduces three contributions---integrated profit-and-loss management, IPCC-compliant carbon credit estimation, and LLM-powered conversational advisory---that are absent from all 17~reviewed works and fully covers five of the six identified agricultural management problem dimensions.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Precision agriculture, deep learning, NDVI, MobileNetV2, LSTM, Google Earth Engine, Google Gemini, carbon credits, Django REST Framework, React, smallholder agriculture.
+\end{IEEEkeywords}
+
+%------------------------------------------------------------
+\section{Introduction}
+%------------------------------------------------------------
+
+According to the FAO, smallholder farms---defined as farms under two hectares---account for 84\% of the world's farms and contribute 35\% of the global food supply~\cite{b16}. Despite their critical importance, these farmers face crop failures, price volatility, pest pressure, and aggravating climate effects. Precision agriculture leverages satellite data, cloud computing, machine learning, and IoT to deliver field-level decision support; however, most existing solutions target large commercial farms and require prohibitive licensing fees or specialised hardware. KrishiSaarthi (Sanskrit: ``Agriculture Companion'', also published as AgriSmart) is a production-ready, open-source platform comprising: (1)~satellite vegetation analysis via Google Earth Engine; (2)~38-class MobileNetV2 crop disease detection; (3)~LSTM temporal risk prediction trained on real-world ERA5 climate data; and (4)~conversational advisory using Google Gemini~2.5 Flash, all delivered via a containerised Django/React full-stack application.
+
+Key gaps in existing smallholder tooling motivate this work: crop health monitoring remains predominantly manual; disease identification demands taxonomic expertise unavailable to rural communities; informal financial record-keeping prevents credit access; asymmetric market pricing disadvantages smallholder sellers; sustainable AWD irrigation practices generate quantifiable carbon credits yet farmers have no documentation mechanism; and English-only text platforms exclude multilingual and low-literacy users. Three research objectives guide the work: \textbf{RO1}---design and evaluate KrishiSaarthi as a production-grade platform with a complete REST API; \textbf{RO2}---document and empirically evaluate the MobileNetV2-based CNN, two-layer LSTM, and composite health scoring model; \textbf{RO3}---verify platform coverage across all six identified smallholder needs and benchmark against leading tools and recent literature.
+
+%------------------------------------------------------------
+\section{Literature Review}
+\label{sec:litreview}
+%------------------------------------------------------------
+
+Nine representative works from a broader review of 17~peer-reviewed papers are summarised in Table~\ref{tab:lr1}, covering five thematic clusters: disease detection, yield prediction, temporal forecasting, federated learning, and LLM integration.
+
+\begin{table}[!t]
+\caption{Representative Reviewed Works (9 of 17)}
+\label{tab:lr1}
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|c|p{1.55cm}|p{2.1cm}|p{2.1cm}|}
+\hline
+\textbf{Ref.} & \textbf{Authors \& Year} & \textbf{Key Results} & \textbf{Gap / Future Scope} \\
+\hline
+\cite{b16} & Manzoor (2024) & Accurate disease \& yield detection & Scalability; regional validation \\
+\hline
+\cite{b22} & Sudha \& Loret (2026) & CNNs 94.5\%, LSTMs 92.7\% & Hybrid ML+XAI; blockchain \\
+\hline
+\cite{b10} & Mazumder et al.\ (2024) & 99.99\% cassava; 94.94\% wheat & Multi-species + XAI layers \\
+\hline
+\cite{b8}  & Alkanan \& Gulzar (2024) & MobileNetV2: 96.27\%; precision 0.975 & Diverse multi-crop datasets \\
+\hline
+\cite{b21} & Meghraoui et al.\ (2024) & CNN-LSTM dominates; satellite $\sim$50\% & XAI + high resolution \\
+\hline
+\cite{b4}  & Wang et al.\ (2024) & $R^2$ up to 0.98 for corn yield & Explainability; multimodal fusion \\
+\hline
+\cite{b13} & Jabed \& Murad (2024) & CNN-LSTM best for regional prediction & XAI + satellite-IoT integration \\
+\hline
+\cite{b14} & Hiremani et al.\ (2025) & FL $\geq$97\%; privacy maintained & FL+XAI for edge devices \\
+\hline
+\cite{b20} & Shaikh et al.\ (2025) & LLMs excel in zero-shot agriculture & Ag-specific foundation models \\
+\hline
+\end{tabular}
+\end{table}
+
+Four convergent findings emerge: (1)~hybrid CNN-LSTM and ensemble models consistently outperform single-modality architectures~\cite{b4,b13,b21}; (2)~satellite-derived vegetation indices (NDVI, EVI, SAVI) are the most predictive temporal input features in approximately half of reviewed studies~\cite{b21}; (3)~Explainable AI (XAI) is increasingly a functional requirement---Grad-CAM++ and SHAP integrate without degrading model performance~\cite{b4,b10}; (4)~federated learning enables privacy-preserving collaborative training~\cite{b14}. Three contributions are entirely absent from all 17~reviewed works: LLM-powered conversational advisory, integrated profit-and-loss management, and IPCC-compliant carbon credit estimation. Explainability (Grad-CAM++ + SHAP) and multi-lingual voice support are addressed by KrishiSaarthi, closing two additional gaps partially covered by the literature.
+
+%------------------------------------------------------------
+\section{System Architecture and Design}
+\label{sec:architecture}
+%------------------------------------------------------------
+
+KrishiSaarthi is built on a layered, service-oriented architecture with four tiers: Client Layer, API Gateway, Domain Service Modules, and an ML/AI Inference Layer. Table~\ref{tab:techstack} lists the complete technology stack.
+
+\begin{table}[!t]
+\caption{KrishiSaarthi Complete Technology Stack}
+\label{tab:techstack}
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{1.3cm}|p{2.6cm}|p{2.6cm}|}
+\hline
+\textbf{Layer} & \textbf{Technology} & \textbf{Notes} \\
+\hline
+Frontend & React~18 + TypeScript + Vite & 79 components, 21 dashboard modules \\
+\hline
+UI / Maps & TailwindCSS~4, Shadcn UI, Leaflet.js, Recharts & Field polygon drawing, live charts \\
+\hline
+Backend & Django~5.1 + Django REST Framework & Python~3.11+, 45 REST endpoints \\
+\hline
+ML / AI & PyTorch~2.0+, Scikit-learn & CPU inference -- no GPU required \\
+\hline
+LLM & Google Gemini~2.5 Flash & Vision validation + chat advisory \\
+\hline
+Satellite & Google Earth Engine (Python API) & Sentinel-2 + Landsat imagery \\
+\hline
+Weather & OpenWeather API & Current + 7-day forecast \\
+\hline
+Database & PostgreSQL~14+ (prod) / SQLite (dev) & Full relational store \\
+\hline
+Infra & Docker, Nginx, Gunicorn & Dev + Prod Compose configurations \\
+\hline
+Observability & Prometheus + Grafana + GitHub Actions & Metrics, dashboards, CI/CD \\
+\hline
+\end{tabular}
+\end{table}
+
+The backend exposes 45~REST endpoints organised into five route groups (field, finance, planning, chat, authentication), secured with RFC~6750 token authentication, CORS policies, rate limiting, and RFC~7807 structured error responses. The frontend is a 79-component SPA with an i18n hook supporting EN, HI, PA, and ML language switching without page reload, and a \texttt{useVoice} hook for hands-free field data entry via the Web Speech API. Two Docker Compose stacks are provided---development (SQLite + Django dev server) and production (Nginx + Gunicorn + PostgreSQL)---with Prometheus/Grafana runtime observability and GitHub Actions CI/CD.
+
+%------------------------------------------------------------
+\section{Machine Learning Pipeline}
+\label{sec:mlpipeline}
+%------------------------------------------------------------
+
+The ML engine comprises four components: vegetation index computation, CNN-based crop disease detection, LSTM risk forecasting, and composite health scoring with AWD/carbon credit estimation.
+
+\subsection{Vegetation Index Computation}
+
+Field-level indices (NDVI, EVI, SAVI, NDWI) are computed on demand via the Earth Engine Python API over user-defined polygons from cloud-free Sentinel-2 L2A imagery, where
+\begin{equation}
+\mathrm{NDVI} = \frac{\mathrm{NIR} - \mathrm{Red}}{\mathrm{NIR} + \mathrm{Red}}
+\label{eq:ndvi}
+\end{equation}
+tracks biomass, EVI corrects for dense canopy aerosol effects, SAVI ($L{=}0.5$) targets semi-arid sparse cover, and
+\begin{equation}
+\mathrm{NDWI} = \frac{\mathrm{Green} - \mathrm{NIR}}{\mathrm{Green} + \mathrm{NIR}}
+\label{eq:ndwi}
+\end{equation}
+monitors foliar water content and AWD cycles. The most recent 90~days of index data are streamed to the frontend; an anomaly alert fires when NDVI falls more than 1.5~standard deviations below the 30-day rolling mean.
+
+\subsection{Crop Disease CNN (MobileNetV2)}
+
+A 38-class MobileNetV2 classifier with ImageNet pre-trained weights and a custom softmax output head produces a probability distribution $\hat{y}_c$ over PlantVillage disease classes; the predicted class $\hat{c} = \arg\max_c \hat{y}_c$ determines the diagnosis. A two-stage inference pipeline reduces false positives: Stage~1 submits the uploaded image to Gemini Vision for semantic validation (non-plant images never reach the CNN); Stage~2 resizes the validated image to $224\times224$ pixels, normalises using ImageNet statistics (mean~$=$~[0.485,~0.456,~0.406], std~$=$~[0.229,~0.224,~0.225]), and performs CNN inference. The 9.1~MB model checkpoint (\texttt{crop\_health\_model.pth}) corresponds to 3.4M FP32 parameters, enabling CPU-only inference within a Docker container.
+
+\subsection{LSTM Risk Prediction}
+
+The two-layer LSTM model (\texttt{risk\_lstm\_final.pth}, 208~KB, 64~neurons per layer, dropout rate~$=$~0.1) returns the binary risk probability $p \in [0,1]$, which is computed from a ten-day sequence. The daily sequence consists of four inputs: vegetation index, precipitation~(mm), temperature~($^\circ$C), and soil moisture, which are all scaled based on the fitted \texttt{StandardScaler} model (\texttt{risk\_scaler.save}, 711~bytes). The model was trained using ERA5 climate data from the Open-Meteo portal, which provides information for twenty-five agricultural regions in India (January~2023 to December~2024, 18,275~observations).
+
+\subsection{Composite Health Score \& AWD/Carbon Credits}
+
+The composite health engine aggregates five signals onto a common $H \in [0,100]$ scale:
+\begin{equation}
+\begin{split}
+H = \; & w_1 S_{\text{CNN}} + w_2\,\mathrm{NDVI}_{\text{norm}} + w_3(1-p_{\text{LSTM}})\times100 \\
+       & + w_4 S_{\text{weather}} + w_5 S_{\text{practice}}
+\end{split}
+\label{eq:health}
+\end{equation}
+where $w_1{=}0.30$, $w_2{=}0.25$, $w_3{=}0.20$, $w_4{=}0.15$, $w_5{=}0.10$ and $\sum_{i=1}^{5} w_i=1$. AWD cycle detection identifies characteristic NDWI dips in the time-series; carbon credit estimation applies the IPCC 2019 Refinement Tier~2 methodology:
+\begin{equation}
+\Delta E = (\mathrm{EF}_{\text{continuous}} - \mathrm{EF}_{\text{AWD}}) \times A \times D \quad [\text{kg\;CH}_4]
+\label{eq:carbon}
+\end{equation}
+where $A$ is the field area in hectares and $D$ is the AWD duration in days. The CH$_4$ reduction is converted to CO$_2$-equivalent using GWP$_{100}=27.9$ (IPCC AR6) and multiplied by the configured voluntary carbon market price. For a representative field ($A=1.2$~ha, $D=45$~days, EF$_{\text{continuous}}=1.30$~kg CH$_4$/ha/day, EF$_{\text{AWD}}=0.55$~kg CH$_4$/ha/day): $\Delta E = (1.30-0.55)\times1.2\times45 = 40.5$~kg CH$_4 \Rightarrow 1.130$~t CO$_2$-eq, yielding estimated farmer revenue of \textbf{Rs.\,1{,}406.85} per AWD cycle at USD~15/tonne.
+
+%------------------------------------------------------------
+\section{Results}
+\label{sec:results}
+%------------------------------------------------------------
+
+\subsection{API and Model Specifications}
+
+\begin{table}[H]
+\caption{API Module Coverage (45 Endpoints Across 8 Modules)}
+\label{tab:api}
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{1.85cm}|c|p{4.0cm}|}
+\hline
+\textbf{Module} & \textbf{EPs} & \textbf{Key Capabilities} \\
+\hline
+Authentication & 5 & Token auth, registration, password reset \\
+\hline
+Field & 8 & Earth Engine analysis, health score, disease detection, AWD, carbon credits, yield prediction \\
+\hline
+Logs \& Alerts & 4 & Activity history, automated alert lifecycle \\
+\hline
+Irrigation & 3 & Schedule management, logs, AI recommendations \\
+\hline
+Finance & 11 & Costs, revenue, P\&L, market prices, schemes, insurance \\
+\hline
+Planning & 10 & Crop calendar, inventory, labour, equipment, rotation \\
+\hline
+Chat (LLM) & 2 & Gemini AI query, conversation session history \\
+\hline
+Health Probes & 2 & Liveness + readiness for container orchestration \\
+\hline
+\textbf{TOTAL} & \textbf{45} & Full agricultural management coverage \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\caption{ML Model Specifications. Both CNN and LSTM Perform CPU Inference.}
+\label{tab:mlspecs}
+\centering
+\renewcommand{\arraystretch}{1.4}
+\small
+\begin{tabular}{|p{1.1cm}|p{2.3cm}|p{4.2cm}|}
+\hline
+\textbf{Model} & \textbf{File \& Size} & \textbf{Architecture / I-O} \\
+\hline
+Disease CNN &
+  \raggedright{\ttfamily\footnotesize crop\_model.pth}\newline 9.1~MB &
+  MobileNetV2 + softmax (38 cls); $224{\times}224$ RGB $\rightarrow \hat{y}_c$ \\
+\hline
+Risk LSTM &
+  \raggedright{\ttfamily\footnotesize risk\_lstm.pth}\newline 208~KB &
+  2-layer LSTM, 64 hidden, dropout 0.1; $10{\times}4$ seq $\rightarrow p{{\in}}[0,1]$ \\
+\hline
+Scaler &
+  \raggedright{\ttfamily\footnotesize risk\_scale.save}\newline 711~B &
+  StandardScaler; 4-feature normalisation for LSTM \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{CNN Crop Disease Classifier Performance}
+
+The MobileNetV2 model classifier was trained on the augmented PlantVillage dataset~\cite{b10} over 10~epochs using transfer learning with progressive unfreezing starting at epoch~7 (batch size 64, Adam optimiser, initial LR~$10^{-3}$ decayed $\times0.5$ every 5~epochs). The held-out test set contains 1,758~samples across all 38~classes.
+
+Of 38~classes, 25 were classified perfectly with F$_1 = 100\%$; those with F$_1 < 100\%$ were \textit{Tomato Target Spot} (F$_1$~=~94.29\%), \textit{Tomato Late Blight} (F$_1$~=~95.65\%), and \textit{Corn Cercospora Leaf Spot} (F$_1$~=~93.94\%), all of which have visually similar lesion morphologies. The full 38$\times$38 confusion matrix contains only 17~incorrect classifications across the entire test set. Validation accuracy increased monotonically from 88.56\% at epoch~1 to 99.03\% at epoch~9 without overfitting, exceeding the 96.27\% MobileNetV2 baseline reported by Alkanan and Gulzar~\cite{b8}.
+
+\begin{table}[H]
+\caption{MobileNetV2 Performance on the PlantVillage Test Set ($n{=}1{,}758$, 38 Classes)}
+\label{tab:cnn_results}
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{3.4cm}|p{1.6cm}|p{1.8cm}|}
+\hline
+\textbf{Metric} & \textbf{Value} & \textbf{Scope} \\
+\hline
+Top-1 Accuracy      & 99.03\%  & 38-class \\
+\hline
+Top-3 Accuracy      & 99.89\%  & 38-class \\
+\hline
+Top-5 Accuracy      & 99.94\%  & 38-class \\
+\hline
+Weighted Precision  & 99.07\%  & Weighted avg \\
+\hline
+Weighted Recall     & 99.03\%  & Weighted avg \\
+\hline
+Weighted F$_1$      & 99.03\%  & Weighted avg \\
+\hline
+Macro Precision     & 98.97\%  & Macro avg \\
+\hline
+Macro Recall        & 98.89\%  & Macro avg \\
+\hline
+Macro F$_1$         & 98.90\%  & Macro avg \\
+\hline
+Binary Healthy Acc. & 99.89\%  & Healthy vs.\ diseased \\
+\hline
+Avg.\ Inference     & 0.17~ms  & CPU \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{LSTM Risk Forecasting Performance}
+
+The two-layer LSTM was trained on ERA5 reanalysis data~\cite{b21} for 25~Indian agricultural districts (January~2023 to December~2024, 18,275~daily observations, 18,025~sequences after windowing; high-risk: 54.6\%, low-risk: 45.4\%).
+
+Training loss decreased from 0.283 at epoch~1 to 0.038 at epoch~30; validation loss stabilised below 0.055 from epoch~21 with no evidence of overfitting. An AUC-ROC of 0.9983 indicates near-perfect rank discrimination. The confusion matrix records 37~false negatives and 29~false positives from 2,704~test sequences, yielding a missed-alert rate of 1.37\%---within the comfortable operating range of a daily advisory system. Geographically, Ahmedabad~(0.685), Jaipur~(0.684), and Hisar~(0.675) exhibit the highest risk ratios, consistent with arid Gujarat and Haryana profiles, while Guntur~(0.373) and Coimbatore~(0.374) reflect stable humid southern conditions.
+
+\begin{table}[H]
+\caption{LSTM Binary Risk Model on ERA5 Test Set ($n{=}2{,}704$ Sequences)}
+\label{tab:lstm_results}
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{3.2cm}|p{2.0cm}|p{1.6cm}|}
+\hline
+\textbf{Metric} & \textbf{Value} & \textbf{Notes} \\
+\hline
+Test Accuracy     & 97.56\%  & Binary \\
+\hline
+Precision         & 97.50\%  & High-risk class \\
+\hline
+Recall            & 98.03\%  & High-risk class \\
+\hline
+F$_1$-Score       & 97.76\%  & High-risk class \\
+\hline
+AUC-ROC           & 0.9983   & Near-perfect \\
+\hline
+Best Val.\ Acc.   & 97.89\%  & Epoch 21 of 30 \\
+\hline
+Avg.\ Inference   & 0.60~ms  & CPU only \\
+\hline
+P95 Latency       & 0.71~ms  & CPU only \\
+\hline
+Training Time     & 42.1~s   & 30 epochs, CPU \\
+\hline
+Total Parameters  & 51{,}265 & $\approx$208~KB \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Explainability Analysis (Grad-CAM++ \& SHAP)}
+\label{sec:explainability}
+
+Grad-CAM++ heatmaps~\cite{gradcam_plus_plus} were generated for the MobileNetV2 classifier by back-propagating class-discriminative gradients to the final convolutional block (\texttt{features[-1]}), analysed on the three lowest-performing classes and the \textit{Tomato Healthy} class. Diseased classes exhibit focal activation (peak $\geq$0.85, coverage 34--48\%), while the healthy class produces diffuse activation ($>$60\%), confirming biologically meaningful feature learning~\cite{b10,b19}. The three lower-performing classes share overlapping ring-shaped necrotic morphologies; heatmap overlap across these classes explains the observed inter-class confusion.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{gradcam_results.png}
+\caption{Grad-CAM++ Explainability Analysis --- KrishiSaarthi MobileNetV2. Each row shows (left) the original leaf image, (centre) the Grad-CAM++ heatmap, and (right) the overlay. Diseased classes (\textit{Tomato Late Blight}, \textit{Corn Cercospora}, \textit{Tomato Target Spot}) exhibit \textbf{focal} attention on lesion regions (coverage 34--48\%), while the \textit{Tomato Healthy} class produces \textbf{diffuse} activations (coverage 63.2\%), confirming biologically meaningful feature learning.}
+\label{fig:gradcam}
+\end{figure}
+
+\begin{table}[!t]
+\caption{SHAP GradientExplainer Summary --- LSTM Risk Model (50 Test Sequences, 25 Districts). Peak Day is Day~10 for All Features.}
+\label{tab:shap_summary}
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{2.0cm}|p{1.35cm}|p{1.35cm}|p{0.95cm}|p{0.65cm}|}
+\hline
+\textbf{Feature} & \textbf{Mean $|$SHAP$|$} & \textbf{Max $|$SHAP$|$} & \textbf{Peak Day} & \textbf{Rank} \\
+\hline
+Rainfall (mm)       & 0.0360 & 0.9765 & 10 & 1 \\
+\hline
+Soil Moisture       & 0.0097 & 0.2257 & 10 & 2 \\
+\hline
+Temperature ($^\circ$C) & 0.0078 & 0.3474 & 10 & 3 \\
+\hline
+Vegetation Index    & 0.0057 & 0.1596 & 10 & 4 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{shap_importance.png}
+\caption{LSTM Risk Model --- Feature Importance (SHAP GradientExplainer). Rainfall (mm) is the dominant feature (mean $|$SHAP$|$~=~0.0360), followed by Soil Moisture (0.0097), Temperature (0.0078), and Vegetation Index (0.0057). Based on 50 test sequences from 25 Indian agricultural districts (ERA5).}
+\label{fig:shap_importance}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\columnwidth]{shap_temporal.png}
+\caption{Temporal SHAP Attribution --- per-day importance across the 10-day input sequence. All features spike at day~10 (the forecast day), with Rainfall driving the steepest rise ($|$SHAP$|$~=~0.270), confirming recency-weighted attention consistent with short-horizon agricultural risk forecasting.}
+\label{fig:shap_temporal}
+\end{figure}
+
+SHAP GradientExplainer~\cite{lundberg2017} analysis on 50 held-out sequences identifies \textbf{Rainfall~(mm)} as the dominant predictive feature (mean $|$SHAP$|=0.0360$), followed by Soil Moisture~(0.0097), Temperature~(0.0078), and Vegetation Index~(0.0057)---a ranking agronomically consistent with rainfall and soil moisture as the primary waterlogging and drought stress drivers, and vegetation index decline as a lagging stress indicator~\cite{b21,b13}. Temporal attribution (Fig.~\ref{fig:shap_temporal}) reveals a sharp importance spike at day~10 of the input window, indicating recency-bias consistent with short-horizon forecasting~\cite{b4,b13}.
+
+\subsection{Feature Coverage \& Comparative Positioning}
+
+Table~\ref{tab:comparison} benchmarks KrishiSaarthi against two leading commercial platforms and the average capability of the 17~reviewed works across nine evaluation criteria.
+
+\begin{table*}[!ht]
+\caption{Feature Coverage and Comparative Positioning Against Commercial Platforms and Reviewed Literature}
+\label{tab:comparison}
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{3.2cm}|p{2.5cm}|p{2.0cm}|p{1.8cm}|p{2.5cm}|}
+\hline
+\textbf{Criterion} & \textbf{KrishiSaarthi} & \textbf{FieldView} & \textbf{Plantix} & \textbf{Reviewed Works Avg.} \\
+\hline
+Satellite RS (NDVI/EVI/SAVI/NDWI) & Full (Earth Engine) & Full & None & $\sim$20\% \\
+\hline
+CNN disease detection (38 classes) & MobileNetV2 99.03\% + LLM pre-validation & Partial & CNN only & $\sim$45\% \\
+\hline
+LSTM temporal risk forecasting & 2-layer LSTM, AUC-ROC 0.9983 & None & None & $\sim$30\% \\
+\hline
+LLM conversational advisory & Gemini~2.5 Flash & None & None & 0\% -- \textbf{Novel} \\
+\hline
+Integrated financial management & Full P\&L + government schemes & Partial & None & 0\% -- \textbf{Novel} \\
+\hline
+Carbon credit (IPCC Tier~2 AWD) & IPCC Tier~2 CH$_4$ & None & None & 0\% -- \textbf{Novel} \\
+\hline
+Multi-lingual + voice & 4 languages + Web Speech API & EN only & Partial & $\sim$5\% \\
+\hline
+Explainable AI & Grad-CAM++ (CNN) + SHAP (LSTM) & Partial & None & $\sim$25\% \\
+\hline
+Open-source licence & MIT & Commercial & Freemium & $\sim$60\% \\
+\hline
+\end{tabular}
+\end{table*}
+
+%------------------------------------------------------------
+\section{Discussion}
+\label{sec:discussion}
+%------------------------------------------------------------
+
+\subsection{Architectural Strengths}
+
+The composite health scoring approach---normalising CNN disease probability, NDVI biomass, LSTM risk, weather stress, and practice quality onto a common 0--100 scale---confers robustness against degradation of any individual signal, consistent with hybrid ensemble studies reporting 12--18\% accuracy improvements over single-modality baselines~\cite{b1,b9,b13}. Combining CNN classification (99.03\% top-1) with LSTM risk forecasting (AUC-ROC~0.9983) into a unified score preserves individual model quality while providing resilience through signal redundancy.
+
+The two-stage LLM-augmented inference pipeline---Gemini Vision pre-filtering followed by CNN inference---is a novel engineering approach addressing the well-documented lab-to-field accuracy degradation problem~\cite{b4,b19}. By eliminating non-plant images at the semantic level, the pipeline removes a significant source of false positives without affecting CNN performance; no equivalent architecture was identified among the 17~reviewed works. The AWD-based IPCC Tier~2 carbon credit module introduces a previously unexplored capability in both reviewed literature and commercial platforms, opening a new revenue pathway for smallholders (Rs.\,1{,}406.85 per 1.2~ha field per AWD cycle).
+
+\subsection{Critical Limitations}
+
+\textbf{Dataset Scope:} The CNN is validated exclusively on the PlantVillage laboratory dataset; real-world field performance under varying illumination, occlusion, and regional crop varieties remains unquantified. This constitutes the highest-priority validation gap, and field-captured image evaluation is planned for the next development cycle.
+
+\textbf{Cloud API Dependency:} The pipeline depends on three external APIs (Google Earth Engine, OpenWeather, Gemini); degradation of any service would compromise the pipeline with no documented offline fallback---a significant reliability risk in low-connectivity rural environments~\cite{b9}. An offline-capable fallback using cached satellite tiles and a local lightweight LLM is under investigation.
+
+\textbf{LSTM Feature Set:} The current LSTM uses four weather-derived features; a richer nine-feature formulation (adding irrigation flags, pesticide application, and NDVI delta) is expected to improve forecasting precision and is a priority for the next model version.
+
+\subsection{Literature Contextualization}
+
+KrishiSaarthi fully satisfies the two dominant literature trends of hybrid ensemble deep learning~\cite{b1,b9,b20} and multi-modal fusion~\cite{b2,b21,b13}, partially satisfies the edge deployment trend through compact model sizes (9.1~MB CNN, 208~KB LSTM), and fully satisfies the XAI requirement~\cite{b3,b19} through Grad-CAM++ on the CNN and SHAP GradientExplainer~\cite{lundberg2017} on the LSTM.
+
+%------------------------------------------------------------
+\section{Future Research Directions}
+\label{sec:future}
+%------------------------------------------------------------
+
+Four improvements have been identified for the next development phase:
+\begin{itemize}
+    \item \textbf{XAI Frontend Integration:} Grad-CAM++ overlays can be surfaced alongside disease predictions, together with per-feature SHAP bar charts alongside risk scores in the React frontend, to increase trust among farmers and agronomists~\cite{b3,b16}.
+    \item \textbf{Expanded LSTM Feature Set:} Enhancing the input feature set from four to nine (adding irrigation flags, pesticide application events, and day-over-day NDVI delta) will bring the forecaster closer to the full agro-meteorological signal space~\cite{b21,b13}.
+    \item \textbf{Federated Learning:} Adoption of privacy-preserving federated learning with differential privacy will enable collaborative model improvement while retaining local control over sensitive farm data~\cite{b11,b14}.
+    \item \textbf{IoT Edge Inference:} Integration of low-cost soil sensors for ground-truth measurements alongside a quantised 2.3~MB MobileNetV2 deployed on a Raspberry Pi will enable seamless disease detection in areas without network connectivity~\cite{b5,b12}.
+\end{itemize}
+
+%------------------------------------------------------------
+\section{Conclusion}
+\label{sec:conclusion}
+%------------------------------------------------------------
+
+This paper has introduced KrishiSaarthi (AgriSmart), an advanced, production-ready open-source precision platform for smart agriculture. The MobileNetV2 38-class crop disease classifier achieves a top-1 accuracy of 99.03\% on the PlantVillage benchmark, outperforming comparable models reported in existing literature~\cite{b8}. The two-layer LSTM risk forecasting model achieves 97.56\% accuracy and AUC-ROC~0.9983 on real-world ERA5 reanalysis data spanning 25~Indian agricultural districts. Both models operate entirely on CPU hardware, confirming deployability without any specialised infrastructure. Benchmarked against 17~peer-reviewed works across six agricultural management verticals, KrishiSaarthi introduces three contributions entirely absent from the literature: Gemini~2.5 Flash conversational advisory, integrated profit-and-loss and government subsidy management, and IPCC Tier~2 AWD carbon credit estimation. Grad-CAM++ heatmaps confirm which regions of the plant the model focuses on during classification, while SHAP GradientExplainer~\cite{lundberg2017} identifies Rainfall~(mm) as the dominant LSTM risk feature (mean $|$SHAP$|=0.0360$) with a pronounced recency bias at day~10. Field-level validation with real-world crop images and offline fallback capability remain the highest-priority next steps toward a fully accessible precision agriculture platform for smallholder farmers worldwide.
+
+\begin{thebibliography}{00}
+
+\bibitem{gradcam_plus_plus} A. Chattopadhay, A. Sarkar, P. Howlader, and V. N. Balasubramanian, ``Grad-CAM++: Generalized gradient-based visual explanations for deep convolutional networks,'' in \textit{Proc. IEEE Winter Conf. Applications of Computer Vision (WACV)}, 2018, pp.~839--847.
+
+\bibitem{lundberg2017} S. M. Lundberg and S.-I. Lee, ``A unified approach to interpreting model predictions,'' in \textit{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~30, 2017.
+
+\bibitem{b1} C. Trentin, Y. Ampatzidis, C. Lacerda, and L. Shiratsuchi, ``Tree crop yield estimation and prediction using remote sensing and machine learning: A systematic review,'' \textit{Smart Agricultural Technology}, vol.~9, p.~100556, 2024.
+
+\bibitem{b2} J. Lu, L. Tan, and H. Jiang, ``Review on convolutional neural network (CNN) applied to plant leaf disease classification,'' \textit{Agriculture}, vol.~11, no.~8, p.~707, 2021.
+
+\bibitem{b3} S. Saleem, M. I. Sharif, M. I. Sharif, M. Z. Sajid, and F. Marinello, ``Comparison of deep learning models for multi-crop leaf disease detection with enhanced vegetative feature isolation and definition of a new hybrid architecture,'' \textit{Agronomy}, vol.~14, no.~10, p.~2230, 2024.
+
+\bibitem{b4} Y. Wang, Q. Zhang, F. Yu, N. Zhang, X. Zhang, Y. Li, and J. Zhang, ``Progress in research on deep learning based crop yield prediction,'' \textit{Agronomy}, vol.~14, no.~10, p.~2264, 2024.
+
+\bibitem{b5} P. Rado\v{c}aj, D. Rado\v{c}aj, and G. Martinovi\'{c}, ``Image based leaf disease recognition using transfer deep learning with a novel versatile optimization module,'' \textit{Big Data and Cognitive Computing}, vol.~8, no.~6, p.~52, 2024.
+
+\bibitem{b6} J. Yuan, Y. Zhang, Z. Zheng, W. Yao, W. Wang, and L. Guo, ``Grain crop yield prediction using machine learning based on UAV remote sensing: A systematic literature review,'' \textit{Drones}, vol.~8, no.~10, p.~559, 2024.
+
+\bibitem{b7} S. Saha, O. D. Kucher, A. O. Utkina, and N. Y. Rebouh, ``Precision agriculture for improving crop yield predictions: a literature review,'' \textit{Frontiers in Agronomy}, vol.~7, p.~1566201, 2025.
+
+\bibitem{b8} M. Alkanan and Y. Gulzar, ``Enhanced corn seed disease classification: leveraging MobileNetV2 with feature augmentation and transfer learning,'' \textit{Frontiers in Applied Mathematics and Statistics}, vol.~9, p.~1320177, 2024.
+
+\bibitem{b9} S. Khaki and L. Wang, ``Crop yield prediction using deep neural networks,'' \textit{Frontiers in Plant Science}, vol.~10, p.~621, 2019.
+
+\bibitem{b10} M. K. A. Mazumder, M. F. Mridha, S. Alfarhood, M. Safran, M. Abdullah-Al-Jubair, and D. Che, ``A robust and light-weight transfer learning-based architecture for accurate detection of leaf diseases across multiple plants using less amount of images,'' \textit{Frontiers in Plant Science}, vol.~14, p.~1321877, 2024.
+
+\bibitem{b11} D. De Clercq, E. Nehring, H. Mayne, and A. Mahdi, ``Large language models can help boost food production, but be mindful of their risks,'' \textit{Frontiers in Artificial Intelligence}, vol.~7, p.~1326153, 2024.
+
+\bibitem{b12} J. P. Gujjar and H. R. P. Kumar, ``Agri friendly conversational AI chatbot using open source framework,'' \textit{Indian Journal of Science and Technology}, vol.~18, no.~8, pp.~580--585, 2025.
+
+\bibitem{b13} M. A. Jabed and M. A. A. Murad, ``Crop yield prediction in agriculture: A comprehensive review of machine learning and deep learning approaches, with insights for future research and sustainability,'' \textit{Heliyon}, vol.~10, no.~24, 2024.
+
+\bibitem{b14} V. Hiremani, R. M. Devadas, R. Sapna, T. Sowmya, P. Gujjar, N. S. Rani, and K. R. Bhavya, ``Federated learning for crop yield prediction: A comprehensive review of techniques and applications,'' \textit{MethodsX}, vol.~14, p.~103408, 2025.
+
+\bibitem{b15} S. Ajith, S. Vijayakumar, and N. Elakkiya, ``Yield prediction, pest and disease diagnosis, soil fertility mapping, precision irrigation scheduling, and food quality assessment using machine learning and deep learning algorithms,'' \textit{Discover Food}, vol.~5, no.~1, p.~67, 2025.
+
+\bibitem{b16} M. F. Manzoor, ``A review of machine learning techniques for precision agriculture and crop yield prediction,'' \textit{Premier Journal of Plant Biology}, vol.~1, 2024.
+
+\bibitem{b17} N. Abbasi, H. Nouri, K. Didan, A. Barreto-Mu\~{n}oz, S. Chavoshi Borujeni, C. Opp, and S. Siebert, ``Mapping vegetation index-derived actual evapotranspiration across croplands using the Google Earth Engine platform,'' \textit{Remote Sensing}, vol.~15, no.~4, p.~1017, 2023.
+
+\bibitem{b18} I. Pacal, I. Kunduracioglu, M. H. Alma, M. Deveci, S. Kadry, J. Nedoma, and R. Martinek, ``A systematic review of deep learning techniques for plant diseases,'' \textit{Artificial Intelligence Review}, vol.~57, no.~11, p.~304, 2024.
+
+\bibitem{b19} W. Shafik, A. Tufail, C. De Silva Liyanage, and R. A. A. H. M. Apong, ``Using transfer learning-based plant disease classification and detection for sustainable agriculture,'' \textit{BMC Plant Biology}, vol.~24, no.~1, p.~136, 2024.
+
+\bibitem{b20} T. A. Shaikh, T. Rasool, K. Veningston, and S. M. Yaseen, ``The role of large language models in agriculture: harvesting the future with LLM intelligence,'' \textit{Progress in Artificial Intelligence}, vol.~14, no.~2, pp.~117--164, 2025.
+
+\bibitem{b21} K. Meghraoui, I. Sebari, J. Pilz, K. Ait El Kadi, and S. Bensiali, ``Applied deep learning-based crop yield prediction: A systematic analysis of current developments and potential challenges,'' \textit{Technologies}, vol.~12, no.~4, p.~43, 2024.
+
+\bibitem{b22} S. P. Sudha and J. B. Loret, ``A review on machine learning-based precision agriculture techniques for crop farming monitoring with IOT,'' \textit{Discover Environment}, vol.~4, no.~1, p.~10, 2026.
+
+\bibitem{b24} C. Krupitzer, ``Generative artificial intelligence in the agri-food value chain---overview, potential, and research challenges,'' \textit{Frontiers in Food Science and Technology}, vol.~4, p.~1473357, 2024.
+
+\bibitem{b25} D. J. S. Ravindran, I. Skarga-Bandurova, S. V., M. Awais, and M. S., ``AgrolLM: Connecting farmers and agricultural practices through large language models for enhanced knowledge transfer and practical application,'' \textit{AgriEngineering}, vol.~8, no.~1, p.~38, 2026.
+
+\end{thebibliography}
+
+\end{document}

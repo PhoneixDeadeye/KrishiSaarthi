@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      devOptions: { enabled: true },
+      devOptions: { enabled: false, type: 'module' },
       manifest: {
         name: 'KrishiSaarthi',
         short_name: 'Krishi',
@@ -56,6 +56,8 @@ export default defineConfig({
     drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
   },
   server: {
+    port: 5173,
+    strictPort: true, // Ensures it fails if 5173 is in use, rather than picking 5174
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
@@ -85,6 +87,14 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      '/test_token': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/logout': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
       '/health': {
         target: 'http://localhost:8000',
         changeOrigin: true,
@@ -94,6 +104,10 @@ export default defineConfig({
         changeOrigin: true,
       },
       '/media': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/static': {
         target: 'http://localhost:8000',
         changeOrigin: true,
       },

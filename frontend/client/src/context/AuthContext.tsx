@@ -1,7 +1,7 @@
 // src/context/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { apiGet, apiPost, setUnauthorizedHandler } from "@/lib/api";
+import { apiGet, apiPost, setUnauthorizedHandler, API_BASE_URL, authHeaders } from "@/lib/api";
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 interface User {
@@ -30,24 +30,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Use refs for timers and listeners to avoid stale closures
     const logoutTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const isLoggingOutRef = useRef(false);
 
     const logout = useCallback(async () => {
+        // Guard against re-entrant calls (e.g. cascading 401s)
+        if (isLoggingOutRef.current) return;
+        isLoggingOutRef.current = true;
+
         const currentToken = token || localStorage.getItem("authToken");
-        if (currentToken) {
-            try {
-                await apiPost("/logout", {});
-            } catch { /* best-effort */ }
-        }
+
+        // Clear local state FIRST so no further API calls use an invalid token
         setToken(null);
         setUser(null);
         localStorage.removeItem("authToken");
         localStorage.removeItem("authUser");
         if (logoutTimerRef.current) clearTimeout(logoutTimerRef.current);
+
+        // Best-effort server-side logout using raw fetch to avoid
+        // triggering the global 401 handler (which would recurse)
+        if (currentToken) {
+            try {
+                await fetch(`${API_BASE_URL}/logout`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Token ${currentToken}`,
+                    },
+                    body: JSON.stringify({}),
+                });
+            } catch { /* best-effort, ignore errors */ }
+        }
+
+        isLoggingOutRef.current = false;
     }, [token]);
 
     // Register global 401 interceptor so API calls auto-logout on expired tokens
     useEffect(() => {
         setUnauthorizedHandler(() => {
+            // Skip if already logging out to prevent cascade
+            if (isLoggingOutRef.current) return;
             logout();
             toast({
                 title: "Session Expired",
@@ -80,13 +101,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             if (storedToken && storedUser) {
                 try {
-                    setUser(JSON.parse(storedUser));
-                    setToken(storedToken);
+                    // Keep loading true while checking
+                    setIsLoading(true);
                     
-                    await apiGet("/test_token");
+                    // Manually fetch so we don't use apiGet which relies on global state sometimes, or just use fetch directly
+                    const res = await fetch(`${API_BASE_URL}/test_token`, {
+                        headers: { "Authorization": `Token ${storedToken}` }
+                    });
+                    
+                    if (res.ok) {
+                        setUser(JSON.parse(storedUser));
+                        setToken(storedToken);
+                    } else {
+                        // Invalid token, do silent local cleanup
+                        localStorage.removeItem("authToken");
+                        localStorage.removeItem("authUser");
+                        setToken(null);
+                        setUser(null);
+                    }
                 } catch {
-                    // Network error or parse error, clear state if it's a parse error
-                    logout();
+                    // Network error or parse error
+                    localStorage.removeItem("authToken");
+                    localStorage.removeItem("authUser");
+                    setToken(null);
+                    setUser(null);
                 } finally {
                     setIsLoading(false);
                 }
@@ -96,7 +134,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         };
         
         validateToken();
-    }, [logout]);
+    }, []);
 
     // Setup activity listeners when authenticated
     useEffect(() => {

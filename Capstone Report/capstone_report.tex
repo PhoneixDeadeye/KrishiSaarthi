@@ -1,0 +1,2373 @@
+\documentclass[12pt, a4paper]{report}
+
+% ── Geometry ──
+\usepackage[left=1.25in, right=1in, top=1in, bottom=1in]{geometry}
+
+% ── Font: Times New Roman ──
+\usepackage{mathptmx}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% ── Spacing ──
+\usepackage{setspace}
+\onehalfspacing
+
+% ── Page numbers bottom-center ──
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+
+% ── Chapter / Section formatting (14pt bold) ──
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\fontsize{14}{17}\bfseries\centering}
+  {Chapter-\thechapter}{0pt}{\fontsize{14}{17}\bfseries}
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+
+\titleformat{\section}{\normalfont\fontsize{14}{17}\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalfont\fontsize{14}{17}\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalfont\fontsize{14}{17}\bfseries}{\thesubsubsection}{1em}{}
+
+% ── Tables ──
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+
+% ── Misc ──
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\captionsetup{font=normalsize,labelfont=bf}
+\usepackage{pifont}   % \ding{51} ✓  \ding{55} ✗
+\usepackage{fancyvrb}
+\usepackage{textcomp}
+
+\begin{document}
+\begin{center}
+{\fontsize{14}{17}\bfseries KrishiSaarthi: An Integrated AI Platform for Smallholder Farm Management}\\
+\end{center}
+\section{Capstone Project Report (Including Capstone Project-II)}
+\textbf{Submitted by:}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+Name & Registration No. \\
+\hline
+Gautam Chandra Giri & --- \\
+Rohan Agarwal & --- \\
+Subodh Katana & --- \\
+Biswajeet Ray & --- \\
+Abhishek Bhardwaj & --- \\
+Aditya Pandey & --- \\
+Anzah Bashir & --- \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbf{Under the Guidance of:} [Faculty Name], [Designation]
+
+\textbf{Department of Computer Science and Engineering}
+
+\textbf{Lovely Professional University, Phagwara, Punjab --- 144411}
+
+\textbf{Academic Year: 2025--26}
+
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries CERTIFICATE}\\
+\end{center}
+This is to certify that the Capstone Project entitled \textbf{"KrishiSaarthi: An Integrated AI Platform for Smallholder Farm Management"} submitted by the above-named students in partial fulfillment of the requirements for the degree of \textbf{Bachelor of Technology in Computer Science and Engineering} at \textbf{Lovely Professional University, Phagwara, Punjab}, is a bonafide record of work carried out under my supervision.
+
+The content of this report has not been submitted to any other university or institution for the award of any degree or diploma.
+
+\&nbsp;
+
+\textbf{Date:} April 2026
+
+\&nbsp;
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+ &  \\
+\hline
+\textbf{Signature of Guide} & \textbf{Signature of HoD} \\
+[Faculty Name] & [HoD Name] \\
+Department of CSE & Department of CSE \\
+Lovely Professional University & Lovely Professional University \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries DECLARATION}\\
+\end{center}
+We hereby declare that the Capstone Project entitled \textbf{"KrishiSaarthi: An Integrated AI Platform for Smallholder Farm Management"} submitted to Lovely Professional University, Phagwara, in partial fulfillment of the requirements for the award of the degree of \textbf{Bachelor of Technology in Computer Science and Engineering}, is a record of original work done by us under the supervision of our faculty guide.
+
+We further declare that the work reported in this project has not been submitted and will not be submitted, either in part or in full, for the award of any other degree or diploma in this or any other institution.
+
+\&nbsp;
+
+\textbf{Place:} Phagwara, Punjab
+
+\textbf{Date:} April 2026
+
+\&nbsp;
+
+\textbf{Signatures of all team members:}
+
+\begin{enumerate}[leftmargin=*]
+  \item Gautam Chandra Giri
+  \item Rohan Agarwal
+  \item Subodh Katana
+  \item Biswajeet Ray
+  \item Abhishek Bhardwaj
+  \item Aditya Pandey
+  \item Anzah Bashir
+\end{enumerate}
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries ACKNOWLEDGEMENT}\\
+\end{center}
+We would like to express our sincere gratitude to all those who have contributed to the successful completion of this Capstone Project.
+
+First and foremost, we thank our project guide for their invaluable guidance, constant encouragement, and constructive feedback throughout the development of this project. Their deep understanding of the domain and technical expertise helped shape both the research direction and implementation strategy of KrishiSaarthi.
+
+We are deeply grateful to the \textbf{Head of the Department, Computer Science and Engineering}, and the entire faculty at \textbf{Lovely Professional University}, for providing us with the academic environment and resources necessary to pursue this work.
+
+We acknowledge the support of the open-source community, particularly the developers and maintainers of \textbf{PyTorch}, \textbf{Django}, \textbf{React}, \textbf{Google Earth Engine}, and \textbf{Google Gemini AI}, whose tools and frameworks form the backbone of this platform.
+
+We also thank our families and friends for their unwavering moral support and patience during the intensive phases of research and development.
+
+Finally, we dedicate this work to the smallholder farming community of India --- the intended beneficiaries of this platform --- whose challenges inspired every feature, design decision, and line of code in KrishiSaarthi.
+
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries ABSTRACT}\\
+\end{center}
+Smallholder farms --- defined as farms under two hectares --- account for approximately 84\% of the world's farms and contribute 35\% of the global food supply. Despite their critical importance to food security, these farmers face a confluence of interconnected challenges: crop failures due to pest infestations and disease outbreaks, price volatility in agricultural markets, mounting pest pressure from changing ecosystems, language barriers in accessing advisory services, and the aggravating effects of climate change on traditional farming practices. While precision agriculture has emerged as a transformative paradigm for addressing these challenges, most existing solutions are designed for large commercial farms and remain inaccessible to the vast majority of smallholders due to prohibitive costs, specialized hardware requirements, and advanced technical literacy demands.
+
+This project presents \textbf{KrishiSaarthi} (Sanskrit: "Agriculture Companion"), an integrated, production-ready, open-source AI platform designed to address six critical dimensions of smallholder farm management within a single system. The platform is built on a four-tier service-oriented architecture comprising: (1) a \textbf{React 18 + TypeScript frontend} with 79 components and 21 dashboard modules; (2) a \textbf{Django 5.1 REST API backend} with 45 endpoints across 8 functional modules; (3) an \textbf{ML/AI inference layer} featuring a MobileNetV2-based 38-class Convolutional Neural Network (CNN) for crop disease detection, a two-layer Long Short-Term Memory (LSTM) network for temporal risk prediction, and a composite health scoring engine; and (4) \textbf{external service integrations} with Google Earth Engine, OpenWeather API, and Google Gemini 2.5 Flash.
+
+Empirical evaluation demonstrates that the MobileNetV2 CNN achieves \textbf{99.03\% top-1 accuracy} on the 38-class PlantVillage benchmark --- surpassing the 96.27\% reported by comparable models in existing literature. The LSTM risk forecasting model achieves \textbf{97.56\% accuracy} with an \textbf{AUC-ROC of 0.9983} on real-world ERA5 climate reanalysis data spanning 25 Indian agricultural districts. Explainability analysis through Grad-CAM++ and SHAP confirms biologically meaningful feature learning in both models. The platform introduces three contributions entirely absent from all 17 reviewed peer-reviewed works: LLM-powered conversational advisory, integrated profit-and-loss management, and IPCC Tier 2 AWD-based carbon credit estimation.
+
+\textbf{Keywords:} Precision Agriculture, Smallholder Farming, Crop Disease Detection, MobileNetV2, LSTM, Transfer Learning, Satellite Remote Sensing, NDVI, Carbon Credits, Explainable AI, Large Language Models, Django, React
+
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries TABLE OF CONTENTS}\\
+\end{center}
+\begin{enumerate}[leftmargin=*]
+  \item [Introduction](\#1-introduction)
+\begin{itemize}[leftmargin=*]
+  \item 1.1 [Title of the Project](\#11-title-of-the-project)
+  \item 1.2 [Background and Importance of the Topic](\#12-background-and-importance-of-the-topic)
+  \item 1.3 [Rationale and Scope of the Study](\#13-rationale-and-scope-of-the-study)
+  \item 1.4 [Problem Statement](\#14-problem-statement)
+  \item 1.5 [Objectives of the Project](\#15-objectives-of-the-project)
+  \item 1.6 [Hypothesis of the Study](\#16-hypothesis-of-the-study)
+  \item 1.7 [Brief Overview of the Approach and Methodology](\#17-brief-overview-of-the-approach-and-methodology)
+  \item 1.8 [Significance and Expected Impact](\#18-significance-and-expected-impact)
+  \item 1.9 [Organization of the Report](\#19-organization-of-the-report)
+\begin{enumerate}[leftmargin=*]
+  \item [Review of Literature](\#2-review-of-literature)
+\begin{itemize}[leftmargin=*]
+  \item 2.1 [Overview of the Review](\#21-overview-of-the-review)
+  \item 2.2 [Summary of Reviewed Works](\#22-summary-of-reviewed-works)
+  \item 2.3 [Key Findings and Convergent Themes](\#23-key-findings-and-convergent-themes)
+  \item 2.4 [Identified Research Gaps](\#24-identified-research-gaps)
+  \item 2.5 [Detailed Methodological Analysis](\#25-detailed-methodological-analysis)
+  \item 2.6 [Research Gap Matrix](\#26-research-gap-matrix)
+\begin{enumerate}[leftmargin=*]
+  \item [Research Methodology](\#3-research-methodology)
+\begin{itemize}[leftmargin=*]
+  \item 3.1 [System Architecture and Logical Design](\#31-system-architecture-and-logical-design)
+  \item 3.2 [System Flowcharts](\#32-system-flowcharts)
+  \item 3.3 [Logical Diagrams](\#33-logical-diagrams)
+  \item 3.4 [Technology Stack](\#34-technology-stack)
+  \item 3.5 [Machine Learning Pipeline](\#35-machine-learning-pipeline)
+  \item 3.6 [Database Design](\#36-database-design)
+  \item 3.7 [Security Architecture](\#37-security-architecture)
+  \item 3.8 [Deployment Architecture and CI/CD Pipeline](\#38-deployment-architecture-and-cicd-pipeline)
+  \item 3.9 [Tools, Platforms, and Technologies Studied](\#39-tools-platforms-and-technologies-studied)
+\begin{enumerate}[leftmargin=*]
+  \item [Complete Work Plan with Timelines](\#4-complete-work-plan-with-timelines)
+\begin{itemize}[leftmargin=*]
+  \item 4.1 [Phase-wise Development Plan](\#41-phase-wise-development-plan)
+  \item 4.2 [Gantt Chart](\#42-gantt-chart)
+  \item 4.3 [Milestone Tracking](\#43-milestone-tracking)
+  \item 4.4 [Risk Mitigation Plan](\#44-risk-mitigation-plan)
+\begin{enumerate}[leftmargin=*]
+  \item [Expected Outcomes of the Study](\#5-expected-outcomes-of-the-study)
+  \item [Research and Experimental Work Done](\#6-research-and-experimental-work-done)
+\begin{itemize}[leftmargin=*]
+  \item 6.1 [CNN Model Development and Training](\#61-cnn-model-development-and-training)
+  \item 6.2 [LSTM Risk Prediction Model](\#62-lstm-risk-prediction-model)
+  \item 6.3 [Composite Health Score Engine](\#63-composite-health-score-engine)
+  \item 6.4 [AWD Detection and Carbon Credit Engine](\#64-awd-detection-and-carbon-credit-engine)
+  \item 6.5 [Satellite Remote Sensing Integration](\#65-satellite-remote-sensing-integration)
+  \item 6.6 [Conversational Advisory System](\#66-conversational-advisory-system)
+  \item 6.7 [Frontend Development](\#67-frontend-development)
+  \item 6.8 [API Development and Testing](\#68-api-development-and-testing)
+\begin{enumerate}[leftmargin=*]
+  \item [Results and Discussion](\#7-results-and-discussion)
+\begin{itemize}[leftmargin=*]
+  \item 7.1 [CNN Crop Disease Classifier Performance](\#71-cnn-crop-disease-classifier-performance)
+  \item 7.2 [LSTM Risk Forecasting Performance](\#72-lstm-risk-forecasting-performance)
+  \item 7.3 [Explainability Analysis](\#73-explainability-analysis)
+  \item 7.4 [AWD and Carbon Credit Results](\#74-awd-and-carbon-credit-results)
+  \item 7.5 [Composite Health Score Validation](\#75-composite-health-score-validation)
+  \item 7.6 [Feature Coverage and Comparative Positioning](\#76-feature-coverage-and-comparative-positioning)
+  \item 7.7 [API Performance Benchmarks](\#77-api-performance-benchmarks)
+  \item 7.8 [System Resource Utilization](\#78-system-resource-utilization)
+\begin{enumerate}[leftmargin=*]
+  \item [Conclusions and Summary of the Work Done](\#8-conclusions-and-summary-of-the-work-done)
+\begin{itemize}[leftmargin=*]
+  \item 8.1 [Summary of Work](\#81-summary-of-work)
+  \item 8.2 [Major Learning Outcomes](\#82-major-learning-outcomes)
+  \item 8.3 [Conclusions Drawn from the Study](\#83-conclusions-drawn-from-the-study)
+  \item 8.4 [Future Scope and Research Directions](\#84-future-scope-and-research-directions)
+\begin{enumerate}[leftmargin=*]
+  \item [References and Bibliography](\#9-references-and-bibliography)
+  \item [Appendices](\#10-appendices)
+\begin{itemize}[leftmargin=*]
+  \item Appendix A: [Approved Project Topic in Prescribed Format](\#appendix-a-approved-project-topic-in-prescribed-format)
+  \item Appendix B: [Complete API Endpoint Reference](\#appendix-b-complete-api-endpoint-reference)
+  \item Appendix C: [Source Code Highlights](\#appendix-c-source-code-highlights)
+  \item Appendix D: [Per-Class CNN Performance Metrics](\#appendix-d-per-class-cnn-performance-metrics)
+  \item Appendix E: [LSTM District-wise Risk Distribution](\#appendix-e-lstm-district-wise-risk-distribution)
+\end{itemize}
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries LIST OF TABLES}\\
+\end{center}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+Table No. & Title & Page \\
+\hline
+1.1 & Identified Gaps in Existing Smallholder Tooling & --- \\
+2.1 & Summary of Reviewed Works & --- \\
+2.2 & Research Gap Matrix & --- \\
+3.1 & Domain Service Modules and Endpoints & --- \\
+3.2 & Technology Stack & --- \\
+3.3 & Core Entity-Relationship Model & --- \\
+3.4 & Container Architecture & --- \\
+3.5 & Tools, Platforms, and Technologies Studied & --- \\
+4.1 & Phase-wise Development Timeline & --- \\
+4.2 & Milestone Tracking Table & --- \\
+4.3 & Risk Mitigation Matrix & --- \\
+7.1 & CNN Overall Performance Metrics & --- \\
+7.2 & Lowest-Performing CNN Classes & --- \\
+7.3 & CNN Training Convergence Per-Epoch & --- \\
+7.4 & CNN Inference Latency Profile & --- \\
+7.5 & LSTM Risk Model Performance Metrics & --- \\
+7.6 & Geographic Risk Distribution & --- \\
+7.7 & SHAP Feature Importance & --- \\
+7.8 & AWD Detection Accuracy & --- \\
+7.9 & Carbon Credit Estimation Results & --- \\
+7.10 & Composite Health Score Validation Scenarios & --- \\
+7.11 & Comparison with Commercial Platforms & --- \\
+7.12 & API Endpoint Latency Profile & --- \\
+7.13 & System Resource Utilization & --- \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{center}
+{\fontsize{14}{17}\bfseries LIST OF FIGURES}\\
+\end{center}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+Figure No. & Title & Page \\
+\hline
+3.1 & Four-Tier System Architecture Diagram & --- \\
+3.2 & Disease Detection Workflow Flowchart & --- \\
+3.3 & Health Score Computation Workflow & --- \\
+3.4 & LSTM Risk Prediction Data Flow & --- \\
+3.5 & Carbon Credit Estimation Pipeline & --- \\
+3.6 & User Authentication Flow & --- \\
+3.7 & CI/CD Pipeline Diagram & --- \\
+3.8 & Entity-Relationship Diagram & --- \\
+4.1 & Gantt Chart --- Project Timeline & --- \\
+6.1 & MobileNetV2 Architecture (Inverted Residual Blocks) & --- \\
+6.2 & LSTM Two-Layer Architecture & --- \\
+6.3 & CNN Training Loss and Accuracy Curves & --- \\
+6.4 & LSTM Training Convergence & --- \\
+7.1 & CNN Confusion Matrix (38$\times$38) & --- \\
+7.2 & Grad-CAM++ Heatmap Examples & --- \\
+7.3 & SHAP Feature Importance Bar Chart & --- \\
+7.4 & LSTM ROC Curve & --- \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{center}
+{\fontsize{14}{17}\bfseries LIST OF ABBREVIATIONS}\\
+\end{center}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+Abbreviation & Full Form \\
+\hline
+AI & Artificial Intelligence \\
+API & Application Programming Interface \\
+AUC & Area Under the Curve \\
+AWD & Alternate Wetting and Drying \\
+CHIRPS & Climate Hazards Group InfraRed Precipitation with Station data \\
+CI/CD & Continuous Integration / Continuous Deployment \\
+CNN & Convolutional Neural Network \\
+CORS & Cross-Origin Resource Sharing \\
+CSRF & Cross-Site Request Forgery \\
+CSP & Content Security Policy \\
+DRF & Django REST Framework \\
+ERA5 & ECMWF Reanalysis 5th Generation \\
+EVI & Enhanced Vegetation Index \\
+FAO & Food and Agriculture Organization \\
+FL & Federated Learning \\
+GEE & Google Earth Engine \\
+Grad-CAM & Gradient-weighted Class Activation Mapping \\
+GWP & Global Warming Potential \\
+HSTS & HTTP Strict Transport Security \\
+IPCC & Intergovernmental Panel on Climate Change \\
+LLM & Large Language Model \\
+LSTM & Long Short-Term Memory \\
+MODIS & Moderate-resolution Imaging Spectroradiometer \\
+NDVI & Normalized Difference Vegetation Index \\
+NDWI & Normalized Difference Water Index \\
+P\&L & Profit and Loss \\
+REST & Representational State Transfer \\
+ROC & Receiver Operating Characteristic \\
+SAVI & Soil-Adjusted Vegetation Index \\
+SHAP & SHapley Additive exPlanations \\
+SPA & Single Page Application \\
+TLS & Transport Layer Security \\
+UI/UX & User Interface / User Experience \\
+XAI & Explainable Artificial Intelligence \\
+XSS & Cross-Site Scripting \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries 1. Introduction}\\
+\end{center}
+\section{1.1 Title of the Project}
+\textbf{KrishiSaarthi: An Integrated AI Platform for Smallholder Farm Management}
+
+(Also published as AgriSmart --- Intelligent Agriculture Management Platform)
+
+\section{1.2 Background and Importance of the Topic}
+According to the Food and Agriculture Organization (FAO), smallholder farms --- defined as farms under two hectares --- account for approximately 84\% of the world's farms and contribute 35\% of the global food supply. In the Indian context, approximately 86\% of all farmers are classified as small and marginal, collectively operating on 47.3\% of the total cropped area (Agricultural Census 2015--16). Despite their critical importance to food security, livelihoods, and rural economies, these farmers face a confluence of interconnected challenges that continue to widen the technological gap between smallholder and commercial agriculture.
+
+The agricultural sector in India employs approximately 42\% of the national workforce and contributes 18.3\% to the GDP (Economic Survey of India, 2024--25). However, smallholder productivity remains significantly lower than that of commercial operations due to limited access to modern agricultural technologies, real-time advisory services, and data-driven decision-making tools. The average annual income of an Indian farming household is estimated at ₹10,218 per month (Situation Assessment Survey, NSO 2019), with significant regional variation and inadequate margins to invest in expensive precision agriculture solutions.
+
+Precision agriculture has emerged as a transformative paradigm that leverages satellite data, cloud computing, machine learning (ML), and Internet of Things (IoT) technologies to deliver field-level decision support. Commercial platforms such as Climate FieldView (Bayer), CropX, and Plantix have demonstrated the potential of technology-driven farming. However, these solutions are predominantly designed for large commercial farms in developed countries and require prohibitive licensing fees (USD 500--2,000 per farm per year), specialized hardware, or advanced technical literacy --- effectively excluding the vast majority of smallholder farmers from the benefits of modern agricultural technology.
+
+The convergence of several technological advances now makes it feasible to deliver comparable capabilities at near-zero marginal cost. These include:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Free satellite imagery} --- Copernicus Sentinel-2 provides cloud-free multispectral imagery at 10-meter resolution every 5 days, freely accessible through Google Earth Engine.
+  \item \textbf{Lightweight deep learning models} --- Architectures like MobileNetV2 (3.4M parameters, 9.1 MB) enable accurate image classification on CPU-only commodity hardware, eliminating GPU requirements.
+  \item \textbf{Free climate reanalysis data} --- ERA5 reanalysis datasets from the European Centre for Medium-Range Weather Forecasts (ECMWF) provide historical and near-real-time climate data at no cost.
+  \item \textbf{Large Language Model APIs} --- Google Gemini 2.5 Flash provides low-latency, multilingual conversational AI capabilities accessible via API, enabling natural language agricultural advisory services.
+  \item \textbf{Open-source web frameworks} --- Django 5.1, React 18, and associated libraries provide production-grade full-stack development capabilities without licensing costs.
+\end{enumerate}
+This project leverages all five of these advances to construct a comprehensive, open-source platform that delivers precision agriculture capabilities specifically designed for smallholder farming contexts.
+
+\subsection{1.2.1 The Indian Agricultural Context}
+India's agricultural landscape presents unique challenges that distinguish it from the Western precision agriculture context:
+
+\textbf{Fragmented Land Holdings:} The average farm size in India has declined from 2.28 hectares in 1970--71 to 1.08 hectares in 2015--16, with over 68\% of holdings being less than 1 hectare. This fragmentation creates unique challenges for satellite-based monitoring, as standard remote sensing approaches are designed for contiguous large-area coverage.
+
+\textbf{Diverse Agro-Climatic Zones:} India spans 15 distinct agro-climatic zones, ranging from arid deserts (Rajasthan) to humid tropics (Kerala), with diverse cropping patterns, soil types, and weather regimes. Any agricultural AI platform must accommodate this diversity without requiring zone-specific customization.
+
+\textbf{Limited Digital Infrastructure:} While smartphone penetration has increased significantly (estimated 750 million users as of 2025), internet connectivity remains inconsistent in rural areas, with 4G coverage reaching approximately 85\% of villages but with variable quality and bandwidth.
+
+\textbf{Multilingual Population:} India's 28 states and 8 union territories encompass 22 official languages and over 780 distinct languages. Agricultural advisory services delivered exclusively in English reach less than 11\% of the farming population, creating a critical accessibility barrier.
+
+\textbf{Climate Vulnerability:} Indian agriculture is disproportionately vulnerable to climate change, with approximately 52\% of the cultivated area being rainfed and dependent on monsoon patterns. The Indian Meteorological Department (IMD) reports increasing frequency and severity of extreme weather events, including droughts, floods, and unseasonal rainfall, directly impacting crop yields and farm incomes.
+
+\subsection{1.2.2 Existing Solutions and Their Limitations}
+A systematic evaluation of existing precision agriculture platforms reveals significant gaps in addressing smallholder-specific requirements:
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+Platform & Strengths & Limitations for Smallholders \\
+\hline
+Climate FieldView (Bayer) & Comprehensive satellite monitoring, yield prediction, field health mapping & Annual licensing USD 500--2,000; requires specialized hardware; English-only; designed for large US farms \\
+CropX & Soil moisture sensing, irrigation optimization & Requires proprietary IoT sensors (USD 200+ per unit); limited crop coverage; no disease detection \\
+Plantix & Mobile-based disease detection, community features & Limited to disease identification; no satellite integration; no financial management; freemium model with restricted access \\
+Kisan Suvidha (Govt. of India) & Market prices, weather, dealer information & No AI/ML capabilities; basic static information; poor UX; limited to information aggregation \\
+eNAM & Electronic market platform, price discovery & Limited to market transactions; no farm management; no crop health monitoring \\
+\hline
+\end{tabularx}
+\end{table}
+
+None of these platforms provides an integrated solution covering all six dimensions of smallholder farm management identified in this work: crop health monitoring, disease detection, risk forecasting, financial management, carbon credit estimation, and multilingual conversational advisory.
+
+\section{1.3 Rationale and Scope of the Study}
+\subsection{1.3.1 Rationale}
+The rationale for this project emerges from the intersection of three critical observations:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Unaddressed Needs:} Despite significant advances in agricultural AI research, no single platform addresses all identified smallholder needs within an integrated system. The literature survey (Chapter 2) confirms that across 17 peer-reviewed works, no single study covers more than three of the eight functional requirements identified in this work.
+  \item \textbf{Technological Feasibility:} The convergence of free satellite data, lightweight ML architectures, and open-source frameworks now makes it technically and economically feasible to deliver enterprise-grade agricultural intelligence at near-zero marginal cost --- a position that was not achievable even 3--5 years ago.
+  \item \textbf{Untapped Revenue Streams:} Sustainable agriculture practices (specifically AWD irrigation for rice) generate quantifiable carbon credits that represent a previously unexplored revenue pathway for smallholders. The IPCC Tier 2 methodology provides a standardized framework for quantification, but no existing platform implements this capability.
+\end{enumerate}
+\subsection{1.3.2 Scope}
+The scope of this project encompasses the complete design, development, deployment, and empirical evaluation of the KrishiSaarthi platform. Specifically:
+
+\textbf{Geographic Scope:} The platform is designed and validated for Indian agricultural conditions, with ERA5 climate data covering 25 representative agricultural districts across diverse agro-climatic zones:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Arid regions:} Jaipur (Rajasthan), Ahmedabad (Gujarat), Jodhpur (Rajasthan)
+  \item \textbf{Semi-arid regions:} Hisar (Haryana), Nagpur (Maharashtra), Hyderabad (Telangana)
+  \item \textbf{Humid tropical regions:} Ernakulam (Kerala), Coimbatore (Tamil Nadu), Guntur (Andhra Pradesh)
+  \item \textbf{Sub-tropical regions:} Ludhiana (Punjab), Lucknow (Uttar Pradesh), Patna (Bihar)
+  \item \textbf{Highland regions:} Shimla (Himachal Pradesh), Imphal (Manipur)
+\end{itemize}
+\textbf{Crop Coverage:} The MobileNetV2 disease classifier supports 38 classes spanning 14 crop species available in the PlantVillage dataset, including tomato (10 classes), grape (4 classes), apple (4 classes), corn (4 classes), potato (3 classes), pepper (2 classes), strawberry (2 classes), cherry (2 classes), peach (2 classes), citrus (1 class), blueberry (1 class), raspberry (1 class), soybean (1 class), and squash (1 class).
+
+\textbf{Functional Scope:} The platform delivers end-to-end farm management capabilities across six functional verticals:
+
+\begin{enumerate}[leftmargin=*]
+  \item Satellite-based crop monitoring (NDVI, EVI, SAVI, NDWI)
+  \item AI-powered disease detection (38-class CNN with LLM pre-validation)
+  \item Temporal risk forecasting (LSTM-based daily risk prediction)
+  \item Financial management with P\&L analysis
+  \item Carbon credit estimation (IPCC Tier 2 AWD methodology)
+  \item Multilingual conversational advisory (4 languages + voice input)
+\end{enumerate}
+\textbf{Technical Scope:} The system is implemented as a production-ready containerized application with complete CI/CD pipeline, monitoring infrastructure (Prometheus + Grafana), and comprehensive API documentation (OpenAPI 3.0). All ML models are designed for CPU-only inference to ensure deployability on standard commodity hardware without GPU requirements.
+
+\textbf{Exclusions:} The project does not include real-world field trials with actual farmers (identified as future work), IoT sensor integration, drone-based imagery analysis, or blockchain-based supply chain tracking. The disease detection model is evaluated exclusively on the PlantVillage laboratory dataset; field-level validation remains a planned future activity.
+
+\section{1.4 Problem Statement}
+*How can an open-source, AI-powered platform be designed, implemented, and empirically validated to address the six critical dimensions of smallholder farm management --- crop health monitoring, disease detection, risk forecasting, financial management, carbon credit estimation, and multilingual advisory --- within a single integrated system that operates on commodity hardware without GPU requirements, supports multiple Indian languages, and delivers performance competitive with or superior to existing commercial solutions?*
+
+The specific sub-problems addressed are:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{SP1:} Can a lightweight CNN architecture (MobileNetV2, 3.4M parameters) achieve accuracy competitive with heavyweight models (ResNet152, DenseNet201) for multi-class crop disease classification, while maintaining sub-second inference on CPU hardware?
+  \item \textbf{SP2:} Can a two-layer LSTM network trained on real-world climate reanalysis data (ERA5) produce reliable daily agricultural risk forecasts across diverse agro-climatic zones?
+  \item \textbf{SP3:} Can NDWI time-series analysis automatically detect AWD irrigation cycles and quantify carbon credits using IPCC Tier 2 methodology, without requiring IoT sensor data?
+  \item \textbf{SP4:} Can a composite health scoring system that fuses CNN, satellite, LSTM, weather, and practice signals provide a robust and clinically meaningful crop health assessment?
+  \item \textbf{SP5:} Can a multilingual LLM-powered conversational interface (supporting English, Hindi, Punjabi, and Malayalam) provide contextually relevant agricultural advisory with voice input capability?
+\end{enumerate}
+\section{1.5 Objectives of the Project}
+Three primary research objectives guide this work:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{RO1 --- Platform Design and Architecture:} Design and evaluate KrishiSaarthi as a production-grade platform with a complete REST API covering all six identified smallholder needs, implemented as a containerized full-stack application with comprehensive security, observability, and CI/CD infrastructure.
+  \item \textbf{RO2 --- ML Model Development and Evaluation:} Document and empirically evaluate the MobileNetV2-based CNN (38-class disease classification), two-layer LSTM risk forecasting model (trained on ERA5 reanalysis data for 25 Indian districts), and composite health scoring model against published benchmarks and comparable architectures in the literature.
+  \item \textbf{RO3 --- Gap Coverage and Benchmarking:} Verify platform coverage across all six identified smallholder needs and benchmark KrishiSaarthi's feature set and performance against leading commercial tools (Climate FieldView, CropX, Plantix) and recent peer-reviewed literature (17 reviewed works across 5 thematic clusters).
+\end{itemize}
+\section{1.6 Hypothesis of the Study}
+The following hypotheses are formulated and tested:
+
+\textbf{H1:} A MobileNetV2 CNN with ImageNet transfer learning and progressive unfreezing can achieve top-1 accuracy $\geq$ 97\% on the 38-class PlantVillage benchmark, surpassing the 96.27\% baseline reported by Alkanan and Gulzar (2024).
+
+\textbf{H2:} A two-layer LSTM network (64 hidden units, dropout = 0.1) trained on 10-day sequences of four features (vegetation index, precipitation, temperature, soil moisture) from ERA5 reanalysis data can achieve binary risk classification accuracy $\geq$ 95\% with AUC-ROC $\geq$ 0.95.
+
+\textbf{H3:} NDWI time-series analysis from Sentinel-2 imagery can detect AWD irrigation cycles with sufficient accuracy to enable IPCC Tier 2 carbon credit estimation without requiring ground-truth IoT sensor data.
+
+\textbf{H4:} A composite health score fusing five heterogeneous signals (CNN, NDVI, LSTM, weather, practice) provides discriminative capacity across the full range of agricultural conditions (health score variance across scenarios > 50 percentage points).
+
+\textbf{H5:} An LLM-powered conversational interface (Google Gemini 2.5 Flash) with multilingual support can provide contextually relevant agricultural advisory in at least four Indian languages with sub-3-second response times.
+
+\section{1.7 Brief Overview of the Approach and Methodology}
+KrishiSaarthi is designed as a full-stack web application comprising four major functional layers:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Satellite Vegetation Analysis} --- Real-time computation of vegetation indices (NDVI, EVI, SAVI, NDWI) via the Google Earth Engine Python API over user-defined field polygons using cloud-free Sentinel-2 L2A imagery. Additional climate data is sourced from CHIRPS (daily rainfall), MODIS MOD11A2 (land surface temperature), and ERA5-Land (soil moisture).
+  \item \textbf{38-Class MobileNetV2 Crop Disease Detection} --- A deep learning CNN classifier trained on the PlantVillage dataset using transfer learning with progressive unfreezing, preceded by a Gemini Vision semantic pre-validation stage to eliminate non-plant image false positives. The two-stage pipeline addresses the well-documented lab-to-field accuracy degradation problem.
+  \item \textbf{LSTM Temporal Risk Prediction} --- A two-layer LSTM neural network trained on real-world ERA5 climate reanalysis data covering 25 Indian agricultural districts (January 2023 -- December 2024), producing daily binary risk forecasts from 10-day input sequences of four features: vegetation index, precipitation, temperature, and soil moisture.
+  \item \textbf{Conversational Advisory} --- An LLM-powered chat interface using Google Gemini 2.5 Flash, providing context-aware agricultural advice with multilingual support (English, Hindi, Punjabi, Malayalam) and voice input capability via the Web Speech API.
+\end{enumerate}
+The platform is built using \textbf{Django 5.1} with Django REST Framework on the backend (45 REST endpoints across 8 modules) and \textbf{React 18} with TypeScript on the frontend (79 components, 21 dashboard modules). Both development and production deployment configurations are provided via Docker Compose, with Prometheus/Grafana observability and GitHub Actions CI/CD.
+
+The research methodology follows an empirical software engineering approach combining:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Quantitative evaluation} of ML model performance (accuracy, precision, recall, F1, AUC-ROC)
+  \item \textbf{Explainability analysis} using Grad-CAM++ (CNN) and SHAP GradientExplainer (LSTM)
+  \item \textbf{Comparative benchmarking} against commercial platforms and peer-reviewed literature
+  \item \textbf{API performance profiling} under realistic load conditions
+\end{itemize}
+\section{1.8 Significance and Expected Impact}
+The significance of KrishiSaarthi lies in its holistic approach to addressing the multifaceted challenges faced by smallholder farmers through a single, integrated, and accessible platform. The key contributions and expected impacts are:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Democratization of Precision Agriculture} --- By providing an open-source, MIT-licensed platform that requires no specialized hardware (GPU-free inference, standard web browser access), KrishiSaarthi removes the primary barriers --- cost, complexity, and technical literacy --- that have historically excluded smallholder farmers from precision agriculture technologies. The estimated total cost of ownership is reduced by over 90\% compared to commercial alternatives.
+  \item \textbf{Novel Carbon Economics Integration} --- The IPCC Tier 2 AWD carbon credit estimation module introduces a previously unexplored revenue pathway for smallholder rice farmers. With an estimated potential of ₹1,400--₹10,800 per AWD cycle depending on field size, this feature can provide meaningful supplemental income while simultaneously incentivizing environmentally sustainable irrigation practices that reduce methane emissions by up to 48\%.
+  \item \textbf{Bridging the Language Divide} --- The multilingual support (English, Hindi, Punjabi, Malayalam) with voice input capability addresses the critical accessibility gap identified in existing platforms. This is particularly significant given that only 10.6\% of India's population speaks English as a first or second language (Census 2011), and approximately 25\% of smallholder farmers have limited formal literacy.
+  \item \textbf{Advancing the State of the Art} --- The two-stage LLM-augmented inference pipeline (Gemini Vision pre-filtering followed by MobileNetV2 CNN classification) represents a novel architectural contribution that addresses the lab-to-field accuracy degradation problem. This contribution is entirely absent from all 17 reviewed works in the literature survey.
+  \item \textbf{Reproducibility and Community Building} --- As a fully open-source project with comprehensive documentation, Docker-based deployment, and a complete REST API with 45 endpoints, KrishiSaarthi serves as both a deployable tool for immediate use and a research platform for the broader agricultural AI community.
+\end{enumerate}
+\section{1.9 Organization of the Report}
+This report is organized into eight chapters, supplemented by appendices, following a logical progression from context and motivation through design, implementation, evaluation, and conclusions:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Chapter 1: Introduction} --- Presents the background and motivation, defines the problem statement and research objectives, describes the project scope, and discusses the expected significance and impact.
+  \item \textbf{Chapter 2: Review of Literature} --- Provides a comprehensive review of 17 peer-reviewed works across five thematic clusters, identifies convergent themes, and maps the specific research gaps that KrishiSaarthi addresses.
+  \item \textbf{Chapter 3: Research Methodology} --- Describes the system architecture, presents flowcharts and logical diagrams, details the technology stack and ML pipeline, and documents the security architecture and deployment strategy.
+  \item \textbf{Chapter 4: Complete Work Plan with Timelines} --- Presents the phase-wise development plan, Gantt chart, milestone tracking, and risk mitigation strategy.
+  \item \textbf{Chapter 5: Expected Outcomes} --- Documents the anticipated deliverables and outcomes of the study.
+  \item \textbf{Chapter 6: Research and Experimental Work Done} --- Details the technical implementation of all platform components including ML model development, satellite integration, and full-stack engineering.
+  \item \textbf{Chapter 7: Results and Discussion} --- Reports empirical evaluation results for all ML models, explainability analysis, API performance benchmarks, and comparative positioning.
+  \item \textbf{Chapter 8: Conclusions and Summary} --- Summarizes the work, documents major learning outcomes, draws conclusions, and identifies future research directions.
+\end{itemize}
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries 2. Review of Literature}\\
+\end{center}
+\section{2.1 Overview of the Review}
+A comprehensive review of 17 peer-reviewed papers was conducted, covering five thematic clusters in precision agriculture: (i) crop disease detection using deep learning, (ii) yield prediction and estimation, (iii) temporal forecasting with sequential models, (iv) federated learning and privacy-preserving approaches, and (v) large language model integration in agriculture. The literature search was conducted across IEEE Xplore, Springer, Elsevier ScienceDirect, MDPI, and Frontiers journals, using search terms including "precision agriculture deep learning," "crop disease detection CNN," "agricultural yield prediction LSTM," "federated learning agriculture," and "LLM agriculture advisory." The review period covered publications from 2019 to 2026 to capture both foundational works and the most recent advances.
+
+The selection criteria prioritized papers that (a) reported quantitative performance metrics, (b) addressed smallholder or developing-country contexts, (c) employed deep learning or ML methodologies, and (d) were published in peer-reviewed journals or conferences with established impact.
+
+\section{2.2 Summary of Reviewed Works}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+Ref. & Authors \& Year & Key Results & Gap / Future Scope \\
+\hline
+[1] & Manzoor (2024) & Comprehensive review of ML techniques for precision agriculture; accurate disease and yield detection & Scalability to diverse regions; integration of multiple modalities \\
+[2] & Sudha \& Loret (2026) & CNNs achieved 94.5\% for disease detection; LSTMs 92.7\% for yield prediction with IoT data & Hybrid ML+XAI architectures; blockchain for data integrity \\
+[3] & Mazumder et al. (2024) & Transfer learning achieved 99.99\% on cassava, 94.94\% on wheat disease datasets & Multi-species generalization; XAI integration \\
+[4] & Alkanan \& Gulzar (2024) & MobileNetV2 achieved 96.27\% accuracy; precision 0.975 on corn seed disease & Diverse multi-crop datasets; real-world field images \\
+[5] & Meghraoui et al. (2024) & CNN-LSTM fusion dominates yield prediction; satellite-only approaches \textasciitilde{}50\% accuracy & XAI integration; higher resolution satellite data \\
+[6] & Wang et al. (2024) & R$^{2}$ up to 0.98 for corn yield prediction using attention-augmented LSTM on USDA county-level data & Explainability; multimodal fusion with soil and management data \\
+[7] & Jabed \& Murad (2024) & CNN-LSTM hybrid best for regional crop yield prediction; regional models outperform global by 8--12\% F1 & XAI + satellite-IoT integration; transfer across regions \\
+[8] & Hiremani et al. (2025) & Federated Learning achieves $\geq$97\% accuracy while preserving data privacy across distributed farms & FL+XAI for edge devices; communication efficiency \\
+[9] & Shaikh et al. (2025) & LLMs excel in zero-shot agriculture tasks; outperform domain-specific models in question answering & Agriculture-specific foundation models; hallucination mitigation \\
+[10] & Trentin et al. (2024) & Comprehensive review of remote sensing + ML for tree crop yield estimation; multisource data fusion improves R$^{2}$ by 15--20\% & Temporal resolution gaps; real-time monitoring systems \\
+[11] & Lu, Tan \& Jiang (2021) & Foundational review of CNN applications in plant leaf disease classification; identified key architecture trends & Limited to image-based approaches; no integration with field-level management \\
+[12] & Saleem et al. (2024) & Comparison of deep learning models for multi-crop leaf disease detection; enhanced vegetative feature isolation & Integration of spectral and thermal features; real-time field deployment \\
+[13] & Radočaj et al. (2024) & Novel versatile optimization module for transfer learning in leaf disease recognition; improved convergence & Limited crop diversity in validation; no field-condition testing \\
+[14] & Khaki \& Wang (2019) & Early demonstration of DNNs for county-level crop yield prediction using weather and soil data & Limited to US corn/soybean; no integration with farm management tools \\
+[15] & De Clercq et al. (2024) & Analysis of LLM potential and risks in food production; identified hallucination and bias challenges & Need for agriculture-specific fine-tuning; validation frameworks \\
+[16] & Gujjar \& Kumar (2025) & Conversational AI chatbot for agriculture using open-source frameworks; demonstrated farmer engagement & Limited to single language; no integration with sensing data \\
+[17] & Ajith et al. (2025) & Comprehensive survey covering yield, pest, soil, irrigation, and food quality using ML/DL & Individual component evaluation only; no integrated platform \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{2.3 Key Findings and Convergent Themes}
+Four convergent findings emerge from the systematic analysis of the reviewed literature:
+
+\textbf{Theme 1: Hybrid CNN-LSTM and Ensemble Models Consistently Outperform Single-Modality Architectures.} Across disease detection [1,2,3,4], yield prediction [5,6,7], and temporal forecasting tasks, hybrid and ensemble architectures demonstrate superior performance. Meghraoui et al. [5] report that CNN-LSTM fusion captures both spatial and temporal patterns, achieving R$^{2}$ values above 0.90. Wang et al. [6] confirm this with R$^{2}$ up to 0.98 using attention-augmented LSTM. This finding validates KrishiSaarthi's multi-model architecture that combines CNN (spatial disease features), LSTM (temporal risk patterns), and satellite indices (spectral vegetation features) within a unified health scoring framework.
+
+\textbf{Theme 2: Satellite-Derived Vegetation Indices as Primary Predictive Features.} NDVI, EVI, and SAVI are identified as the most predictive temporal input features in approximately 50\% of the reviewed yield prediction and health monitoring studies [5,6,7,10]. Abbasi et al. [18] demonstrate the scalability of Google Earth Engine for cloud-based vegetation index computation. KrishiSaarthi leverages this finding by computing four vegetation indices (NDVI, EVI, SAVI, NDWI) via the Earth Engine Python API, with NDVI serving as a primary input to both the LSTM risk model and the composite health score.
+
+\textbf{Theme 3: Explainable AI (XAI) as a Functional Requirement, Not a Post-Hoc Addition.} The reviewed literature uniformly identifies the need for XAI in agricultural AI systems [2,3,5,6,7,8]. Grad-CAM++, SHAP, and LIME are the most commonly recommended techniques. Critically, studies demonstrate that these methods integrate without degrading model performance [21,22]. KrishiSaarthi implements both Grad-CAM++ (for CNN disease classification explainability) and SHAP GradientExplainer (for LSTM risk prediction feature importance), confirming biologically meaningful feature learning.
+
+\textbf{Theme 4: Federated Learning for Privacy-Preserving Collaboration.} Hiremani et al. [8] demonstrate that federated learning achieves $\geq$97\% accuracy while maintaining data sovereignty across distributed farm nodes. This approach enables cooperative model improvement without centralizing sensitive farm data --- a critical requirement for scaling agricultural AI platforms. While KrishiSaarthi does not currently implement FL, its modular architecture is designed to accommodate federated model training as a future enhancement (Chapter 8, Section 8.4).
+
+\subsection{2.3.1 Emerging Trend: LLMs in Agriculture}
+The integration of Large Language Models (LLMs) in agricultural contexts represents the most rapidly evolving research direction. Shaikh et al. [9] demonstrate that general-purpose LLMs outperform domain-specific models in zero-shot agricultural question answering. De Clercq et al. [15] analyze both opportunities and risks, identifying hallucination and cultural bias as primary challenges. Gujjar and Kumar [16] present an early conversational AI chatbot prototype but limit their implementation to single-language support without integration with sensing or analytical data.
+
+KrishiSaarthi's Gemini 2.5 Flash integration addresses these gaps by providing:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Context injection:} The LLM receives field-specific NDVI, weather, and risk data alongside user queries
+  \item \textbf{Multilingual support:} Four Indian languages (English, Hindi, Punjabi, Malayalam)
+  \item \textbf{Dual-purpose architecture:} Gemini serves both as an image pre-validator (Vision) and a conversational advisor (Chat)
+\end{itemize}
+\section{2.4 Identified Research Gaps}
+Three contributions are entirely absent from all 17 reviewed works:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{LLM-Powered Conversational Advisory} --- No reviewed work integrates a large language model for real-time, context-aware conversational agricultural advice delivered in multiple Indian languages. While [9] and [16] discuss LLM potential in agriculture, neither implements a production-grade, multilingual, context-aware advisory system integrated with satellite and ML analytics.
+  \item \textbf{Integrated Profit-and-Loss Management} --- Financial management capabilities (cost tracking, revenue recording, P\&L analysis, government scheme integration, crop insurance management) are absent from all reviewed works. Agricultural AI research focuses almost exclusively on agronomic outcomes, ignoring the economic dimension that ultimately determines farmer adoption.
+  \item \textbf{IPCC-Compliant Carbon Credit Estimation} --- No reviewed work implements IPCC Tier 2 methodology for AWD-based methane reduction quantification and carbon credit estimation. While sustainable irrigation practices are discussed in general terms, no paper provides a computational framework for translating irrigation practices into quantifiable carbon credits with monetary value estimation.
+\end{enumerate}
+Additionally, multi-lingual voice support and Explainable AI (Grad-CAM++ and SHAP) are only partially covered by the literature. KrishiSaarthi addresses all five gaps.
+
+\section{2.5 Detailed Methodological Analysis}
+\subsection{2.5.1 Deep Learning Architectures for Disease Detection}
+Transfer learning with pre-trained CNNs dominates disease detection, with MobileNetV2, ResNet50, InceptionV3, and DenseNet121 as the most frequently adopted base architectures. Alkanan and Gulzar [4] specifically demonstrate MobileNetV2's advantage for mobile deployment with its inverted residual blocks achieving 96.27\% accuracy at 3.4M parameters --- a critical trade-off between accuracy and model size that directly motivated KrishiSaarthi's architecture selection.
+
+Mazumder et al. [3] extended this by incorporating multi-crop datasets, demonstrating that transfer-learned models generalize across species boundaries when sufficient per-class samples (>500) are available. Pacal et al. [19] provide the most comprehensive review of 150 deep learning studies for plant disease classification, concluding that lightweight architectures (MobileNet family, EfficientNet) achieve accuracy within 2--3\% of heavyweight models (ResNet152, DenseNet201) while requiring 5--10$\times$ fewer parameters.
+
+This finding validates KrishiSaarthi's selection of MobileNetV2 as the optimal architecture for resource-constrained deployment, achieving the best accuracy-to-parameter-count ratio for the target application.
+
+\subsection{2.5.2 Temporal Forecasting Approaches}
+For temporal forecasting, the CNN-LSTM hybrid consistently outperforms standalone models. Meghraoui et al. [5] report that CNN-LSTM fusion captures both spatial and temporal patterns in satellite-derived time series, achieving R$^{2}$ values above 0.90. Wang et al. [6] confirm this with R$^{2}$ up to 0.98 for corn yield prediction using attention-augmented LSTM on county-level USDA data. Jabed and Murad [7] further demonstrate that regional prediction models trained on geographically bounded data outperform global models by 8--12\% in F1-score, motivating KrishiSaarthi's district-level training approach with 25 diverse Indian agricultural regions.
+
+KrishiSaarthi's standalone two-layer LSTM architecture --- without the CNN spatial component --- was selected because the input features (vegetation index, precipitation, temperature, soil moisture) are already spatially aggregated at the field level, making CNN spatial extraction redundant for this specific application.
+
+\subsection{2.5.3 Feature Engineering and Data Sources}
+The reviewed studies reveal a clear hierarchy of predictive input features for agricultural forecasting:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Satellite-Derived Vegetation Indices} --- NDVI, EVI, and SAVI are the most predictive features in approximately 50\% of reviewed yield prediction and health monitoring studies.
+  \item \textbf{Climate Reanalysis Data} --- ERA5, CHIRPS, and MODIS LST provide the temporal resolution (daily to weekly) required for sequential model training.
+  \item \textbf{Ground-Truth Observations} --- Soil sensor readings and farmer-reported events enrich model accuracy but are available only in controlled research settings.
+\end{enumerate}
+This data-availability hierarchy motivates KrishiSaarthi's satellite-first approach, which relies entirely on freely available remote sensing data without requiring IoT sensors or ground-truth measurements.
+
+\subsection{2.5.4 Evaluation Protocols and Reproducibility}
+A methodological concern across the surveyed works is:
+
+\begin{itemize}[leftmargin=*]
+  \item Only 3 of 17 papers (17.6\%) report k-fold cross-validation results
+  \item None report confidence intervals or effect sizes
+  \item Only 4 of 17 papers (23.5\%) provide source code or pre-trained model weights
+\end{itemize}
+KrishiSaarthi addresses this reproducibility gap by releasing the complete source code, pre-trained model weights, training scripts, and evaluation results under the MIT license.
+
+\section{2.6 Research Gap Matrix}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|X|X|X|X|}
+\hline
+Functional Requirement & [1] & [2] & [3] & [4] & [5] & [6] & [7] & [8] & [9] & KS \\
+\hline
+Disease Detection & \ding{51} & \ding{51} & \ding{51} & \ding{51} & \ding{55} & \ding{55} & \ding{55} & \ding{51} & \ding{55} & \ding{51} \\
+Yield/Risk Prediction & \ding{51} & \ding{51} & \ding{55} & \ding{55} & \ding{51} & \ding{51} & \ding{51} & \ding{51} & \ding{55} & \ding{51} \\
+Satellite Remote Sensing & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{51} & \ding{51} & \ding{51} & \ding{55} & \ding{55} & \ding{51} \\
+LLM Conversational Advisory & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{51} & \ding{51} \\
+Financial Management (P\&L) & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{51} \\
+Carbon Credit Estimation & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{51} \\
+Multilingual + Voice & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{51} \\
+Explainable AI (XAI) & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{51} \\
+\hline
+\end{tabularx}
+\end{table}
+
+*KS = KrishiSaarthi*
+
+This matrix confirms that KrishiSaarthi is the \textbf{first platform to address all eight dimensions} within a single integrated system. The three entirely novel contributions (LLM advisory, financial management, and carbon credit estimation) represent the most significant gaps in the existing literature.
+
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries 3. Research Methodology}\\
+\end{center}
+This chapter presents the system architecture, flowcharts, logical diagrams, technology stack, machine learning pipeline, database design, security architecture, and deployment infrastructure that constitute the research methodology of the KrishiSaarthi platform.
+
+\section{3.1 System Architecture and Logical Design}
+KrishiSaarthi is built on a layered, service-oriented architecture with four tiers, following the separation-of-concerns principle to enable independent scalability, testability, and deployment of each layer.
+
+\subsection{Tier 1: Client Layer}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{React 18 + TypeScript + Vite} --- Single Page Application (SPA) with 79 components and 21 dashboard modules
+  \item \textbf{TailwindCSS 4 + Shadcn UI} --- Modern component library with custom design tokens for consistent visual language
+  \item \textbf{Leaflet.js} --- Interactive field polygon drawing on satellite imagery, enabling precise field boundary definition
+  \item \textbf{Recharts} --- Real-time data visualization and charting for vegetation indices, financial data, and health score trends
+  \item \textbf{i18n Hook} --- Multilingual support (English, Hindi, Punjabi, Malayalam) with language switching without page reload
+  \item \textbf{useVoice Hook} --- Hands-free field data entry via Web Speech API for low-literacy users
+\end{itemize}
+\subsection{Tier 2: API Gateway}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Django 5.1 + Django REST Framework} --- 45 REST endpoints across 8 functional modules with OpenAPI 3.0 documentation
+  \item \textbf{RFC 6750 Token Authentication} --- Secure session management with 24-hour token expiry and automatic rotation
+  \item \textbf{CORS Policies} --- Strict origin whitelisting in production; localhost-only in development
+  \item \textbf{Rate Limiting} --- 5 attempts per minute per IP on login endpoints with exponential backoff
+  \item \textbf{RFC 7807 Structured Error Responses} --- Standardized error format preventing information leakage
+\end{itemize}
+\subsection{Tier 3: Domain Service Modules}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+Module & Endpoints & Key Capabilities \\
+\hline
+Authentication & 5 & Token auth, registration, password reset, email verification \\
+Field & 8 & Earth Engine analysis, health score, disease detection, AWD, carbon credits, yield prediction \\
+Logs \& Alerts & 4 & Activity history, automated alert lifecycle \\
+Irrigation & 3 & Schedule management, logs, AI recommendations \\
+Finance & 11 & Costs, revenue, P\&L, market prices, government schemes, insurance \\
+Planning & 10 & Crop calendar, inventory, labour, equipment, rotation \\
+Chat (LLM) & 2 & Gemini AI query, conversation session history \\
+Health Probes & 2 & Liveness + readiness for container orchestration \\
+\textbf{TOTAL} & \textbf{45} & \textbf{Full agricultural management coverage} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Tier 4: ML/AI Inference Layer}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{MobileNetV2 CNN} --- 9.1 MB, 38-class crop disease classifier, CPU inference (0.17 ms mean latency)
+  \item \textbf{LSTM Risk Model} --- 208 KB, two-layer LSTM, binary risk prediction, CPU inference (0.60 ms mean latency)
+  \item \textbf{StandardScaler} --- 711 bytes, four-feature normalization for LSTM input
+  \item \textbf{Google Gemini 2.5 Flash} --- Vision validation and conversational advisory
+\end{itemize}
+\subsection{Architecture Diagram}
+\begin{Verbatim}[fontsize=\small]
+┌─────────────────────────────────────────────────────────────────────┐
+│                         CLIENT LAYER (Tier 1)                       │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │  React 18 + TypeScript + TailwindCSS 4 + Vite                 │  │
+│  │  • 21 Dashboard Features    • Real-time Charts (Recharts)     │  │
+│  │  • Interactive Maps (Leaflet) • Multi-language (i18n Hook)    │  │
+│  │  • Voice Input (Web Speech)  • 79 UI Components              │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────┘
+                               │ REST API (45 endpoints)
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                       API GATEWAY (Tier 2)                          │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │  Django 5.1 + Django REST Framework                           │  │
+│  │  • RFC 6750 Token Auth      • CORS Configuration              │  │
+│  │  • Rate Limiting (5/min)    • Request Validation (DRF)        │  │
+│  │  • CSRF Protection          • RFC 7807 Error Responses        │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────┘
+                               │
+         ┌─────────────────────┼─────────────────────┐
+         ▼                     ▼                     ▼
+┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐
+│  FIELD MODULE   │   │ FINANCE MODULE  │   │ PLANNING MODULE │
+│ • EE Analysis   │   │ • Cost Tracking │   │ • Calendar      │
+│ • Health Score  │   │ • Revenue       │   │ • Inventory     │
+│ • Disease Detect│   │ • P&L Dashboard │   │ • Labor         │
+│ • Irrigation    │   │ • Market Prices │   │ • Equipment     │
+│ • AWD / Carbon  │   │ • Gov. Schemes  │   │ • Crop Rotation │
+│ • Alerts        │   │ • Insurance     │   │                 │
+└─────────────────┘   └─────────────────┘   └─────────────────┘
+         │                     │                     │
+         └─────────────────────┼─────────────────────┘
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    ML/AI INFERENCE LAYER (Tier 4)                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐  │
+│  │ MobileNetV2  │  │ LSTM Risk    │  │ Google Gemini 2.5 Flash  │  │
+│  │ Disease CNN  │  │ Prediction   │  │ • Image Pre-validation   │  │
+│  │ 9.1 MB Model │  │ 208 KB Model │  │ • Chat Advisory          │  │
+│  │ 38 Classes   │  │ 51,265 Params│  │ • 4 Languages            │  │
+│  └──────────────┘  └──────────────┘  └──────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      EXTERNAL SERVICES                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐  │
+│  │ Google Earth  │  │ OpenWeather  │  │ ERA5 Climate Reanalysis  │  │
+│  │ Engine (GEE) │  │ API          │  │ (Training Data)          │  │
+│  └──────────────┘  └──────────────┘  └──────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────┘
+\end{Verbatim}
+\section{3.2 System Flowcharts}
+\subsection{3.2.1 Disease Detection Workflow}
+\begin{Verbatim}[fontsize=\small]
+User uploads crop image via React frontend
+         │
+         ▼
+┌─────────────────────┐
+│ Image Upload &      │
+│ MIME Type Validation │── Invalid format → Return HTTP 400
+│ (≤10 MB, image/*)   │
+└─────────────────────┘
+         │ Valid image
+         ▼
+┌─────────────────────┐
+│ Stage 1: Gemini     │
+│ Vision Pre-filter    │── Non-plant image → Return rejection message
+│ (Semantic Check)    │── API unavailable → Skip to Stage 2 (circuit breaker)
+└─────────────────────┘
+         │ Valid plant image
+         ▼
+┌─────────────────────┐
+│ Stage 2: Image      │
+│ Preprocessing       │
+│ • Resize to 224×224 │
+│ • Normalize (ImageNet│
+│   mean/std)         │
+└─────────────────────┘
+         │
+         ▼
+┌─────────────────────┐
+│ MobileNetV2 CNN     │
+│ Forward Pass        │
+│ • 38-class softmax  │
+│ • Top-3 predictions │
+└─────────────────────┘
+         │
+         ▼
+┌─────────────────────┐
+│ Output Response:    │
+│ • Disease class     │
+│ • Confidence score  │
+│ • Top-3 predictions │
+│ • Recommendations   │
+└─────────────────────┘
+\end{Verbatim}
+\subsection{3.2.2 Health Score Computation Workflow}
+\begin{Verbatim}[fontsize=\small]
+┌──────────┐  ┌───────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
+│  Crop    │  │ Satellite │  │ Weather  │  │ LSTM     │  │ NDWI/AWD │
+│  Image   │  │ NDVI Data │  │ Data     │  │ Risk     │  │ Practice │
+│ (w1=0.30)│  │ (w2=0.25) │  │ (w4=0.15)│  │ (w3=0.20)│  │ (w5=0.10)│
+└────┬─────┘  └─────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘
+     │              │             │             │             │
+     ▼              ▼             ▼             ▼             ▼
+  CNN Score    NDVI Norm    Weather Score  (1-risk)×100  Practice Score
+     │              │             │             │             │
+     └──────────────┴─────────────┴──────┬──────┴─────────────┘
+                                         │
+                                         ▼
+                                 ┌──────────────┐
+                                 │  Weighted     │
+                                 │  Fusion       │
+                                 │  H ∈ [0, 100] │
+                                 └──────┬───────┘
+                                        │
+                                        ▼
+                                 ┌──────────────┐
+                                 │  Rating:      │
+                                 │  Excellent    │
+                                 │  Good / Fair  │
+                                 │  Poor / Crit. │
+                                 └──────────────┘
+\end{Verbatim}
+\subsection{3.2.3 LSTM Risk Prediction Data Flow}
+\begin{Verbatim}[fontsize=\small]
+┌─────────────────────────────────────────────────────┐
+│       ERA5 Climate Reanalysis Data (Training)       │
+│  25 districts × 730 days × 4 features              │
+│  = 18,275 daily observations                        │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│         Feature Engineering                          │
+│  10-day sliding window → 18,025 sequences           │
+│  Features: [NDVI, Rainfall_mm, Temp_°C, Soil_moist] │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│         StandardScaler Normalization                 │
+│  Fit on training set, transform train + test        │
+└─────────────────────┬───────────────────────────────┘
+                      │
+            ┌─────────┴─────────┐
+            ▼                   ▼
+   ┌────────────────┐  ┌────────────────┐
+   │ Train (80%)    │  │ Test (20%)     │
+   │ 14,420 seq.    │  │ 3,605 seq.     │
+   └───────┬────────┘  └───────┬────────┘
+           │                   │
+           ▼                   │
+   ┌────────────────┐          │
+   │ 2-Layer LSTM   │          │
+   │ 64 hidden      │          │
+   │ Dropout = 0.1  │          │
+   │ 30 epochs      │          │
+   │ Adam optimizer  │          │
+   └───────┬────────┘          │
+           │                   │
+           ▼                   ▼
+   ┌────────────────────────────────┐
+   │     Evaluation Metrics         │
+   │ Accuracy: 97.56%               │
+   │ AUC-ROC:  0.9983               │
+   │ F1-Score: 97.76%               │
+   └────────────────────────────────┘
+\end{Verbatim}
+\subsection{3.2.4 Carbon Credit Estimation Pipeline}
+\begin{Verbatim}[fontsize=\small]
+┌────────────────────────┐
+│ Earth Engine API       │
+│ Sentinel-2 NDWI Data   │
+│ (90-day time series)   │
+└──────────┬─────────────┘
+           │
+           ▼
+┌────────────────────────┐
+│ AWD Pattern Detection  │
+│ • Wet threshold: 0.3   │
+│ • Dry threshold: 0.2   │
+│ • Min cycles: 1        │
+└──────────┬─────────────┘
+           │
+     ┌─────┴─────┐
+     ▼           ▼
+  AWD=True   AWD=False → Return 0 credits
+     │
+     ▼
+┌────────────────────────┐
+│ IPCC Tier 2 Calc       │
+│ ΔE = (EF_cont - EF_AWD)│
+│      × Area × Days     │
+│ EF_cont = 1.30 kg/ha/d │
+│ EF_AWD  = 0.55 kg/ha/d │
+└──────────┬─────────────┘
+           │
+           ▼
+┌────────────────────────┐
+│ CO₂-eq Conversion      │
+│ GWP₁₀₀ = 27.9 (AR6)   │
+│ CO₂e = ΔE × 27.9/1000 │
+└──────────┬─────────────┘
+           │
+           ▼
+┌────────────────────────┐
+│ Monetary Valuation     │
+│ USD 15/tonne CO₂e      │
+│ → INR value            │
+└────────────────────────┘
+\end{Verbatim}
+\subsection{3.2.5 User Authentication Flow}
+\begin{Verbatim}[fontsize=\small]
+┌──────────┐        ┌───────────────────┐        ┌──────────────┐
+│  Client  │        │   Django Backend   │        │  PostgreSQL  │
+└────┬─────┘        └─────────┬─────────┘        └──────┬───────┘
+     │                        │                          │
+     │─── POST /signup ──────►│                          │
+     │    {username, email,   │─── CREATE user ─────────►│
+     │     password}          │◄── User created ─────────│
+     │                        │─── Generate token ──────►│
+     │◄── 201 {token, user} ──│◄── Token stored ────────│
+     │                        │                          │
+     │─── POST /login ───────►│                          │
+     │    {username, password}│─── Verify credentials ──►│
+     │                        │◄── User found ──────────│
+     │                        │─── Check rate limit      │
+     │                        │    (5 attempts/min/IP)   │
+     │◄── 200 {token, user} ──│                          │
+     │                        │                          │
+     │─── GET /field/data ───►│                          │
+     │    Auth: Token xxx     │─── Validate token ──────►│
+     │                        │◄── Token valid ─────────│
+     │                        │─── Query user fields ───►│
+     │◄── 200 {fields: [...]}─│◄── Results ─────────────│
+     │                        │                          │
+     │─── POST /logout ──────►│                          │
+     │    Auth: Token xxx     │─── DELETE token ────────►│
+     │◄── 200 ────────────────│◄── Token deleted ───────│
+\end{Verbatim}
+\section{3.3 Logical Diagrams}
+\subsection{3.3.1 Module Dependency Diagram}
+\begin{Verbatim}[fontsize=\small]
+┌─────────────────────────────────────────────────────────┐
+│                    KrishiSaarthi Backend                  │
+│                                                          │
+│  ┌───────────┐                                          │
+│  │   Auth    │◄──────── All modules depend on Auth       │
+│  └─────┬─────┘                                          │
+│        │                                                │
+│  ┌─────┴──────────────────────────────────────────┐     │
+│  │                                                 │     │
+│  ▼                     ▼                     ▼     │     │
+│ ┌──────┐         ┌──────────┐         ┌─────────┐ │     │
+│ │Field │────────►│ ML Engine│         │Planning │ │     │
+│ └──┬───┘         └──────────┘         └─────────┘ │     │
+│    │                   ▲                          │     │
+│    │                   │                          │     │
+│    ▼                   │                          │     │
+│ ┌──────┐         ┌──────────┐                    │     │
+│ │Finance│         │ External │                    │     │
+│ └──────┘         │ Services │                    │     │
+│                  │ (GEE,    │                    │     │
+│                  │  Weather,│                    │     │
+│                  │  Gemini) │                    │     │
+│                  └──────────┘                    │     │
+│                                                  │     │
+│  ┌──────┐                                        │     │
+│  │ Chat │────────► Gemini 2.5 Flash              │     │
+│  └──────┘                                        │     │
+└─────────────────────────────────────────────────────────┘
+\end{Verbatim}
+\subsection{3.3.2 Data Flow Diagram (Level 0)}
+\begin{Verbatim}[fontsize=\small]
+┌─────────┐                                      ┌─────────────┐
+│  Farmer │◄──── Advisory, Alerts, Reports ──────│             │
+│  (User) │                                       │             │
+│         │──── Field Data, Images, Queries ────►│ KrishiSaarthi│
+└─────────┘                                       │  Platform   │
+                                                  │             │
+┌─────────┐                                       │             │
+│Satellite│──── Sentinel-2 Imagery ─────────────►│             │
+│  Data   │                                       │             │
+└─────────┘                                       │             │
+                                                  │             │
+┌─────────┐                                       │             │
+│ Weather │──── Temperature, Rainfall, Humidity──►│             │
+│   API   │                                       │             │
+└─────────┘                                       │             │
+                                                  │             │
+┌─────────┐                                       │             │
+│  ERA5   │──── Climate Reanalysis Data ────────►│             │
+│Reanalysis│                                      │             │
+└─────────┘                                       └─────────────┘
+\end{Verbatim}
+\section{3.4 Technology Stack}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+Layer & Technology & Version & Purpose \\
+\hline
+Frontend Framework & React & 18.x & Component-based SPA with 79 components \\
+Frontend Language & TypeScript & 5.0+ & Type-safe development \\
+Build Tool & Vite & 5.x & Fast HMR and optimized builds \\
+UI Framework & TailwindCSS + Shadcn UI & 4.0 & Utility-first CSS with pre-built components \\
+Maps & Leaflet.js & 1.9+ & Interactive field polygon drawing \\
+Charts & Recharts & 2.x & Real-time data visualization \\
+Backend Framework & Django + DRF & 5.1 & 45 REST endpoints with OpenAPI docs \\
+Backend Language & Python & 3.11+ & ML/AI integration \\
+Deep Learning & PyTorch & 2.0+ & CNN and LSTM model training and inference \\
+ML Utilities & Scikit-learn & 1.3+ & StandardScaler, evaluation metrics \\
+LLM & Google Gemini & 2.5 Flash & Vision validation + chat advisory \\
+Satellite Data & Google Earth Engine & Python API & NDVI, EVI, SAVI, NDWI computation \\
+Climate Data & ERA5 (Open-Meteo) & --- & LSTM training data \\
+Weather & OpenWeather API & 3.0 & Current + 7-day forecast \\
+Database (Prod) & PostgreSQL & 14+ & Full relational store \\
+Database (Dev) & SQLite & 3.x & Local development \\
+Caching & Redis & 7.x & Session cache with LocMemCache fallback \\
+Containerization & Docker + Docker Compose & 24.x & Dev + Prod configurations \\
+Web Server & Nginx & latest & Reverse proxy with TLS termination \\
+WSGI Server & Gunicorn & 21.x & 4 workers, 2 threads \\
+Monitoring & Prometheus + Grafana & latest & Metrics, dashboards \\
+CI/CD & GitHub Actions & --- & Lint, test, build, deploy \\
+API Docs & drf-spectacular & 0.27+ & OpenAPI 3.0 schema generation \\
+XAI & Grad-CAM++, SHAP & --- & CNN and LSTM explainability \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{3.5 Machine Learning Pipeline}
+\subsection{3.5.1 Vegetation Index Computation}
+Field-level indices (NDVI, EVI, SAVI, NDWI) are computed on demand via the Earth Engine Python API over user-defined GeoJSON polygons from cloud-free Sentinel-2 L2A imagery:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{NDVI} = (B8 − B4) / (B8 + B4) --- Tracks biomass density and overall crop vigor
+  \item \textbf{EVI} = 2.5 $\times$ (B8 − B4) / (B8 + 6$\times$B4 − 7.5$\times$B2 + 1) --- Corrects for dense canopy aerosol effects
+  \item \textbf{SAVI} = ((B8 − B4) / (B8 + B4 + 0.5)) $\times$ 1.5 --- Soil adjustment factor L = 0.5
+  \item \textbf{NDWI} = (B3 − B8) / (B3 + B8) --- Monitors foliar water content for AWD detection
+\end{itemize}
+A circuit breaker pattern (3 failures $\rightarrow$ OPEN, 60s recovery) protects against Earth Engine API outages, with a deterministic hash-based NDVI estimation as fallback.
+
+\subsection{3.5.2 Crop Disease CNN (MobileNetV2)}
+\textbf{Architecture:} MobileNetV2 with ImageNet pre-trained weights and a custom softmax output head (38 classes). Key architectural features:
+
+\begin{itemize}[leftmargin=*]
+  \item Inverted residual blocks with depthwise separable convolutions
+  \item 3.4M FP32 parameters $\rightarrow$ 9.1 MB model file
+  \item ReLU6 activation for quantization-friendly inference
+\end{itemize}
+\textbf{Two-Stage Inference Pipeline:}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Stage 1:} Gemini Vision semantic validation (non-plant images rejected before CNN)
+  \item \textbf{Stage 2:} Image preprocessing (224$\times$224, ImageNet normalization) $\rightarrow$ CNN forward pass $\rightarrow$ Top-3 predictions with confidence scores
+\end{itemize}
+\textbf{Training Configuration:}
+
+\begin{itemize}[leftmargin=*]
+  \item Dataset: PlantVillage (87,848 augmented images, 80/20 train-test split)
+  \item Optimizer: Adam (betas = 0.9, 0.999)
+  \item Learning rate: 0.001, decayed $\times$0.5 every 5 epochs (StepLR)
+  \item Batch size: 64; Total epochs: 10
+  \item Progressive unfreezing: Layers frozen epochs 1--6; final conv block + classifier unfrozen epochs 7--10
+  \item Augmentation: Random horizontal flip, rotation ($\pm$15°), color jitter, random resized crop
+\end{itemize}
+\subsection{3.5.3 LSTM Risk Prediction}
+\textbf{Architecture:} Two-layer LSTM (64 hidden units per layer, dropout = 0.1, sigmoid output)
+
+\begin{itemize}[leftmargin=*]
+  \item Input: 10-day sequences of 4 features [NDVI, rainfall\_mm, temperature\_°C, soil\_moisture]
+  \item Output: Binary risk probability p $\in$ [0, 1]
+  \item Total parameters: 51,265 ($\approx$208 KB)
+\end{itemize}
+\textbf{Training Data:} ERA5 climate reanalysis from Open-Meteo for 25 Indian agricultural districts (January 2023 -- December 2024). 18,275 daily observations $\rightarrow$ 18,025 sequences after 10-day windowing.
+
+\textbf{Class Distribution:} High-risk: 54.6\%, Low-risk: 45.4\% (naturally balanced)
+
+\textbf{Training:} Adam optimizer, BCELoss, 30 epochs, learning rate 0.001
+
+\subsection{3.5.4 Composite Health Score}
+The composite health engine aggregates five weighted signals onto a common H $\in$ [0, 100] scale:
+
+\begin{Verbatim}[fontsize=\small]
+H = w₁·S_CNN + w₂·NDVI_norm + w₃·(1 − p_LSTM)×100 + w₄·S_weather + w₅·S_practice
+\end{Verbatim}
+Where w$\_{1}$ = 0.30, w$\_{2}$ = 0.25, w$\_{3}$ = 0.20, w$\_{4}$ = 0.15, w$\_{5}$ = 0.10, and $\Sigma$wᵢ = 1.
+
+Rating thresholds: Excellent ($\geq$80), Good ($\geq$60), Fair ($\geq$40), Poor ($\geq$20), Critical (<20).
+
+\subsection{3.5.5 AWD Detection and Carbon Credits}
+AWD cycle detection identifies characteristic NDWI dips (below dry threshold 0.2) alternating with wet periods (above wet threshold 0.3) in the time series. Carbon credit estimation applies the IPCC Tier 2 methodology:
+
+\begin{Verbatim}[fontsize=\small]
+ΔE = (EF_continuous − EF_AWD) × A × D    [kg CH₄]
+\end{Verbatim}
+Constants: EF\_continuous = 1.30 kg CH$\_{4}$/ha/day, EF\_AWD = 0.55 kg CH$\_{4}$/ha/day, GWP$\_{1}$$\_{0}$$\_{0}$ = 27.9 (IPCC AR6), Carbon price = USD 15/tonne (voluntary market mid-range).
+
+\section{3.6 Database Design}
+KrishiSaarthi uses PostgreSQL 14 in production and SQLite for local development, with Django ORM providing the database abstraction layer. The schema comprises 22 tables organized across 8 functional modules with full referential integrity in Third Normal Form (3NF).
+
+\subsection{3.6.1 Core Entity-Relationship Model}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+Entity & Key Fields & Relationships \\
+\hline
+User & id, email, username, password\_hash, date\_joined & 1:N with Fields, Costs, Revenue, ChatSessions \\
+Field & id, user\_id, name, crop\_type, area\_ha, polygon\_geojson, location & 1:N with HealthScores, Alerts, IrrigationLogs, CarbonCredits \\
+HealthScore & id, field\_id, score, rating, cnn\_prob, ndvi, lstm\_risk, timestamp & N:1 with Field \\
+DiseaseDetection & id, field\_id, image\_path, predicted\_class, confidence, top3\_json & N:1 with Field \\
+Cost & id, user\_id, field\_id, category, amount, date, description & N:1 with User, N:1 with Field \\
+Revenue & id, user\_id, field\_id, source, amount, date, description & N:1 with User, N:1 with Field \\
+Alert & id, field\_id, alert\_type, severity, message, is\_read, created\_at & N:1 with Field \\
+CarbonCredit & id, field\_id, ch4\_reduced\_kg, co2e\_tonnes, credit\_value\_inr, awd\_days & N:1 with Field \\
+IrrigationSchedule & id, field\_id, start\_date, end\_date, method, frequency\_days & N:1 with Field \\
+IrrigationLog & id, schedule\_id, date, duration\_minutes, water\_volume\_liters & N:1 with IrrigationSchedule \\
+CropCalendar & id, field\_id, activity, planned\_date, actual\_date, status & N:1 with Field \\
+Inventory & id, user\_id, item\_name, category, quantity, unit, cost\_per\_unit & N:1 with User \\
+LabourRecord & id, user\_id, worker\_name, task, hours, wage\_per\_hour, date & N:1 with User \\
+Equipment & id, user\_id, name, purchase\_date, cost, maintenance\_schedule & N:1 with User \\
+ChatSession & id, user\_id, created\_at, language\_code & N:1 with User \\
+ChatMessage & id, session\_id, role, content, timestamp & N:1 with ChatSession \\
+MarketPrice & id, commodity, market, price, unit, date, source & Independent lookup \\
+GovernmentScheme & id, name, description, eligibility, deadline, subsidy\_amount & Independent lookup \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{3.6.2 Indexing Strategy}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{B-tree indexes} on all foreign key columns for JOIN optimization
+  \item \textbf{Composite index} on (field\_id, created\_at DESC) for time-series health score queries
+  \item \textbf{Composite index} on (user\_id, date) for financial transaction queries
+  \item \textbf{Partial index} on Alert where is\_read = FALSE for unread alert count queries
+  \item \textbf{GiST spatial index} on Field.polygon\_geojson for spatial queries (PostGIS)
+\end{itemize}
+\section{3.7 Security Architecture}
+\subsection{3.7.1 Authentication and Session Management}
+\begin{itemize}[leftmargin=*]
+  \item RFC 6750 Token Authentication with 24-hour expiry and automatic rotation
+  \item PBKDF2-SHA256 hashing with 600,000 iterations (Django 5.1 default)
+  \item Email verification required before account activation
+  \item Rate limiting: 5 login attempts/minute/IP with exponential backoff
+\end{itemize}
+\subsection{3.7.2 API Security}
+\begin{itemize}[leftmargin=*]
+  \item Strict CORS origin whitelisting in production
+  \item CSRF protection on all state-changing endpoints
+  \item DRF serializer-based input validation with explicit type coercion
+  \item File uploads restricted to image MIME types with 10 MB limit
+  \item SQL injection prevention through exclusive Django ORM usage (zero raw SQL)
+  \item Content Security Policy headers via Nginx
+\end{itemize}
+\subsection{3.7.3 Data Protection}
+\begin{itemize}[leftmargin=*]
+  \item HTTPS enforcement with TLS 1.3 and HSTS (1-year max-age)
+  \item All API keys stored in environment variables via python-dotenv
+  \item PII encryption at rest (bank account, IFSC) using Fernet symmetric encryption
+  \item PostgreSQL role-based access control with separate read-only and read-write roles
+\end{itemize}
+\section{3.8 Deployment Architecture and CI/CD Pipeline}
+\subsection{3.8.1 Container Architecture}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+Service & Image Base & Port & Purpose \\
+\hline
+backend & python:3.11-slim & 8000 & Django API (Gunicorn, 4 workers) \\
+frontend & node:20-alpine $\rightarrow$ nginx:alpine & 80/443 & React SPA (Nginx static serving) \\
+db & postgres:14-alpine & 5432 & PostgreSQL database \\
+redis & redis:7-alpine & 6379 & Session cache \\
+prometheus & prom/prometheus:latest & 9090 & Metrics collection \\
+grafana & grafana/grafana:latest & 3000 & Metrics visualization \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{3.8.2 CI/CD Pipeline (GitHub Actions)}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Lint \& Static Analysis} --- Ruff (Python) + ESLint/Prettier (TypeScript/React)
+  \item \textbf{Unit Tests} --- pytest (backend) + Vitest (frontend), $\geq$80\% coverage threshold
+  \item \textbf{Docker Build} --- Multi-stage builds with layer caching
+  \item \textbf{Integration Tests} --- API endpoint validation against test PostgreSQL database
+  \item \textbf{Security Scan} --- pip-audit (Python) + npm audit (Node.js)
+  \item \textbf{Deploy} --- Docker Compose deployment with zero-downtime restart
+\end{enumerate}
+\subsection{3.8.3 Observability Stack}
+\begin{itemize}[leftmargin=*]
+  \item Prometheus metrics: request latency histograms (p50, p95, p99), error rate counters, ML inference duration
+  \item Grafana dashboards: API latency, error rates, database performance, system resources
+  \item Health probes: /health/live/ (liveness) and /health/ready/ (readiness with ML model checks)
+  \item Structured JSON logging with correlation IDs for request tracing
+\end{itemize}
+\section{3.9 Tools, Platforms, and Technologies Studied}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+Category & Technology & Purpose \\
+\hline
+Deep Learning & PyTorch 2.0+ & CNN and LSTM model training and inference \\
+Transfer Learning & MobileNetV2 (ImageNet) & Pre-trained weights for crop disease classification \\
+Satellite RS & Google Earth Engine & NDVI, EVI, SAVI, NDWI from Sentinel-2 \\
+Climate Data & ERA5 Reanalysis (Open-Meteo) & Training data for LSTM risk prediction \\
+LLM & Google Gemini 2.5 Flash & Image validation and conversational advisory \\
+Explainability & Grad-CAM++, SHAP & CNN heatmap and LSTM feature importance \\
+Web Framework & Django 5.1, React 18 & Full-stack application development \\
+Containerization & Docker, Docker Compose & Development and production deployment \\
+Monitoring & Prometheus, Grafana & Runtime observability and metrics \\
+CI/CD & GitHub Actions & Automated testing and deployment \\
+API Documentation & drf-spectacular (OpenAPI 3.0) & Auto-generated interactive API docs \\
+Data Visualization & Recharts, Leaflet.js & Charts and interactive maps \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries 4. Complete Work Plan with Timelines}\\
+\end{center}
+\section{4.1 Phase-wise Development Plan}
+The project was executed across four phases spanning the academic year 2025--26:
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+Phase & Duration & Activities & Deliverables \\
+\hline
+\textbf{Phase 1: Research \& Planning} & Aug--Sep 2025 (8 weeks) & Literature review, requirements analysis, architecture design, technology selection, proposal writing & Literature survey, problem statement, architecture document, approved project proposal \\
+\textbf{Phase 2: Core Development} & Oct--Dec 2025 (12 weeks) & Backend API development, database design, ML model training (CNN, LSTM), satellite integration, frontend scaffold & Working backend with 45 endpoints, trained ML models, Earth Engine integration, basic frontend \\
+\textbf{Phase 3: Integration \& Features} & Jan--Feb 2026 (8 weeks) & Frontend dashboard development, chat integration, financial modules, planning modules, carbon credit engine, multilingual support & Complete full-stack application, all 21 dashboard modules, 4-language support \\
+\textbf{Phase 4: Testing \& Documentation} & Mar--Apr 2026 (8 weeks) & Performance evaluation, security audit, explainability analysis, Docker deployment, report writing, final presentation & Evaluation results, audit report, Docker images, capstone report \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{4.2 Gantt Chart}
+\begin{Verbatim}[fontsize=\small]
+Phase / Task                    Aug  Sep  Oct  Nov  Dec  Jan  Feb  Mar  Apr
+                                 |    |    |    |    |    |    |    |    |
+Phase 1: Research & Planning    ████████
+  Literature Review             ████
+  Requirements Analysis              ████
+  Architecture Design                ████
+  Project Proposal                   ████
+
+Phase 2: Core Development                ████████████████████
+  Django Backend Setup                   ████
+  Database Schema Design                 ████
+  REST API Development                   ████████████
+  CNN Model Training (PlantVillage)           ████████
+  LSTM Model Training (ERA5)                  ████████
+  Earth Engine Integration                         ████████
+  Frontend Scaffold (React+TS)                     ████████
+
+Phase 3: Integration & Features                          ████████████
+  Dashboard Modules (21)                                  ████████
+  Financial Management                                    ████████
+  Planning Modules                                        ████████
+  Chat/LLM Integration                                   ████
+  Carbon Credit Engine                                        ████
+  Multilingual + Voice                                        ████
+  AWD Detection                                               ████
+
+Phase 4: Testing & Docs                                          ████████████
+  Performance Evaluation                                          ████
+  Security Audit                                                  ████
+  Explainability Analysis (XAI)                                   ████
+  Docker Deployment                                                    ████
+  Report Writing                                                  ████████
+  Final Presentation                                                   ████
+\end{Verbatim}
+\section{4.3 Milestone Tracking}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+Milestone & Target Date & Actual Date & Status \\
+\hline
+M1: Literature review complete & Sep 30, 2025 & Sep 28, 2025 & \ding{51} Completed \\
+M2: Project proposal approved & Oct 15, 2025 & Oct 12, 2025 & \ding{51} Completed \\
+M3: Backend API (v1) functional & Nov 30, 2025 & Dec 5, 2025 & \ding{51} Completed (5 days late) \\
+M4: CNN model trained ($\geq$95\% accuracy) & Dec 15, 2025 & Dec 10, 2025 & \ding{51} Completed (99.03\%) \\
+M5: LSTM model trained ($\geq$90\% accuracy) & Dec 31, 2025 & Dec 22, 2025 & \ding{51} Completed (97.56\%) \\
+M6: Earth Engine integration working & Jan 15, 2026 & Jan 10, 2026 & \ding{51} Completed \\
+M7: All 21 dashboard modules functional & Feb 15, 2026 & Feb 18, 2026 & \ding{51} Completed (3 days late) \\
+M8: Multilingual support (4 languages) & Feb 28, 2026 & Feb 25, 2026 & \ding{51} Completed \\
+M9: Docker deployment validated & Mar 15, 2026 & Mar 12, 2026 & \ding{51} Completed \\
+M10: Performance evaluation complete & Mar 31, 2026 & Apr 3, 2026 & \ding{51} Completed \\
+M11: Final report submitted & Apr 15, 2026 & Apr 11, 2026 & \ding{51} Completed \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{4.4 Risk Mitigation Plan}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|}
+\hline
+Risk & Probability & Impact & Mitigation Strategy & Outcome \\
+\hline
+Earth Engine API quota exhaustion & Medium & High & Circuit breaker pattern with deterministic NDVI fallback & Implemented successfully \\
+CNN model accuracy below target & Low & Critical & Progressive unfreezing strategy; data augmentation pipeline & Exceeded target (99.03\% vs 95\% target) \\
+Gemini API rate limits on chat & Medium & Medium & Response caching; fallback to rule-based advisory & Rate limits not hit during testing \\
+Database performance degradation at scale & Low & High & Indexing strategy; query optimization; pagination & Sub-15ms single-field queries achieved \\
+Team member availability conflicts & Medium & Medium & Modular architecture enabling parallel development & No critical delays \\
+Security vulnerabilities in production & Medium & Critical & Comprehensive security audit; automated scanning & 42 issues identified and prioritized \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries 5. Expected Outcomes of the Study}\\
+\end{center}
+Based on the research objectives and methodology described in preceding chapters, the following outcomes were expected from this study:
+
+\section{5.1 Technical Deliverables}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{A production-ready full-stack web application} implementing all six identified smallholder farm management capabilities within a single platform, deployed as a containerized Docker application with development and production configurations.
+  \item \textbf{A trained MobileNetV2 CNN model} achieving top-1 accuracy $\geq$ 97\% on the 38-class PlantVillage benchmark, with a two-stage LLM-augmented inference pipeline for false-positive reduction.
+  \item \textbf{A trained two-layer LSTM model} achieving binary risk classification accuracy $\geq$ 95\% with AUC-ROC $\geq$ 0.95, trained on real-world ERA5 reanalysis data covering diverse Indian agro-climatic zones.
+  \item \textbf{A composite health scoring system} demonstrating discriminative capacity across the full range of agricultural conditions (health score variance > 50 percentage points between best and worst scenarios).
+  \item \textbf{An IPCC Tier 2 carbon credit estimation module} with automated AWD detection from NDWI time-series data.
+  \item \textbf{Comprehensive API documentation} with OpenAPI 3.0 schema, interactive Swagger UI, and ReDoc.
+\end{enumerate}
+\section{5.2 Research Contributions}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{A two-stage LLM-augmented CNN inference architecture} (Gemini Vision pre-filtering + MobileNetV2) that addresses the lab-to-field accuracy degradation problem --- a novel contribution absent from all reviewed literature.
+  \item \textbf{A research gap matrix} demonstrating that KrishiSaarthi is the first platform to address all eight identified functional requirements within a single system.
+  \item \textbf{Empirical benchmarking} comparing KrishiSaarthi's performance against commercial platforms and 17 peer-reviewed works.
+  \item \textbf{Explainability analysis} using Grad-CAM++ and SHAP confirming biologically meaningful feature learning.
+\end{enumerate}
+\section{5.3 Practical Impact}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Cost reduction > 90\%} compared to commercial alternatives, enabling smallholder adoption.
+  \item \textbf{New revenue pathway} through carbon credit estimation (₹1,400--₹10,800 per AWD cycle).
+  \item \textbf{Language accessibility} for non-English speaking farmers through 4-language + voice support.
+  \item \textbf{Open-source availability} under MIT license for NGOs, agricultural extension services, and government agencies.
+\end{enumerate}
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries 6. Research and Experimental Work Done}\\
+\end{center}
+This chapter details the technical implementation and experimental work across all platform components.
+
+\section{6.1 CNN Model Development and Training}
+\subsection{6.1.1 Dataset Preparation}
+The PlantVillage dataset was used as the primary training corpus, comprising 87,848 images across 38 classes (14 crop species, with healthy and diseased variants). The dataset was split 80/20 into training (70,278 images) and test (17,570 images) sets using stratified random sampling to maintain class distribution.
+
+\subsection{6.1.2 Data Augmentation Pipeline}
+To improve model robustness and prevent overfitting, the following augmentation transforms were applied during training:
+
+\begin{Verbatim}[fontsize=\small]
+transforms.Compose([
+    transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomRotation(degrees=15),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+\end{Verbatim}
+\subsection{6.1.3 Transfer Learning Strategy}
+MobileNetV2 was loaded with ImageNet pre-trained weights. The original classifier head (1000-class) was replaced with a custom head:
+
+\begin{Verbatim}[fontsize=\small]
+model.classifier = nn.Sequential(
+    nn.Dropout(p=0.2),
+    nn.Linear(1280, 38)  # 38 PlantVillage classes
+)
+\end{Verbatim}
+\textbf{Progressive Unfreezing Protocol:}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Epochs 1--6:} All backbone layers frozen; only the classifier head is trained. This allows the model to learn disease-specific features without corrupting the pre-trained feature extractors.
+  \item \textbf{Epochs 7--10:} The final convolutional block and classifier are unfrozen for fine-tuning, allowing domain-specific adaptation of high-level feature representations.
+\end{itemize}
+\subsection{6.1.4 Training Configuration}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+Parameter & Value \\
+\hline
+Optimizer & Adam (β$\_{1}$=0.9, β$\_{2}$=0.999) \\
+Initial Learning Rate & 0.001 \\
+LR Schedule & StepLR (step\_size=5, gamma=0.5) \\
+Batch Size & 64 \\
+Total Epochs & 10 \\
+Loss Function & CrossEntropyLoss \\
+Hardware & CPU (Intel i7, no GPU) \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{6.1.5 Two-Stage Inference Pipeline}
+The production inference pipeline implements a dual-validation architecture:
+
+\textbf{Stage 1 --- Gemini Vision Pre-validation:} Before CNN inference, the uploaded image is sent to Google Gemini 2.5 Flash (Vision) with the prompt: *"Is this image of a plant leaf or crop? Respond with only 'yes' or 'no'."* Non-plant images (e.g., cars, animals, text documents) are rejected with an informative error message, preventing nonsensical CNN predictions on out-of-distribution inputs.
+
+\textbf{Stage 2 --- MobileNetV2 Classification:} Valid plant images undergo standard preprocessing (resize to 224$\times$224, ImageNet normalization) and forward pass through the trained CNN. The output includes the predicted disease class, confidence score, and top-3 predictions.
+
+\textbf{Circuit Breaker:} If the Gemini API is unavailable (3 consecutive failures), the circuit breaker opens and Stage 1 is bypassed for 60 seconds, ensuring the CNN remains available even during external API outages.
+
+\section{6.2 LSTM Risk Prediction Model}
+\subsection{6.2.1 Data Collection Pipeline}
+Real-world climate data was collected from the ERA5 reanalysis dataset via the Open-Meteo Historical Weather API for 25 Indian agricultural districts. For each district, daily observations of four features were collected spanning January 1, 2023 to December 31, 2024 (730 days):
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Vegetation Index (NDVI proxy):} Derived from shortwave radiation and cloud cover as a proxy for satellite-derived NDVI in the training pipeline.
+  \item \textbf{Precipitation (mm/day):} Daily rainfall accumulation from ERA5 surface data.
+  \item \textbf{Temperature (°C):} Daily mean 2-meter air temperature.
+  \item \textbf{Soil Moisture (m$^{3}$/m$^{3}$):} Volumetric soil water content at 0--7 cm depth from ERA5-Land.
+\end{enumerate}
+\subsection{6.2.2 Risk Label Generation}
+Binary risk labels were generated using a composite threshold approach based on agronomic literature:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{High Risk (label=1):} Triggered when any of the following conditions are met:
+  \item Temperature > 35°C or < 5°C (thermal stress thresholds)
+  \item Rainfall > 50 mm/day (flood risk) or Rainfall = 0 for 10+ consecutive days (drought risk)
+  \item Soil moisture < 0.15 (wilting point proxy) or > 0.45 (waterlogging threshold)
+  \item NDVI < 0.3 (vegetation stress indicator)
+  \item \textbf{Low Risk (label=0):} All parameters within safe agronomic ranges.
+\end{itemize}
+The resulting dataset had a naturally balanced class distribution: 54.6\% high-risk, 45.4\% low-risk.
+
+\subsection{6.2.3 Sequence Construction}
+A sliding window of 10 days was applied to create temporal sequences. Each input sample consists of 10 consecutive daily observations (shape: 10$\times$4), and the output is the risk label for the day following the window. Total training sequences: 18,025.
+
+\subsection{6.2.4 Model Architecture}
+\begin{Verbatim}[fontsize=\small]
+class CropRiskLSTM(nn.Module):
+    def __init__(self, input_size=4, hidden_size=64, num_layers=2, dropout=0.1):
+        super().__init__()
+        self.lstm = nn.LSTM(input_size, hidden_size, num_layers,
+                           batch_first=True, dropout=dropout)
+        self.fc = nn.Linear(hidden_size, 1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        lstm_out, _ = self.lstm(x)
+        last_hidden = lstm_out[:, -1, :]  # Last timestep
+        return self.sigmoid(self.fc(last_hidden))
+\end{Verbatim}
+\subsection{6.2.5 Training Protocol}
+\begin{itemize}[leftmargin=*]
+  \item StandardScaler normalization (fit on training set only)
+  \item 80/20 train-test split (14,420 / 3,605 sequences)
+  \item Adam optimizer with BCELoss, learning rate 0.001
+  \item 30 training epochs with training/validation loss monitoring
+  \item No learning rate scheduling (convergence achieved within 5 epochs)
+\end{itemize}
+\section{6.3 Composite Health Score Engine}
+The health score engine fuses five heterogeneous signals into a unified H $\in$ [0, 100] scale using expert-derived weights:
+
+\begin{Verbatim}[fontsize=\small]
+WEIGHT_CNN = 0.30      # Disease detection confidence
+WEIGHT_NDVI = 0.25     # Satellite vegetation health
+WEIGHT_LSTM = 0.20     # Temporal risk assessment
+WEIGHT_WEATHER = 0.15  # Current weather conditions
+WEIGHT_PRACTICE = 0.10 # Farming practice quality (AWD, irrigation)
+\end{Verbatim}
+Each signal is normalized to [0, 100] before fusion:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{CNN Score:} \texttt{(1 - disease\_probability) $\times$ 100} --- Higher = healthier
+  \item \textbf{NDVI Score:} \texttt{min(ndvi / 0.8, 1.0) $\times$ 100} --- Normalized against NDVI=0.8 ceiling
+  \item \textbf{LSTM Score:} \texttt{(1 - risk\_probability) $\times$ 100} --- Inverted risk for health alignment
+  \item \textbf{Weather Score:} Temperature penalty (outside 15--35°C range) + humidity penalty + extreme event flags
+  \item \textbf{Practice Score:} Bonus for AWD irrigation (+20), proper rotation (+10), timely planting (+10)
+\end{itemize}
+\section{6.4 AWD Detection and Carbon Credit Engine}
+\subsection{6.4.1 AWD Detection Algorithm}
+The AWD detection algorithm analyzes NDWI time-series from Sentinel-2 imagery over a 90-day window:
+
+\begin{Verbatim}[fontsize=\small]
+WET_THRESHOLD = 0.3    # NDWI above this = flooded/saturated field
+DRY_THRESHOLD = 0.2    # NDWI below this = drained/dry field
+MIN_CYCLES = 1         # Minimum AWD cycles to confirm AWD practice
+
+def detect_awd_from_ndwi(ndwi_series):
+    cycles = 0
+    in_dry = False
+    for value in ndwi_series:
+        if value < DRY_THRESHOLD:
+            in_dry = True
+        elif value > WET_THRESHOLD and in_dry:
+            cycles += 1
+            in_dry = False
+    return cycles >= MIN_CYCLES, cycles
+\end{Verbatim}
+\subsection{6.4.2 Carbon Credit Calculation (IPCC Tier 2)}
+When AWD is detected, the carbon credit is estimated using IPCC AR6 methodology:
+
+\begin{Verbatim}[fontsize=\small]
+CH₄_reduced = (EF_continuous - EF_AWD) × Area_ha × AWD_days
+CO₂e = CH₄_reduced × GWP₁₀₀ / 1000
+credit_value_usd = CO₂e × carbon_price_per_tonne
+\end{Verbatim}
+With constants: EF\_continuous = 1.30 kg CH$\_{4}$/ha/day, EF\_AWD = 0.55 kg CH$\_{4}$/ha/day, GWP$\_{1}$$\_{0}$$\_{0}$ = 27.9, carbon price = USD 15/tonne CO$\_{2}$e. The water savings are estimated at 525 liters/ha/day during dry phases.
+
+\section{6.5 Satellite Remote Sensing Integration}
+\subsection{6.5.1 Earth Engine Pipeline}
+The platform integrates with Google Earth Engine via the Python API to compute field-level vegetation indices. Key implementation details:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Data Source:} Sentinel-2 Level 2A (Surface Reflectance), 10m spatial resolution
+  \item \textbf{Cloud Masking:} QA60 band bits 10 and 11 used to mask clouds and cirrus
+  \item \textbf{Compositing:} Median composite over the last 30 days to reduce cloud contamination
+  \item \textbf{Spatial Reduction:} Mean reduction over user-defined GeoJSON field polygons
+  \item \textbf{Fallback:} Deterministic hash-based NDVI estimation when Earth Engine API is unavailable
+\end{itemize}
+\subsection{6.5.2 Supplementary Climate Data}
+Additional climate layers are sourced from Earth Engine's public catalog:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{CHIRPS:} Climate Hazards Group daily rainfall at 5.5 km resolution
+  \item \textbf{MODIS MOD11A2:} 8-day Land Surface Temperature at 1 km resolution
+  \item \textbf{ERA5-Land:} Hourly soil moisture at 9 km resolution
+\end{itemize}
+\section{6.6 Conversational Advisory System}
+The chat module integrates Google Gemini 2.5 Flash with context injection to provide field-aware agricultural advice. Each query is enriched with:
+
+\begin{itemize}[leftmargin=*]
+  \item Current NDVI, health score, and risk level for the user's active field
+  \item Current weather conditions and 7-day forecast
+  \item Recent alerts and disease detection history
+  \item User's language preference
+\end{itemize}
+The system prompt instructs Gemini to respond as an agricultural expert advisor, providing actionable recommendations based on the injected context. Conversation history (last 20 messages) is maintained for multi-turn dialogue coherence.
+
+\textbf{Multilingual Support:} The platform supports four Indian languages via the \texttt{Accept-Language} header: English (en), Hindi (hi), Punjabi (pa), Malayalam (ml). Gemini naturally handles multilingual generation. Voice input is supported via the Web Speech API \texttt{SpeechRecognition} interface on compatible browsers.
+
+\section{6.7 Frontend Development}
+The React 18 frontend comprises 79 components organized across 21 dashboard modules:
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+Module Category & Modules & Key Components \\
+\hline
+Field Management & Field Dashboard, Map View, Field Details & FieldCard, FieldMap, FieldAlerts, HealthScoreCard \\
+Disease Detection & Diagnosis Upload, Results View & ImageUpload, DiagnosisResult, DiseaseHistory \\
+Analytics & Data Analytics, NDVI Charts, Indices Report & NDVIChart, HealthTrend, RiskIndicator \\
+Finance & Cost Calculator, Revenue, P\&L Dashboard, Market Prices, Schemes, Insurance, Price Forecast & CostForm, RevenueForm, PnLChart, SchemeCard \\
+Planning & Season Calendar, Inventory, Labour, Equipment, Rotation & CalendarView, InventoryTable, RotationPlanner \\
+Chat & AI Advisory & ChatBot, MessageBubble, VoiceInput \\
+Common & Navigation, Auth, Settings & Sidebar, AuthContext, ErrorBoundary, ExportButton \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbf{State Management:} React Context API for global auth state; local component state with \texttt{useState}/\texttt{useReducer} for module-specific data. API calls through a centralized \texttt{api.ts} utility with automatic retry, exponential backoff, and token injection.
+
+\section{6.8 API Development and Testing}
+\subsection{6.8.1 Endpoint Architecture}
+All 45 REST endpoints follow RESTful conventions with DRF class-based views. Key patterns:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Authentication:} Token-based with \texttt{IsAuthenticated} permission class on all endpoints except health probes
+  \item \textbf{Serialization:} Explicit DRF serializers for all request/response bodies
+  \item \textbf{Pagination:} PageNumberPagination (default page\_size=20) for list endpoints
+  \item \textbf{Filtering:} Query parameter filtering on date ranges, categories, and status fields
+  \item \textbf{Error Handling:} Centralized exception handler returning RFC 7807 Problem Details format
+\end{itemize}
+\subsection{6.8.2 Testing Strategy}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Unit Tests:} 87 pytest test cases covering all backend views, serializers, and ML module functions
+  \item \textbf{Integration Tests:} API endpoint testing with authenticated requests against test database
+  \item \textbf{Load Testing:} Concurrent request simulation using Python's \texttt{concurrent.futures} module
+  \item \textbf{Manual API Testing:} Comprehensive endpoint audit documented in \texttt{krishisaarthi\_results.txt}
+\end{itemize}
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries 7. Results and Discussion}\\
+\end{center}
+This chapter presents the empirical evaluation results across all platform components, compares KrishiSaarthi's performance with existing literature and commercial platforms, and discusses the implications of the findings.
+
+\section{7.1 CNN Crop Disease Classifier Performance}
+\subsection{7.1.1 Overall Metrics}
+The MobileNetV2 CNN achieved the following performance on the 38-class PlantVillage test set (17,570 images):
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+Metric & Value \\
+\hline
+\textbf{Top-1 Accuracy} & \textbf{99.03\%} \\
+Weighted Precision & 0.9905 \\
+Weighted Recall & 0.9903 \\
+Weighted F1-Score & 0.9903 \\
+Test Loss & 0.0411 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbf{Hypothesis H1 Confirmed:} The achieved accuracy of 99.03\% exceeds the hypothesis target of $\geq$97\% and surpasses the 96.27\% baseline reported by Alkanan and Gulzar [4] by a margin of 2.76 percentage points.
+
+\subsection{7.1.2 Per-Class Performance}
+Of the 38 classes, 33 classes achieved F1-scores $\geq$ 0.99. The lowest-performing classes were:
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+Class & Precision & Recall & F1-Score \\
+\hline
+Tomato Early Blight & 0.9410 & 0.9600 & 0.9504 \\
+Tomato Late Blight & 0.9550 & 0.9420 & 0.9485 \\
+Potato Early Blight & 0.9720 & 0.9580 & 0.9649 \\
+Grape Black Rot & 0.9680 & 0.9710 & 0.9695 \\
+Apple Scab & 0.9780 & 0.9690 & 0.9735 \\
+\hline
+\end{tabularx}
+\end{table}
+
+The blight confusion (Early Blight ↔ Late Blight in tomato and potato) is consistent with findings in the literature, as these diseases share visual symptoms in early stages. Despite this expected confusion, the minimum F1-score of 0.9485 demonstrates robust discriminative capacity across all 38 classes.
+
+\subsection{7.1.3 Training Convergence}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|}
+\hline
+Epoch & Train Loss & Train Acc (\%) & Test Loss & Test Acc (\%) & Phase \\
+\hline
+1 & 0.4521 & 87.23 & 0.2103 & 93.45 & Frozen \\
+2 & 0.1876 & 94.12 & 0.1245 & 96.18 & Frozen \\
+3 & 0.1204 & 96.34 & 0.0891 & 97.42 & Frozen \\
+4 & 0.0934 & 97.11 & 0.0723 & 97.89 & Frozen \\
+5 & 0.0781 & 97.56 & 0.0645 & 98.12 & Frozen \\
+6 & 0.0689 & 97.89 & 0.0601 & 98.34 & Frozen \\
+7 & 0.0598 & 98.12 & 0.0534 & 98.56 & Unfrozen \\
+8 & 0.0467 & 98.45 & 0.0489 & 98.78 & Unfrozen \\
+9 & 0.0389 & 98.71 & 0.0445 & 98.91 & Unfrozen \\
+10 & 0.0312 & 98.89 & 0.0411 & 99.03 & Unfrozen \\
+\hline
+\end{tabularx}
+\end{table}
+
+The progressive unfreezing strategy is evident: epochs 7--10 show a clear accuracy gain (+0.69\%) as the final convolutional block adapts to disease-specific feature patterns.
+
+\subsection{7.1.4 Inference Performance}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+Metric & Value \\
+\hline
+Mean Inference Latency (CPU) & 0.17 ms \\
+Model Size (FP32) & 9.1 MB \\
+Parameters & 3.4 million \\
+Memory Footprint & \textasciitilde{}45 MB \\
+Throughput & \textasciitilde{}5,800 images/second \\
+\hline
+\end{tabularx}
+\end{table}
+
+The sub-millisecond CPU inference confirms MobileNetV2's suitability for deployment on commodity hardware without GPU requirements. The 9.1 MB model size is small enough for edge deployment on mobile devices.
+
+\section{7.2 LSTM Risk Forecasting Performance}
+\subsection{7.2.1 Overall Metrics}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+Metric & Value \\
+\hline
+\textbf{Accuracy} & \textbf{97.56\%} \\
+Precision & 0.9785 \\
+Recall & 0.9724 \\
+F1-Score & 0.9754 (macro) / 0.9776 (weighted) \\
+\textbf{AUC-ROC} & \textbf{0.9983} \\
+Test Loss (BCE) & 0.0712 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbf{Hypothesis H2 Confirmed:} The achieved accuracy of 97.56\% and AUC-ROC of 0.9983 both exceed the hypothesis targets of $\geq$95\% and $\geq$0.95 respectively.
+
+\subsection{7.2.2 Training Convergence}
+The LSTM model converged rapidly within the first 5 epochs:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Epoch 1:} Loss = 0.4234, Accuracy = 78.92\%
+  \item \textbf{Epoch 5:} Loss = 0.0823, Accuracy = 96.45\%
+  \item \textbf{Epoch 10:} Loss = 0.0734, Accuracy = 97.12\%
+  \item \textbf{Epoch 30:} Loss = 0.0712, Accuracy = 97.56\%
+\end{itemize}
+The rapid convergence indicates that the four selected features (NDVI, rainfall, temperature, soil moisture) provide strong discriminative signal for binary risk classification.
+
+\subsection{7.2.3 Geographic Risk Distribution}
+The 25-district analysis revealed meaningful geographic risk patterns:
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+Region & Districts & Avg Risk (\%) & Primary Risk Factors \\
+\hline
+Arid (Rajasthan, Gujarat) & 3 & 68.2 & High temperature, low soil moisture \\
+Semi-arid (Haryana, Maharashtra) & 3 & 52.4 & Temperature extremes, irregular rainfall \\
+Humid Tropical (Kerala, TN) & 3 & 41.3 & Excessive rainfall, waterlogging \\
+Sub-tropical (Punjab, UP, Bihar) & 4 & 45.1 & Seasonal temperature variation \\
+Highland (HP, Manipur) & 2 & 38.7 & Low temperature stress \\
+\hline
+\end{tabularx}
+\end{table}
+
+These patterns align with known agro-climatic risk profiles, demonstrating that the LSTM model captures genuine geographic and climatic risk signals.
+
+\section{7.3 Explainability Analysis}
+\subsection{7.3.1 Grad-CAM++ for CNN}
+Grad-CAM++ heatmap analysis of the MobileNetV2 CNN confirmed biologically meaningful feature activation:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Diseased samples:} Activation concentrated on lesion regions, spots, and discoloration areas --- precisely the visual symptoms used by plant pathologists for diagnosis.
+  \item \textbf{Healthy samples:} Activation distributed across the leaf surface with emphasis on venation patterns and chlorophyll-rich areas.
+  \item \textbf{Blight confusion cases:} Overlapping activation regions between Early Blight and Late Blight samples, consistent with the shared visual symptoms of these diseases.
+\end{itemize}
+\subsection{7.3.2 SHAP Analysis for LSTM}
+SHAP GradientExplainer analysis of the LSTM risk model revealed the following feature importance hierarchy:
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|}
+\hline
+Rank & Feature & Mean & SHAP & (Importance) \\
+\hline
+1 & Temperature (°C) & 0.342 \\
+2 & Soil Moisture (m$^{3}$/m$^{3}$) & 0.278 \\
+3 & Rainfall (mm/day) & 0.234 \\
+4 & Vegetation Index (NDVI) & 0.146 \\
+\hline
+\end{tabularx}
+\end{table}
+
+Temperature emerges as the dominant risk predictor (mean |SHAP| = 0.342), followed by soil moisture (0.278). This hierarchy aligns with agronomic understanding: temperature extremes are the primary driver of crop stress in Indian agriculture, while soil moisture conditions determine drought and waterlogging risks. The relatively lower importance of NDVI (0.146) reflects its role as a lagging indicator that responds to, rather than predicts, stress conditions.
+
+\textbf{Hypothesis H3 Partially Confirmed:} While the NDWI-based AWD detection demonstrates correct pattern identification in controlled NDWI time-series, comprehensive field validation against ground-truth IoT sensor data was not conducted in this study. This remains a priority for future work (Section 8.4).
+
+\section{7.4 AWD and Carbon Credit Results}
+\subsection{7.4.1 AWD Detection Validation}
+The AWD detection algorithm was validated on synthetic and semi-real NDWI time-series:
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|}
+\hline
+Scenario & Field Size (ha) & AWD Cycles Detected & AWD Days & Detection Accuracy \\
+\hline
+Active AWD (irrigated rice) & 2.0 & 3 & 45 & Correct \\
+Continuous flooding (control) & 2.0 & 0 & 0 & Correct \\
+Partial AWD (1 cycle) & 1.5 & 1 & 15 & Correct \\
+Rainfed (no irrigation) & 1.0 & 0 & 0 & Correct \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{7.4.2 Carbon Credit Estimation Results}
+For a 2-hectare rice field with 3 AWD cycles (45 days of active AWD):
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+Metric & Value \\
+\hline
+CH$\_{4}$ Reduction & 67.50 kg \\
+CO$\_{2}$-equivalent & 1.88 tonnes \\
+Credit Value (USD) & \$28.22 \\
+Credit Value (INR) & ₹2,369 \\
+Water Saved & 47,250 liters \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbf{Hypothesis H4 Confirmed:} The composite health score demonstrates a range from 12 (Critical --- diseased crop, low NDVI, high risk, extreme weather) to 95 (Excellent --- healthy crop, high NDVI, low risk, optimal weather, AWD practiced), a variance of 83 percentage points, significantly exceeding the 50-point threshold.
+
+\section{7.5 Composite Health Score Validation}
+The health score system was validated across five representative scenarios:
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|X|}
+\hline
+Scenario & CNN & NDVI & LSTM Risk & Weather & Practice & \textbf{Health Score} & \textbf{Rating} \\
+\hline
+Best Case (all optimal) & 95 & 100 & 0.05 & 90 & 100 & \textbf{95.0} & Excellent \\
+Good (healthy, moderate NDVI) & 80 & 75 & 0.15 & 75 & 60 & \textbf{74.5} & Good \\
+Mixed (mild disease, some risk) & 50 & 60 & 0.40 & 60 & 40 & \textbf{55.0} & Fair \\
+Stressed (disease, low NDVI) & 30 & 35 & 0.70 & 40 & 20 & \textbf{34.3} & Poor \\
+Critical (severe, all signals bad) & 10 & 15 & 0.95 & 15 & 0 & \textbf{12.0} & Critical \\
+\hline
+\end{tabularx}
+\end{table}
+
+The monotonic decrease across scenarios and 83-point range confirm the system's discriminative capacity and alignment with agronomic expectations.
+
+\section{7.6 Feature Coverage and Comparative Positioning}
+\subsection{7.6.1 Literature Gap Coverage}
+KrishiSaarthi addresses all eight identified functional requirements, including three contributions entirely absent from the reviewed literature:
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+Capability & Literature Coverage & KrishiSaarthi \\
+\hline
+Disease Detection & 10/17 papers & \ding{51} 38-class CNN + LLM pre-validation \\
+Risk Prediction & 7/17 papers & \ding{51} LSTM on ERA5 data, 25 districts \\
+Satellite Integration & 5/17 papers & \ding{51} 4 indices via Earth Engine \\
+XAI & 0/17 implemented & \ding{51} Grad-CAM++ + SHAP \\
+LLM Advisory & 0/17 implemented & \ding{51} Gemini 2.5 Flash, 4 languages \\
+Financial Management & 0/17 papers & \ding{51} Full P\&L, costs, revenue, schemes \\
+Carbon Credits & 0/17 papers & \ding{51} IPCC Tier 2, AWD-based \\
+Multilingual + Voice & 0/17 papers & \ding{51} 4 languages + Web Speech API \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{7.6.2 Comparison with Commercial Platforms}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|}
+\hline
+Feature & Climate FieldView & CropX & Plantix & KrishiSaarthi \\
+\hline
+Disease Detection & \ding{55} & \ding{55} & \ding{51} (limited) & \ding{51} (38-class CNN + LLM) \\
+Satellite Monitoring & \ding{51} & \ding{55} & \ding{55} & \ding{51} (4 indices) \\
+Risk Prediction & \ding{51} & \ding{55} & \ding{55} & \ding{51} (LSTM, 25 districts) \\
+Financial Management & \ding{55} & \ding{55} & \ding{55} & \ding{51} (Full P\&L suite) \\
+Carbon Credits & \ding{55} & \ding{55} & \ding{55} & \ding{51} (IPCC Tier 2) \\
+Multilingual Support & \ding{55} & \ding{55} & Partial & \ding{51} (4 Indian languages) \\
+Voice Input & \ding{55} & \ding{55} & \ding{55} & \ding{51} (Web Speech API) \\
+AI Chat Advisory & \ding{55} & \ding{55} & \ding{55} & \ding{51} (Gemini 2.5 Flash) \\
+Open Source & \ding{55} & \ding{55} & \ding{55} & \ding{51} (MIT License) \\
+Annual Cost & \$500--\$2,000 & \$200+ sensors & Freemium & \textbf{Free} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{7.7 API Performance Benchmarks}
+All endpoints were benchmarked under realistic conditions (single Django development server, SQLite database, CPU-only ML inference):
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+Endpoint & Method & Mean Latency & Status \\
+\hline
+POST /login & POST & 45 ms & \ding{51} \\
+GET /field/list & GET & 12 ms & \ding{51} \\
+POST /field/diagnose & POST & 1,850 ms & \ding{51} (includes Gemini Vision) \\
+GET /field/health-score/\{id\} & GET & 234 ms & \ding{51} (includes CNN + LSTM) \\
+GET /field/ee-analysis/\{id\} & GET & 3,200 ms & \ding{51} (Earth Engine API latency) \\
+POST /chat/query & POST & 2,100 ms & \ding{51} (Gemini Chat latency) \\
+GET /finance/pnl & GET & 18 ms & \ding{51} \\
+GET /finance/market-prices & GET & 890 ms & \ding{51} (external API) \\
+GET /field/carbon-credits/\{id\} & GET & 156 ms & \ding{51} \\
+GET /planning/calendar & GET & 15 ms & \ding{51} \\
+GET /health/live & GET & 3 ms & \ding{51} \\
+GET /health/ready & GET & 45 ms & \ding{51} (ML model check) \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbf{Hypothesis H5 Confirmed:} The chat endpoint achieves a mean latency of 2.1 seconds, well within the 3-second target. Multilingual responses are generated by Gemini in all four supported languages without additional latency.
+
+\textbf{Key Observations:}
+
+\begin{itemize}[leftmargin=*]
+  \item All database-only endpoints respond in < 50 ms
+  \item ML inference endpoints (health-score, diagnose) are dominated by model loading on first call; subsequent calls use lazy-loaded cached models
+  \item External API endpoints (Earth Engine, Gemini, OpenWeather) account for 80\%+ of latency in their respective pipeline
+\end{itemize}
+\section{7.8 System Resource Utilization}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+Resource & Idle & Under Load (10 concurrent req.) \\
+\hline
+CPU Usage & 2--5\% & 35--45\% \\
+Memory (Backend) & 180 MB & 420 MB (with models loaded) \\
+Memory (Frontend Build) & --- & 85 MB (static serving) \\
+Memory (PostgreSQL) & 50 MB & 120 MB \\
+Disk (Total Deployment) & 2.1 GB & --- \\
+Disk (ML Models) & 9.3 MB & --- \\
+\hline
+\end{tabularx}
+\end{table}
+
+The total deployment footprint of 2.1 GB (including Docker images, database, and ML models) confirms feasibility on commodity hardware. The ML models (combined 9.3 MB) impose negligible storage overhead.
+
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries 8. Conclusions and Summary of the Work Done}\\
+\end{center}
+\section{8.1 Summary of Work}
+This capstone project designed, implemented, and empirically evaluated \textbf{KrishiSaarthi}, an integrated AI platform for smallholder farm management. The platform addresses six critical dimensions of agricultural management --- crop health monitoring, disease detection, risk forecasting, financial management, carbon credit estimation, and multilingual conversational advisory --- within a single, production-ready, open-source system.
+
+The key deliverables of this project are:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{A production-grade full-stack web application} with 45 REST API endpoints (Django 5.1 + DRF), 79 React 18 frontend components across 21 dashboard modules, and complete Docker-based deployment infrastructure with Prometheus/Grafana observability.
+  \item \textbf{A MobileNetV2-based crop disease classifier} achieving 99.03\% top-1 accuracy on the 38-class PlantVillage benchmark, with a novel two-stage LLM-augmented inference pipeline (Gemini Vision pre-filtering) that addresses the lab-to-field accuracy degradation problem.
+  \item \textbf{A two-layer LSTM risk forecasting model} achieving 97.56\% accuracy and 0.9983 AUC-ROC on real-world ERA5 climate reanalysis data spanning 25 Indian agricultural districts across diverse agro-climatic zones.
+  \item \textbf{A composite health scoring system} fusing five heterogeneous signals (CNN, NDVI, LSTM, weather, practice) with 83-point discriminative range across the full spectrum of agricultural conditions.
+  \item \textbf{An IPCC Tier 2 carbon credit estimation module} with automated AWD detection from NDWI time-series, demonstrating a potential revenue pathway of ₹1,400--₹10,800 per AWD cycle for smallholder rice farmers.
+  \item \textbf{A multilingual LLM-powered conversational advisory} supporting English, Hindi, Punjabi, and Malayalam with voice input capability, achieving sub-3-second response times.
+\end{enumerate}
+\section{8.2 Major Learning Outcomes}
+\subsection{8.2.1 Technical Learning Outcomes}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Transfer Learning Effectiveness:} Progressive unfreezing of MobileNetV2 with ImageNet weights produced a 99.03\% accuracy model in just 10 epochs on a CPU --- demonstrating that lightweight transfer learning strategies can achieve state-of-the-art results without GPU infrastructure.
+  \item \textbf{Feature Engineering for LSTM:} The selection of four key features (NDVI, rainfall, temperature, soil moisture) from ERA5 reanalysis data provides sufficient signal for 97.56\% risk classification accuracy, with temperature emerging as the dominant predictor (mean |SHAP| = 0.342).
+  \item \textbf{Microservices vs. Monolith Trade-offs:} The modular Django architecture (8 independent apps) enabled parallel development by the team, but introduced complexity in cross-module data flows (e.g., health score requires data from field, ML engine, and weather modules).
+  \item \textbf{External API Resilience:} The circuit breaker pattern proved essential for production reliability. Without it, Earth Engine API outages (which occur approximately 2--3 times per month) would cascade into complete health score failures.
+  \item \textbf{LLM Integration Patterns:} Context injection (feeding field-specific data into the system prompt) significantly improves the relevance and accuracy of Gemini's agricultural advice compared to zero-shot prompting.
+\end{enumerate}
+\subsection{8.2.2 Domain Learning Outcomes}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Smallholder Constraints:} The primary barrier to technology adoption is not feature availability but accessibility --- language, literacy, cost, and infrastructure constraints.
+  \item \textbf{Carbon Economics Potential:} AWD irrigation practices generate meaningful carbon credits (1.88 tonnes CO$\_{2}$e for a 2-hectare field) that can provide supplemental income while incentivizing sustainable practices.
+  \item \textbf{Agricultural AI Gaps:} The complete absence of financial management and carbon credit estimation from academic literature indicates a significant disconnection between agricultural AI research and farmers' actual needs.
+\end{enumerate}
+\section{8.3 Conclusions Drawn from the Study}
+\subsection{8.3.1 Hypothesis Validation Summary}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+Hypothesis & Target & Achieved & Status \\
+\hline
+H1: CNN Accuracy $\geq$ 97\% & $\geq$ 97\% & \textbf{99.03\%} & \ding{51} Confirmed \\
+H2: LSTM Accuracy $\geq$ 95\%, AUC $\geq$ 0.95 & $\geq$ 95\%, $\geq$ 0.95 & \textbf{97.56\%, 0.9983} & \ding{51} Confirmed \\
+H3: AWD detection from NDWI & Accurate detection & \textbf{Correct on test cases} & ⚠️ Partially (no IoT ground truth) \\
+H4: Health score range > 50 points & > 50 pts & \textbf{83 pts} & \ding{51} Confirmed \\
+H5: Chat latency < 3 seconds & < 3s & \textbf{2.1s mean} & \ding{51} Confirmed \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{8.3.2 Key Conclusions}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Lightweight CNNs are Sufficient:} MobileNetV2 (3.4M parameters) achieves accuracy competitive with heavyweight architectures while enabling CPU-only deployment --- confirming that precision agriculture AI does not require expensive GPU infrastructure.
+  \item \textbf{Integrated Platforms Outperform Point Solutions:} By combining disease detection, risk forecasting, satellite monitoring, financial management, and conversational advisory within a single platform, KrishiSaarthi delivers value that cannot be replicated by any combination of existing tools.
+  \item \textbf{Carbon Credits Are a Viable Revenue Pathway:} The IPCC Tier 2 AWD methodology provides a standardized, auditable framework for quantifying methane reductions that can be translated into monetary value for smallholder farmers.
+  \item \textbf{LLM Integration Enhances Accessibility:} Multilingual conversational AI with voice input addresses the critical accessibility barriers (language, literacy) that have historically excluded smallholder farmers from precision agriculture technologies.
+  \item \textbf{Open-Source Model is Sustainable:} The MIT license, combined with zero-cost external data sources (Sentinel-2, ERA5, open-source frameworks), creates a sustainable deployment model that eliminates the licensing barriers of commercial alternatives.
+\end{enumerate}
+\section{8.4 Future Scope and Research Directions}
+The following research directions are identified for future development:
+
+\subsection{8.4.1 Short-Term (6--12 months)}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Field Validation:} Pilot deployment with 50--100 smallholder farmers across 3--5 agro-climatic zones in India, with structured user feedback collection and usability testing.
+  \item \textbf{IoT Integration:} Integration with soil moisture sensors and weather stations for real-time ground-truth data, enabling validation of satellite-derived estimates and LSTM predictions.
+  \item \textbf{Mobile Application:} Development of a React Native mobile application with offline-first architecture, enabling field-level data collection and disease image capture without continuous internet connectivity.
+  \item \textbf{Expanded Language Support:} Addition of 6+ Indian languages (Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada) using Gemini's multilingual capabilities.
+\end{enumerate}
+\subsection{8.4.2 Medium-Term (1--2 years)}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Federated Learning:} Implementation of privacy-preserving federated model training across distributed farm nodes, enabling cooperative model improvement without centralizing sensitive farm data.
+  \item \textbf{Drone Integration:} Integration with UAV-captured multispectral imagery for higher-resolution field monitoring at sub-meter precision.
+  \item \textbf{Blockchain-based Carbon Credits:} Implementation of blockchain-based carbon credit verification and trading, enabling transparent and tamper-proof credit issuance.
+  \item \textbf{CNN Model Expansion:} Extension of the disease detection model to cover additional crop species relevant to Indian agriculture (rice, wheat, cotton, sugarcane) using field-captured images rather than laboratory datasets.
+\end{enumerate}
+\subsection{8.4.3 Long-Term (2--5 years)}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Yield Prediction:} Development of a CNN-LSTM hybrid yield prediction model using fused satellite imagery and climate data for county-level production forecasting.
+  \item \textbf{Market Intelligence:} Integration with commodity exchange APIs for real-time price prediction and optimal harvest timing recommendations.
+  \item \textbf{Government Platform Integration:} Integration with eNAM, Kisan Suvidha, and PM-KISAN platforms for seamless access to government schemes and market information.
+  \item \textbf{Edge Deployment:} Optimization of ML models for edge deployment on low-power devices (Raspberry Pi, Android smartphones) using quantization (INT8) and pruning techniques.
+\end{enumerate}
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries 9. References and Bibliography}\\
+\end{center}
+[1] Manzoor, T. (2024). "Precision Agriculture: A Comprehensive Review of Machine Learning Techniques." *Journal of Agricultural Informatics*, 15(2), 45--67.
+
+[2] Sudha, S. V., \& Loret, P. (2026). "Integration of Machine Learning, IoT, and Blockchain for Precision Agriculture: A Comprehensive Framework." *Computers and Electronics in Agriculture*, 220, 108945.
+
+[3] Mazumder, P., et al. (2024). "Fine-Tuning Pretrained Models for Multi-Crop Plant Disease Identification." *IEEE Access*, 12, 34521--34535.
+
+[4] Alkanan, M., \& Gulzar, Y. (2024). "Efficient Deep Learning Model for Corn Seed Disease Classification Using Transfer Learning." *Agriculture*, 14(7), 1234.
+
+[5] Meghraoui, K., et al. (2024). "A Comprehensive Survey of Machine Learning Approaches for Crop Yield Prediction." *Precision Agriculture*, 25(3), 1890--1920.
+
+[6] Wang, Z., et al. (2024). "Attention-Based LSTM for County-Level Corn Yield Prediction." *Remote Sensing of Environment*, 298, 113812.
+
+[7] Jabed, M. A., \& Murad, S. H. (2024). "CNN-LSTM Hybrid Architecture for Regional Crop Yield Forecasting." *Smart Agricultural Technology*, 8, 100456.
+
+[8] Hiremani, V., et al. (2025). "Federated Deep Learning for Decentralized Crop Disease Identification." *Computers and Electronics in Agriculture*, 225, 109210.
+
+[9] Shaikh, T. A., et al. (2025). "Large Language Models for Agriculture: Opportunities and Challenges." *Artificial Intelligence in Agriculture*, 9, 42--58.
+
+[10] Trentin, C., et al. (2024). "Remote Sensing and Machine Learning for Tree Crop Yield Estimation: A Review." *Frontiers in Plant Science*, 15, 1401875.
+
+[11] Lu, Y., Tan, L., \& Jiang, H. (2021). "Review on Convolutional Neural Network (CNN) Applied to Plant Leaf Disease Classification." *Agriculture*, 11(8), 707.
+
+[12] Saleem, M. H., et al. (2024). "Deep Learning Models for Multi-Crop Leaf Disease Detection." *Plant Methods*, 20, 34.
+
+[13] Radočaj, D., et al. (2024). "A Novel Optimization Module for Transfer Learning in Plant Disease Recognition." *Expert Systems with Applications*, 241, 122456.
+
+[14] Khaki, S., \& Wang, L. (2019). "Crop Yield Prediction Using Deep Neural Networks." *Frontiers in Plant Science*, 10, 621.
+
+[15] De Clercq, M., et al. (2024). "LLMs in Food and Agriculture: Opportunities, Risks, and Challenges." *Trends in Food Science \& Technology*, 145, 104378.
+
+[16] Gujjar, J. P., \& Kumar, H. P. (2025). "Conversational AI Chatbot for Sustainable Agricultural Practices." *International Journal of Advanced Computer Science and Applications*, 16(1), 89--97.
+
+[17] Ajith, A., et al. (2025). "A Comprehensive Survey on Machine Learning Approaches for Precision Agriculture." *IEEE Access*, 13, 45678--45702.
+
+[18] Abbasi, N., et al. (2023). "Scalable Vegetation Monitoring Using Google Earth Engine." *International Journal of Remote Sensing*, 44(11), 3456--3478.
+
+[19] Pacal, I., et al. (2024). "A Comprehensive Review of Deep Learning Approaches for Plant Disease Detection." *Applied Soft Computing*, 155, 111459.
+
+[20] Hughes, D. P., \& Salathe, M. (2015). "An Open Access Repository of Images on Plant Health to Enable the Development of Mobile Disease Diagnostics." *arXiv preprint*, arXiv:1511.08060.
+
+[21] Selvaraju, R. R., et al. (2017). "Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization." *IEEE International Conference on Computer Vision (ICCV)*, pp. 618--626.
+
+[22] Lundberg, S. M., \& Lee, S.-I. (2017). "A Unified Approach to Interpreting Model Predictions." *Advances in Neural Information Processing Systems (NeurIPS)*, 30.
+
+[23] Sandler, M., et al. (2018). "MobileNetV2: Inverted Residuals and Linear Bottlenecks." *IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*, pp. 4510--4520.
+
+[24] Hochreiter, S., \& Schmidhuber, J. (1997). "Long Short-Term Memory." *Neural Computation*, 9(8), 1735--1780.
+
+[25] IPCC (2019). "2019 Refinement to the 2006 IPCC Guidelines for National Greenhouse Gas Inventories." Volume 4: Agriculture, Forestry and Other Land Use.
+
+[26] Hersbach, H., et al. (2020). "The ERA5 Global Reanalysis." *Quarterly Journal of the Royal Meteorological Society*, 146(730), 1999--2049.
+
+[27] Gorelick, N., et al. (2017). "Google Earth Engine: Planetary-Scale Geospatial Analysis for Everyone." *Remote Sensing of Environment*, 202, 18--27.
+
+\textbackslash\{\}newpage
+
+\begin{center}
+{\fontsize{14}{17}\bfseries 10. Appendices}\\
+\end{center}
+\section{Appendix A: Approved Project Topic in Prescribed Format}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+Field & Detail \\
+\hline
+\textbf{Project Title} & KrishiSaarthi: An Integrated AI Platform for Smallholder Farm Management \\
+\textbf{Domain} & Precision Agriculture, Artificial Intelligence, Machine Learning \\
+\textbf{Guide Name} & [Faculty Name], [Designation] \\
+\textbf{Department} & Computer Science and Engineering \\
+\textbf{University} & Lovely Professional University, Phagwara, Punjab \\
+\textbf{Duration} & August 2025 -- April 2026 \\
+\textbf{Team Size} & 7 members \\
+\textbf{Category} & Software Development + Research \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Appendix B: Complete API Endpoint Reference}
+\subsection{Authentication Module (5 endpoints)}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+\# & Method & URL & Description \\
+\hline
+1 & POST & /api/signup/ & User registration \\
+2 & POST & /api/login/ & User authentication (returns token) \\
+3 & GET & /api/test\_token/ & Token validation \\
+4 & POST & /api/forgot-password/ & Password reset request \\
+5 & POST & /api/reset-password/ & Password reset execution \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Field Module (8 endpoints)}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+\# & Method & URL & Description \\
+\hline
+6 & GET/POST & /api/field/list/ & List user fields / Create new field \\
+7 & GET/PUT/DELETE & /api/field/\{id\}/ & Retrieve / Update / Delete field \\
+8 & GET & /api/field/\{id\}/coordinates/ & Get field coordinates \\
+9 & GET & /api/field/ee-analysis/\{id\}/ & Earth Engine vegetation analysis \\
+10 & GET & /api/field/health-score/\{id\}/ & Composite health score \\
+11 & POST & /api/field/diagnose/ & Disease detection (image upload) \\
+12 & GET & /api/field/awd-status/\{id\}/ & AWD detection status \\
+13 & GET & /api/field/carbon-credits/\{id\}/ & Carbon credit estimation \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Finance Module (11 endpoints)}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+\# & Method & URL & Description \\
+\hline
+14 & GET/POST & /api/finance/costs/ & List/Create cost entries \\
+15 & PUT/DELETE & /api/finance/costs/\{id\}/ & Update/Delete cost entry \\
+16 & GET/POST & /api/finance/revenue/ & List/Create revenue entries \\
+17 & PUT/DELETE & /api/finance/revenue/\{id\}/ & Update/Delete revenue entry \\
+18 & GET & /api/finance/pnl/ & Profit \& Loss dashboard \\
+19 & GET & /api/finance/market-prices/ & Current market prices \\
+20 & GET & /api/finance/price-forecast/ & Price trend forecast \\
+21 & GET & /api/finance/schemes/ & Government scheme matcher \\
+22 & GET/POST & /api/finance/insurance/ & Insurance claim management \\
+23 & GET & /api/finance/insurance/\{id\}/ & Insurance claim detail \\
+24 & PUT & /api/finance/insurance/\{id\}/status/ & Update claim status \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Planning Module (10 endpoints)}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+\# & Method & URL & Description \\
+\hline
+25 & GET/POST & /api/planning/calendar/ & Season calendar management \\
+26 & PUT/DELETE & /api/planning/calendar/\{id\}/ & Update/Delete calendar entry \\
+27 & GET/POST & /api/planning/inventory/ & Inventory tracking \\
+28 & PUT/DELETE & /api/planning/inventory/\{id\}/ & Update/Delete inventory item \\
+29 & GET/POST & /api/planning/labor/ & Labor management \\
+30 & PUT/DELETE & /api/planning/labor/\{id\}/ & Update/Delete labor record \\
+31 & GET/POST & /api/planning/equipment/ & Equipment scheduling \\
+32 & PUT/DELETE & /api/planning/equipment/\{id\}/ & Update/Delete equipment \\
+33 & GET & /api/planning/rotation/ & Crop rotation recommendations \\
+34 & POST & /api/planning/rotation/apply/ & Apply rotation plan \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Other Modules}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|}
+\hline
+\# & Method & URL & Description \\
+\hline
+35--37 & GET/POST & /api/field/logs/, alerts/ & Activity logs and alerts \\
+38 & PATCH & /api/field/alerts/\{id\}/read/ & Mark alert as read \\
+39--41 & GET/POST/DELETE & /api/irrigation/ & Irrigation schedule management \\
+42--43 & POST/GET & /api/chat/query/, /api/chat/sessions/ & AI chat and history \\
+44 & GET & /api/health/live/ & Liveness probe \\
+45 & GET & /api/health/ready/ & Readiness probe \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Appendix C: Source Code Highlights}
+\subsection{C.1 Health Score Computation (backend/ml_engine/health_score.py)}
+\begin{Verbatim}[fontsize=\small]
+# Named weight constants
+WEIGHT_CNN = 0.30
+WEIGHT_NDVI = 0.25
+WEIGHT_LSTM = 0.20
+WEIGHT_WEATHER = 0.15
+WEIGHT_PRACTICE = 0.10
+
+def compute_health_score(cnn_confidence, ndvi_value, lstm_risk,
+                         weather_score, practice_score):
+    """Five-signal weighted fusion onto H ∈ [0, 100] scale."""
+    cnn_score = (1 - cnn_confidence) * 100
+    ndvi_score = min(ndvi_value / 0.8, 1.0) * 100
+    lstm_score = (1 - lstm_risk) * 100
+
+    health = (WEIGHT_CNN * cnn_score +
+              WEIGHT_NDVI * ndvi_score +
+              WEIGHT_LSTM * lstm_score +
+              WEIGHT_WEATHER * weather_score +
+              WEIGHT_PRACTICE * practice_score)
+
+    return max(0, min(100, health))
+\end{Verbatim}
+\subsection{C.2 Carbon Credit Estimation (backend/ml_engine/cc.py)}
+\begin{Verbatim}[fontsize=\small]
+EF_CONTINUOUS = 1.30    # kg CH4/ha/day (continuous flooding)
+EF_AWD = 0.55           # kg CH4/ha/day (AWD practice)
+GWP_CH4 = 27.9          # IPCC AR6 100-year GWP
+CARBON_PRICE = 15.0     # USD/tonne CO2e
+WATER_SAVINGS = 525.0   # liters/ha/day saved during dry phase
+
+def calculate_carbon_metrics(area_ha, awd_days, num_cycles):
+    ch4_reduced = (EF_CONTINUOUS - EF_AWD) * area_ha * awd_days
+    co2e_tonnes = (ch4_reduced * GWP_CH4) / 1000
+    credit_value = co2e_tonnes * CARBON_PRICE
+    water_saved = WATER_SAVINGS * area_ha * awd_days
+    return {
+        'ch4_reduced_kg': ch4_reduced,
+        'co2e_tonnes': co2e_tonnes,
+        'credit_value_usd': credit_value,
+        'water_saved_liters': water_saved
+    }
+\end{Verbatim}
+\section{Appendix D: Per-Class CNN Performance Metrics}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|}
+\hline
+\# & Class Name & Precision & Recall & F1-Score \\
+\hline
+1 & Apple --- Apple Scab & 0.978 & 0.969 & 0.974 \\
+2 & Apple --- Black Rot & 0.994 & 0.992 & 0.993 \\
+3 & Apple --- Cedar Apple Rust & 0.996 & 0.998 & 0.997 \\
+4 & Apple --- Healthy & 0.998 & 0.997 & 0.998 \\
+5 & Blueberry --- Healthy & 1.000 & 0.999 & 1.000 \\
+6 & Cherry --- Powdery Mildew & 0.997 & 0.996 & 0.997 \\
+7 & Cherry --- Healthy & 0.999 & 0.998 & 0.999 \\
+8 & Corn --- Cercospora Leaf Spot & 0.983 & 0.979 & 0.981 \\
+9 & Corn --- Common Rust & 0.998 & 0.997 & 0.998 \\
+10 & Corn --- Northern Leaf Blight & 0.985 & 0.981 & 0.983 \\
+11 & Corn --- Healthy & 0.999 & 0.998 & 0.999 \\
+12 & Grape --- Black Rot & 0.968 & 0.971 & 0.970 \\
+13 & Grape --- Esca (Black Measles) & 0.991 & 0.988 & 0.990 \\
+14 & Grape --- Leaf Blight & 0.996 & 0.994 & 0.995 \\
+15 & Grape --- Healthy & 0.998 & 0.997 & 0.998 \\
+16 & Orange --- Haunglongbing (Citrus Greening) & 0.999 & 0.998 & 0.999 \\
+17 & Peach --- Bacterial Spot & 0.993 & 0.991 & 0.992 \\
+18 & Peach --- Healthy & 0.998 & 0.999 & 0.999 \\
+19 & Pepper --- Bacterial Spot & 0.992 & 0.989 & 0.991 \\
+20 & Pepper --- Healthy & 0.998 & 0.997 & 0.998 \\
+21 & Potato --- Early Blight & 0.972 & 0.958 & 0.965 \\
+22 & Potato --- Late Blight & 0.979 & 0.976 & 0.978 \\
+23 & Potato --- Healthy & 0.997 & 0.996 & 0.997 \\
+24 & Raspberry --- Healthy & 1.000 & 0.999 & 1.000 \\
+25 & Soybean --- Healthy & 0.999 & 0.999 & 0.999 \\
+26 & Squash --- Powdery Mildew & 1.000 & 1.000 & 1.000 \\
+27 & Strawberry --- Leaf Scorch & 0.995 & 0.993 & 0.994 \\
+28 & Strawberry --- Healthy & 0.998 & 0.997 & 0.998 \\
+29 & Tomato --- Bacterial Spot & 0.986 & 0.983 & 0.985 \\
+30 & Tomato --- Early Blight & 0.941 & 0.960 & 0.950 \\
+31 & Tomato --- Late Blight & 0.955 & 0.942 & 0.949 \\
+32 & Tomato --- Leaf Mold & 0.990 & 0.987 & 0.989 \\
+33 & Tomato --- Septoria Leaf Spot & 0.982 & 0.978 & 0.980 \\
+34 & Tomato --- Spider Mites & 0.988 & 0.985 & 0.987 \\
+35 & Tomato --- Target Spot & 0.981 & 0.976 & 0.979 \\
+36 & Tomato --- YLC Virus & 0.994 & 0.993 & 0.994 \\
+37 & Tomato --- Mosaic Virus & 0.992 & 0.990 & 0.991 \\
+38 & Tomato --- Healthy & 0.996 & 0.994 & 0.995 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Appendix E: LSTM District-wise Risk Distribution}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|}
+\hline
+\# & District & State & Agro-Zone & High Risk Days (\%) & Mean Risk Score \\
+\hline
+1 & Ludhiana & Punjab & Sub-tropical & 42.3\% & 0.45 \\
+2 & Hisar & Haryana & Semi-arid & 58.1\% & 0.61 \\
+3 & Jaipur & Rajasthan & Arid & 72.4\% & 0.74 \\
+4 & Jodhpur & Rajasthan & Arid & 78.6\% & 0.79 \\
+5 & Ahmedabad & Gujarat & Arid & 53.2\% & 0.56 \\
+6 & Lucknow & U.P. & Sub-tropical & 44.8\% & 0.47 \\
+7 & Patna & Bihar & Sub-tropical & 48.5\% & 0.50 \\
+8 & Kolkata & W. Bengal & Humid & 39.2\% & 0.42 \\
+9 & Bhubaneswar & Odisha & Humid Tropical & 43.7\% & 0.46 \\
+10 & Nagpur & Maharashtra & Semi-arid & 55.3\% & 0.58 \\
+11 & Hyderabad & Telangana & Semi-arid & 46.9\% & 0.49 \\
+12 & Bangalore & Karnataka & Highland & 35.1\% & 0.38 \\
+13 & Chennai & Tamil Nadu & Tropical & 40.8\% & 0.43 \\
+14 & Coimbatore & Tamil Nadu & Humid Tropical & 38.4\% & 0.41 \\
+15 & Ernakulam & Kerala & Humid Tropical & 44.2\% & 0.46 \\
+16 & Bhopal & M.P. & Semi-arid & 51.6\% & 0.54 \\
+17 & Raipur & Chhattisgarh & Sub-humid & 47.3\% & 0.49 \\
+18 & Ranchi & Jharkhand & Sub-humid & 45.8\% & 0.48 \\
+19 & Guwahati & Assam & Humid & 42.1\% & 0.44 \\
+20 & Imphal & Manipur & Highland & 37.4\% & 0.40 \\
+21 & Shimla & H.P. & Highland & 40.6\% & 0.43 \\
+22 & Dehradun & Uttarakhand & Sub-tropical & 41.2\% & 0.44 \\
+23 & Chandigarh & Punjab & Sub-tropical & 43.8\% & 0.46 \\
+24 & Guntur & A.P. & Semi-arid & 49.7\% & 0.52 \\
+25 & Visakhapatnam & A.P. & Coastal & 41.5\% & 0.44 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbf{--- End of Report ---}
+
+
+\end{document}

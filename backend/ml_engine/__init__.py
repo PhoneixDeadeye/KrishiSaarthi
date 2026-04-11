@@ -18,12 +18,39 @@ Usage:
     from ml_engine import get_health_score
 """
 
-from .awd import detect_awd_from_ndwi, calculate_awd_score
-from .cc import calculate_carbon_metrics
-from .cnn import predict_health, get_model as get_cnn_model, predict_health_batch
-from .lstm import predict_risk_from_values, get_model_and_scaler as get_lstm_model
-from .health_score import get_health_score, compute_health_score, get_health_rating
-from .registry import registry as model_registry
+import importlib as _importlib
+
+
+def __getattr__(name):
+    """Lazy import to avoid loading torch/torchvision at package init time."""
+    _lazy_map = {
+        # AWD (pure Python)
+        "detect_awd_from_ndwi": (".awd", "detect_awd_from_ndwi"),
+        "calculate_awd_score": (".awd", "calculate_awd_score"),
+        # Carbon Credits (pure Python)
+        "calculate_carbon_metrics": (".cc", "calculate_carbon_metrics"),
+        # CNN (requires torch)
+        "predict_health": (".cnn", "predict_health"),
+        "predict_health_batch": (".cnn", "predict_health_batch"),
+        "get_cnn_model": (".cnn", "get_model"),
+        # LSTM (requires torch)
+        "predict_risk_from_values": (".lstm", "predict_risk_from_values"),
+        "get_lstm_model": (".lstm", "get_model_and_scaler"),
+        # Health Score (pure Python, but get_health_score lazily imports cnn/lstm)
+        "get_health_score": (".health_score", "get_health_score"),
+        "compute_health_score": (".health_score", "compute_health_score"),
+        "get_health_rating": (".health_score", "get_health_rating"),
+        # Registry (requires torch)
+        "model_registry": (".registry", "registry"),
+    }
+
+    if name in _lazy_map:
+        module_path, attr_name = _lazy_map[name]
+        module = _importlib.import_module(module_path, __package__)
+        return getattr(module, attr_name)
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __all__ = [
     # AWD Detection

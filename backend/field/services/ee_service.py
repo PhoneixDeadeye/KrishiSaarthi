@@ -3,6 +3,7 @@ import time
 import logging
 import traceback
 from datetime import datetime, timedelta
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from ..models import FieldData
 
@@ -65,6 +66,9 @@ def fetchEEData_safe(
         data = _fetch_ee_data_impl(user, field_id, field_instance, start_date, end_date)
         ee_breaker.record_success()
         return data
+    except (Http404, FieldData.DoesNotExist):
+        # Field not found is NOT an EE failure — don't trip the circuit breaker.
+        return {"error": "Field not found", "details": "The requested field does not exist."}
     except Exception as e:
         ee_breaker.record_failure()
         logger.error("EE Service Failure: %s", e, exc_info=True)

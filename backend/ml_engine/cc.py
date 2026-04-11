@@ -6,6 +6,14 @@ from ml_engine.awd import detect_awd_from_ndwi
 
 logger = logging.getLogger(__name__)
 
+# ── IPCC / Market Constants ─────────────────────────────────────────
+EF_CONTINUOUS    = 1.30    # kg CH4/ha/day,  IPCC Tier 2 (continuous flooding)
+EF_AWD           = 0.55    # kg CH4/ha/day   (AWD-managed paddies)
+CH4_TO_CO2_EQ    = 27.9    # GWP100,         IPCC AR6
+CARBON_PRICE_USD = 15.0    # USD / tonne CO2e (voluntary market mid-range)
+USD_TO_INR       = 83.0    # Exchange rate
+AWD_REDUCTION_FACTOR = 1.0 - (EF_AWD / EF_CONTINUOUS)  # ~0.577
+
 
 def calculate_carbon_metrics(
     area_hectare: float,
@@ -13,11 +21,10 @@ def calculate_carbon_metrics(
     ndwi_dates: List[str] = None,
     crop_days: int = 100,
     baseline_water_mm: float = 1200.0,
-    ch4_baseline_kg_per_ha_per_day: float = 1.3,
-    awd_reduction_factor: float = 0.35,
-    ch4_to_co2e: float = 27.2,
-    # 15 USD/tonne CO2e * ~83 INR/USD = 1245 INR/tonne (or 900 INR based on local market discount)
-    credit_price_inr: float = 1245.0,
+    ch4_baseline_kg_per_ha_per_day: float = EF_CONTINUOUS,
+    awd_reduction_factor: float = AWD_REDUCTION_FACTOR,
+    ch4_to_co2e: float = CH4_TO_CO2_EQ,
+    credit_price_inr: float = CARBON_PRICE_USD * USD_TO_INR,
     ndwi_params: dict = None,
 ) -> Dict[str, Any]:
     """

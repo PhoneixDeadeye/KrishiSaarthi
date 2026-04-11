@@ -21,6 +21,10 @@ from ml_engine import (
 
 logger = logging.getLogger(__name__)
 
+# ── Anomaly Detection Constants ─────────────────────────────────────
+ANOMALY_THRESHOLD_STD = 1.5   # flag NDVI values beyond 1.5 sigma
+ROLLING_WINDOW_DAYS   = 30    # smoothing window for trend baselines
+
 
 class EEAnalysisView(APIView):
     """
@@ -215,17 +219,24 @@ class AWDreport(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        field_id = request.query_params.get("field_id")
-        data = fetchEEData(user=request.user, field_id=field_id)
+        try:
+            field_id = request.query_params.get("field_id")
+            data = fetchEEData(user=request.user, field_id=field_id)
 
-        if "error" in data:
-            return Response(data, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            if "error" in data:
+                return Response(data, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-        ndwi_data = data.get("ndwi_time_series", [])
+            ndwi_data = data.get("ndwi_time_series", [])
 
-        # awd.py
-        report = detect_awd_from_ndwi(ndwi_series=ndwi_data)
-        return Response(report)
+            # awd.py
+            report = detect_awd_from_ndwi(ndwi_series=ndwi_data)
+            return Response(report)
+        except Exception as e:
+            logger.error("Error in AWD report: %s", e)
+            return Response(
+                {"error": "Failed to generate AWD report"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class CarbonCredit(APIView):
@@ -286,15 +297,22 @@ class PestPrediction(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        field_id = request.query_params.get("field_id")
-        # lstm.py
-        data = fetchEEData(user=request.user, field_id=field_id)
+        try:
+            field_id = request.query_params.get("field_id")
+            # lstm.py
+            data = fetchEEData(user=request.user, field_id=field_id)
 
-        if "error" in data:
-            return Response(data, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            if "error" in data:
+                return Response(data, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-        result = predict_risk_from_values(data)
-        return Response(result)
+            result = predict_risk_from_values(data)
+            return Response(result)
+        except Exception as e:
+            logger.error("Error in pest prediction: %s", e)
+            return Response(
+                {"error": "Failed to generate prediction"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class HealthScore(APIView):

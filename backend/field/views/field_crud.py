@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from config.pagination import get_optional_paginator
@@ -139,20 +140,35 @@ class GetCoordView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        field_id = request.query_params.get("field_id")
-        if field_id:
-            field_data = get_object_or_404(FieldData, id=field_id, user=request.user)
-        else:
-            field_data = FieldData.objects.filter(user=request.user).first()
+        try:
+            field_id = request.query_params.get("field_id")
+            if field_id:
+                field_data = get_object_or_404(FieldData, id=field_id, user=request.user)
+            else:
+                field_data = FieldData.objects.filter(user=request.user).first()
 
-        if not field_data:
+            if not field_data:
+                return Response({"coord": None})
+
+            polygon = field_data.polygon
+            coords = polygon.get("coordinates", [])
+            first_coord = coords[0][0] if coords and coords[0] else None
+
+            return Response({"coord": first_coord})
+        except (IndexError, KeyError, TypeError) as e:
+            logger.error("Error getting coordinates: %s", e)
             return Response({"coord": None})
-
-        polygon = field_data.polygon
-        coords = polygon.get("coordinates", [])
-        first_coord = coords[0][0] if coords and coords[0] else None
-
-        return Response({"coord": first_coord})
+        except Http404:
+            return Response(
+                {"error": "Field not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Exception as e:
+            logger.error("Error getting coordinates: %s", e)
+            return Response(
+                {"error": "Failed to get coordinates"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 # Backwards-compatible alias

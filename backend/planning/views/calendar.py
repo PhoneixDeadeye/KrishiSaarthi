@@ -17,37 +17,45 @@ class SeasonCalendarView(APIView):
 
     def get(self, request):
         """List calendar events for user, optionally filtered by field"""
-        events = (
-            SeasonCalendar.objects.filter(user=request.user)
-            .select_related("field")
-            .order_by("start_date")
-        )
+        try:
+            events = (
+                SeasonCalendar.objects.filter(user=request.user)
+                .select_related("field")
+                .order_by("start_date")
+            )
 
-        field_id = request.query_params.get("field_id")
-        if field_id:
-            events = events.filter(field_id=field_id)
+            field_id = request.query_params.get("field_id")
+            if field_id:
+                events = events.filter(field_id=field_id)
 
-        # Filter by date range
-        start_date = request.query_params.get("start_date")
-        end_date = request.query_params.get("end_date")
-        if start_date:
-            events = events.filter(end_date__gte=start_date)
-        if end_date:
-            events = events.filter(start_date__lte=end_date)
+            # Filter by date range
+            start_date = request.query_params.get("start_date")
+            end_date = request.query_params.get("end_date")
+            if start_date:
+                events = events.filter(end_date__gte=start_date)
+            if end_date:
+                events = events.filter(start_date__lte=end_date)
 
-        # Filter by status
-        event_status = request.query_params.get("status")
-        if event_status:
-            events = events.filter(status=event_status)
+            # Filter by status
+            event_status = request.query_params.get("status")
+            if event_status:
+                events = events.filter(status=event_status)
 
-        paginator = get_optional_paginator(request)
-        if paginator is not None:
-            page = paginator.paginate_queryset(events, request)
-            serializer = SeasonCalendarSerializer(page, many=True)
-            return paginator.get_paginated_response(serializer.data)
+            paginator = get_optional_paginator(request)
+            if paginator is not None:
+                page = paginator.paginate_queryset(events, request)
+                serializer = SeasonCalendarSerializer(page, many=True)
+                return paginator.get_paginated_response(serializer.data)
 
-        serializer = SeasonCalendarSerializer(events, many=True)
-        return Response(serializer.data)
+            serializer = SeasonCalendarSerializer(events, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error("Error fetching calendar events: %s", e)
+            return Response(
+                {"error": "Failed to fetch calendar events"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def post(self, request):
         """Create a new calendar event"""
