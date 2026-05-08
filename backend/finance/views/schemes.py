@@ -15,6 +15,7 @@ import logging
 
 from ..models import GovernmentScheme
 from field.models import FieldData
+from ..services.live_data import fetch_live_schemes
 
 logger = logging.getLogger(__name__)
 
@@ -146,54 +147,123 @@ SAMPLE_SCHEMES = [
 class SchemesView(APIView):
     """
     GET: Returns eligible government schemes for the farmer.
-    Queries from the GovernmentScheme database table.
+    Uses Gemini to fetch live, accurate scheme recommendations based on user profile.
     """
 
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        state = request.query_params.get("state", None)
-        crop = request.query_params.get("crop", None)
-        scheme_type = request.query_params.get("type", None)
-        land_acres = request.query_params.get("land_acres", None)
+        import os
+        import json
+        import re
+        import google.generativeai as genai
+        
+        state = request.query_params.get("state", "India")
+        crop = request.query_params.get("crop", "Any")
+        scheme_type = request.query_params.get("type", "All")
+        land_acres = request.query_params.get("land_acres", "Not specified")
 
-        # Ensure schemes exist (seed via: python manage.py seed_schemes)
-        if not GovernmentScheme.objects.exists():
-            logger.warning(
-                "No government schemes in DB. Run: python manage.py seed_schemes"
-            )
-            return Response(
-                {
-                    "total_schemes": 0,
-                    "user_crops": [],
-                    "schemes": [],
-                    "grouped": {
-                        "subsidy": [],
-                        "loan": [],
-                        "insurance": [],
-                        "grant": [],
-                        "training": [],
-                    },
-                    "tips": [],
-                    "setup_required": 'Run "python manage.py seed_schemes" to load scheme data.',
-                }
-            )
-
-        # Build queryset
-        qs = GovernmentScheme.objects.filter(is_active=True)
-
-        if scheme_type:
-            qs = qs.filter(scheme_type=scheme_type)
-
-        # Use values_list to avoid loading full model instances (N+1 fix)
+        # Get user's actual crops if available
         user_crops = list(
             FieldData.objects.filter(user=request.user)
             .exclude(cropType="")
             .values_list("cropType", flat=True)
             .distinct()
         )
+        if not crop or crop == "Any" and user_crops:
+            crop = ", ".join(user_crops)
 
-        if land_acres:
+        try:
+            api_key = os.environ.get("GEMINI_API_KEY")
+            if not api_key:
+                raise ValueError("No Gemini key configured")
+                
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            
+            prompt = f"""
+            You are an agriculture government scheme expert in India.
+            Provide a realistic list of currently active agricultural government schemes in India.
+            Limit to 4-5 highly relevant schemes.
+
+            Filters: 
+            State: {state}
+            Crop: {crop}
+            Scheme Type: {scheme_type}
+            Land Size (Acres): {land_acres}
+
+            Return exactly a JSON array of objects. Do not use block quotes, just the pure JSON.
+            Each object must have these exactly properties:
+            "id": number
+            "name": string
+            "scheme_type": string (one of "subsidy", "insurance", "loan", "grant")
+            "description": string (1-2 sentences)
+            "benefits": string
+            "eligible_crops": array of strings
+            "eligible_states": array of strings
+            "min_land_acres": number
+            "max_subsidy_amount": null or number
+            "documents_required": array of strings
+            "link": string (URL)
+            """
+            response = model.generate_content(prompt)
+            text = response.text.replace("```json", "").replace("```", "").strip()
+            
+            match = re.search(r"\[.*\]", text, re.DOTALL)
+            if match:
+                ai_schemes = json.loads(match.group(0))
+                
+                # Group schemes
+                grouped = {
+                    "subsidy": [s for s in ai_schemes if s.get("scheme_type") == "subsidy"],
+                    "loan": [s for s in ai_schemes if s.get("scheme_type") == "loan"],
+                    "insurance": [s for s in ai_schemes if s.get("scheme_type") == "insurance"],
+                    "grant": [s for s in ai_schemes if s.get("scheme_type") == "grant"],
+                    "training": [s for s in ai_schemes if s.get("scheme_type") == "training"],
+                }
+                
+                return Response(
+                    {
+                        "total_schemes": len(ai_schemes),
+                        "user_crops": user_crops,
+                        "schemes": ai_schemes,
+                        "grouped": grouped,
+                        "tips": [
+                            "Apply for schemes before the pre-sowing season.",
+                            "Keep your land records (Khasra/Khatauni) updated."
+                        ],
+                    }
+                )
+                
+        except Exception as e:
+            logger.error(f"Failed to fetch dynamic schemes: {e}")
+            pass
+
+        # Fallback to local static sample if API fails
+        if not GovernmentScheme.objects.exists():
+            return Response(
+                {
+                    "total_schemes": len(SAMPLE_SCHEMES),
+                    "user_crops": user_crops,
+                    "schemes": SAMPLE_SCHEMES,
+                    "grouped": {
+                        "subsidy": [s for s in SAMPLE_SCHEMES if s["scheme_type"] == "subsidy"],
+                        "loan": [s for s in SAMPLE_SCHEMES if s["scheme_type"] == "loan"],
+                        "insurance": [s for s in SAMPLE_SCHEMES if s["scheme_type"] == "insurance"],
+                        "grant": [s for s in SAMPLE_SCHEMES if s["scheme_type"] == "grant"],
+                        "training": [],
+                    },
+                    "tips": ["(Data running in static fallback mode. Ensure APIs are active.)"],
+                }
+            )
+
+        # Build queryset from DB 
+        qs = GovernmentScheme.objects.filter(is_active=True)
+
+        if scheme_type and scheme_type != "All":
+            qs = qs.filter(scheme_type=scheme_type)
+
+        if land_acres and land_acres != "Not specified":
             try:
                 land_acres_float = float(land_acres)
                 qs = qs.filter(min_land_acres__lte=land_acres_float)
@@ -261,6 +331,7 @@ class SchemesView(APIView):
                 "user_crops": user_crops,
                 "schemes": eligible_schemes,
                 "grouped": grouped,
+                "live_schemes_news": fetch_live_schemes(crop, state),
                 "tips": [
                     {
                         "icon": "📅",

@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 from rest_framework.test import APIClient
 from rest_framework import status
-from rest_framework.authtoken.models import Token
+from knox.models import AuthToken
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta, date
@@ -194,8 +194,9 @@ class PlanningDeleteEndpointTestCase(TestCase):
         self.user = User.objects.create_user(
             username="plandeluser", password="TestPass123!"
         )
-        self.token = Token.objects.create(user=self.user)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        from knox.models import AuthToken
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
 
     def test_equipment_delete_returns_204(self):
         equip = Equipment.objects.create(

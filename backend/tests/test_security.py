@@ -5,7 +5,7 @@ Verifies password is write-only, auth is enforced, and data is properly validate
 
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
+from knox.models import AuthToken
 from KrishiSaarthi.serializers import UserSerializer
 import json
 

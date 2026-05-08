@@ -145,7 +145,7 @@ def fetch_location_data(lat, lon, start_date, end_date, retries=3):
                 for d in range(n_days):
                     chunk = raw_sm[d * 24:(d + 1) * 24]
                     valid = [v for v in chunk if v is not None]
-                    hourly_sm.append(np.mean(valid) if valid else None)
+                    hourly_sm.append(float(np.mean(valid)) if valid else None)
             break
         except Exception as e:
             logger.warning("SM attempt %d failed: %s", attempt + 1, e)
@@ -382,10 +382,12 @@ def train_model(X_train, y_train, X_val, y_val, epochs=30, lr=0.001, batch_size=
     pos_count = y_train.sum()
     neg_count = len(y_train) - pos_count
     pos_weight = torch.tensor([neg_count / (pos_count + 1e-5)], dtype=torch.float32).to(device)
-    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    
+    def criterion(output, target):
+        loss = nn.BCELoss(reduction='none')(output, target)
+        weight = torch.where(target == 1.0, pos_weight, torch.tensor(1.0).to(device))
+        return (loss * weight).mean()
 
-    # Since model already has sigmoid, use BCELoss instead
-    criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-5)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=0.5)
 
@@ -545,7 +547,13 @@ def main():
     logger.info("\n--- Step 6: Saving model and scaler ---")
     import torch
     model_path = MODELS_DIR / "risk_lstm_final.pth"
-    torch.save({"state_dict": model.state_dict()}, str(model_path))
+    torch.save({
+        "state_dict": model.state_dict(),
+        "input_size": 4,
+        "hidden_size": 64,
+        "num_layers": 2,
+        "dropout": 0.1,
+    }, str(model_path))
     logger.info("Model saved to %s", model_path)
 
     scaler_path = MODELS_DIR / "risk_scaler.save"

@@ -5,7 +5,7 @@ Tests cost, revenue, season, and P&L operations.
 
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
+from knox.models import AuthToken
 from field.models import FieldData
 import json
 
@@ -18,8 +18,8 @@ class CostCRUDTestCase(TestCase):
         self.user = User.objects.create_user(
             username="costuser", password="testpass123"
         )
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
         self.field = FieldData.objects.create(
             user=self.user,
             name="Cost Field",
@@ -66,8 +66,8 @@ class RevenueCRUDTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username="revuser", password="testpass123")
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
         self.field = FieldData.objects.create(
             user=self.user,
             name="Revenue Field",
@@ -108,8 +108,8 @@ class SeasonCRUDTestCase(TestCase):
         self.user = User.objects.create_user(
             username="seasonuser", password="testpass123"
         )
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
 
     def test_list_seasons(self):
         """Test listing seasons"""
@@ -123,8 +123,8 @@ class PnLDashboardTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username="pnluser", password="testpass123")
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
 
     def test_pnl_dashboard(self):
         """Test P&L dashboard returns structured data"""
@@ -147,8 +147,8 @@ class InsuranceClaimCRUDTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username="insuser", password="testpass123")
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
         self.field = FieldData.objects.create(
             user=self.user,
             name="Insurance Field",

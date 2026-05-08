@@ -290,10 +290,16 @@ class YieldPredictionView(APIView):
 
     def _get_recommendations(self, ndvi_data, model, crop_type):
         """Generate recommendations based on prediction factors"""
-        recommendations = []
+        import os
+        import json
+        import re
+        import logging
+        import google.generativeai as genai
+        
+        fallback_recommendations = []
 
         if ndvi_data["current"] < 0.5:
-            recommendations.append(
+            fallback_recommendations.append(
                 {
                     "type": "warning",
                     "icon": "⚠️",
@@ -302,7 +308,7 @@ class YieldPredictionView(APIView):
             )
 
         if ndvi_data["trend"] == "decreasing":
-            recommendations.append(
+            fallback_recommendations.append(
                 {
                     "type": "action",
                     "icon": "📉",
@@ -311,7 +317,7 @@ class YieldPredictionView(APIView):
             )
 
         if model.get("water_sensitive") and ndvi_data["current"] < 0.6:
-            recommendations.append(
+            fallback_recommendations.append(
                 {
                     "type": "irrigation",
                     "icon": "💧",
@@ -320,7 +326,7 @@ class YieldPredictionView(APIView):
             )
 
         if ndvi_data["current"] >= 0.7:
-            recommendations.append(
+            fallback_recommendations.append(
                 {
                     "type": "positive",
                     "icon": "✅",
@@ -328,4 +334,51 @@ class YieldPredictionView(APIView):
                 }
             )
 
-        return recommendations
+        try:
+            api_key = os.environ.get("GEMINI_API_KEY")
+            if api_key:
+                genai.configure(api_key=api_key)
+                # Use gemini-1.5-flash for fast requests
+                generative_model = genai.GenerativeModel("gemini-1.5-flash")
+                
+                prompt = f"""
+                Analyze the following crop data and provide 2 to 3 actionable recommendations for the farmer.
+
+                Crop: {crop_type}
+                Current NDVI (Vegetation Index): {ndvi_data['current']} (0 is dead, 1 is extremely healthy)
+                NDVI Trend: {ndvi_data['trend']}
+                Water Sensitive: {model.get('water_sensitive', False)}
+
+                Format the response strictly as a JSON array of objects. Do not include markdown blocks or other text.
+                Each object must have these exactly 3 keys:
+                "type": string (one of "warning", "action", "irrigation", "success", "info")
+                "icon": string (a single relevant emoji)
+                "text": string (a short, clear, and actionable recommendation, max 120 characters)
+
+                Example:
+                [
+                  {{"type": "irrigation", "icon": "💧", "text": "Increase irrigation due to dropping NDVI and water sensitivity."}},
+                  {{"type": "action", "icon": "🧪", "text": "Conduct a soil test to check for nutrient deficiency."}}
+                ]
+                """
+                response = generative_model.generate_content(prompt)
+                text = response.text.replace("```json", "").replace("```", "").strip()
+                
+                match = re.search(r"\[.*\]", text, re.DOTALL)
+                if match:
+                    ai_recs = json.loads(match.group(0))
+                    valid_recs = [r for r in ai_recs if isinstance(r, dict) and "type" in r and "icon" in r and "text" in r]
+                    if valid_recs:
+                        return valid_recs
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to fetch AI recommendations: {e}")
+
+        if not fallback_recommendations:
+            fallback_recommendations.append({
+                "type": "info",
+                "icon": "ℹ️",
+                "text": "Monitor field condition closely."
+            })
+            
+        return fallback_recommendations

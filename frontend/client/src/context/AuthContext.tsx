@@ -1,7 +1,7 @@
 // src/context/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { apiGet, apiPost, setUnauthorizedHandler, API_BASE_URL, authHeaders } from "@/lib/api";
+import { apiGet, apiPost, setUnauthorizedHandler, API_BASE_URL, authHeaders, invalidateApiCache } from "@/lib/api";
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 interface User {
@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem("authToken");
         localStorage.removeItem("authUser");
         if (logoutTimerRef.current) clearTimeout(logoutTimerRef.current);
+        invalidateApiCache();
 
         // Best-effort server-side logout using raw fetch to avoid
         // triggering the global 401 handler (which would recurse)

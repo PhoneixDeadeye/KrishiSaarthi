@@ -100,8 +100,13 @@ def load_risk_model(
         return None, None
 
     try:
-        model = RiskLSTM(input_size=4, hidden_size=HIDDEN_SIZE, num_layers=N_LAYERS).to(device)
-        ckpt = torch.load(model_path, map_location=device, weights_only=True)
+        ckpt = torch.load(model_path, map_location=device, weights_only=False)
+        model = RiskLSTM(
+            input_size=ckpt.get("input_size", 4),
+            hidden_size=ckpt.get("hidden_size", HIDDEN_SIZE),
+            num_layers=ckpt.get("num_layers", N_LAYERS),
+            dropout=ckpt.get("dropout", 0.1),
+        ).to(device)
         model.load_state_dict(ckpt["state_dict"])
         model.eval()
 

@@ -85,7 +85,7 @@ def load_model(device: str = DEVICE) -> Optional[nn.Module]:
     # Try 38-class model first
     if os.path.exists(_MULTICLASS_MODEL_PATH):
         try:
-            ckpt = torch.load(_MULTICLASS_MODEL_PATH, map_location=device, weights_only=True)
+            ckpt = torch.load(_MULTICLASS_MODEL_PATH, map_location=device, weights_only=False)
             num_classes = ckpt.get("num_classes", 38)
             model = models.mobilenet_v2(weights=None)
             model.classifier = nn.Sequential(

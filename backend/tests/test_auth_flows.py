@@ -7,7 +7,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
 from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
+from knox.models import AuthToken
 from unittest.mock import patch
 
 
@@ -19,14 +19,14 @@ class LogoutTokenDeletionTestCase(TestCase):
         self.user = User.objects.create_user(
             username="logoutuser", password="TestPass123!", email="logout@test.com"
         )
-        self.token = Token.objects.create(user=self.user)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
 
     def test_logout_deletes_token(self):
         """Logout should delete the user's token."""
         response = self.client.post("/logout")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFalse(Token.objects.filter(user=self.user).exists())
+        self.assertFalse(AuthToken.objects.filter(user=self.user).exists())
 
     def test_logout_without_token_fails(self):
         """Logout without auth should return 401."""
@@ -161,10 +161,10 @@ class TokenValidationTestCase(TestCase):
         self.user = User.objects.create_user(
             username="tokenuser", password="TestPass123!"
         )
-        self.token = Token.objects.create(user=self.user)
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
 
     def test_valid_token(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
         response = self.client.get("/test_token")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

@@ -16,6 +16,7 @@ from config.pagination import get_optional_paginator
 from ..models import InsuranceClaim, Season
 from ..serializers import InsuranceClaimSerializer
 from field.models import FieldData
+from ..services.live_data import fetch_live_insurance_policies
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +91,7 @@ class InsuranceClaimView(APIView):
                 "pending_claims": pending_claims,
                 "approved_total": approved_total,
             },
+            "live_insurance_policies_news": fetch_live_insurance_policies(),
             "damage_types": [
                 {"value": "flood", "label": "Flood", "icon": "🌊"},
                 {"value": "drought", "label": "Drought", "icon": "☀️"},
@@ -124,17 +126,23 @@ class InsuranceClaimView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # Verify field belongs to user
-        field = get_object_or_404(
-            FieldData, id=serializer.validated_data["field"].id, user=request.user
-        )
+        # Verify field belongs to user if field is provided and exists in validated data
+        if "field" in serializer.validated_data and serializer.validated_data["field"]:
+            field = get_object_or_404(
+                FieldData, id=serializer.validated_data["field"].id, user=request.user
+            )
 
         # Verify season belongs to user if provided
         season = serializer.validated_data.get("season")
         if season:
             get_object_or_404(Season, id=season.id, user=request.user)
 
-        claim = serializer.save(user=request.user, status="draft")
+        # Ensure field is present since it's required by the model
+        if "field_id" in request.data:
+            field = get_object_or_404(FieldData, id=request.data["field_id"], user=request.user)
+            claim = serializer.save(user=request.user, field=field, status="draft")
+        else:
+             return Response({"field_id": ["This field is required."]}, status=status.HTTP_400_BAD_REQUEST)
         logger.info(
             "Created insurance claim %d for user %s", claim.id, request.user.username
         )

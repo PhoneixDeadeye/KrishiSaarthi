@@ -39,19 +39,24 @@ const CROPS = ["Rice", "Wheat", "Cotton", "Sugarcane", "Maize", "Soybean", "Grou
 export function MarketPrices() {
     const [data, setData] = useState<MarketData | null>(null);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [state, setState] = useState(() => localStorage.getItem("market_state") || "Punjab");
     const [crop, setCrop] = useState<string>("");
     const [searchQuery, setSearchQuery] = useState("");
 
     const fetchMarketData = async () => {
         setLoading(true);
+        setError(null);
         try {
             const params = new URLSearchParams({ state });
             if (crop && crop !== "all") params.append("crop", crop);
             const result = await apiFetch<MarketData>(`/finance/market-prices?${params.toString()}`);
             setData(result);
-        } catch (error) {
-            logger.error("Failed to fetch market data:", error);
+        } catch (err: any) {
+            logger.error("Failed to fetch market data:", err);
+            // Show the actual error message from the backend if available (e.g., "Live market data unavailable at this moment.")
+            setError(err?.message || "Live market data is temporarily unavailable. Please try again later.");
+            setData(null);
         } finally {
             setLoading(false);
         }
@@ -96,7 +101,14 @@ export function MarketPrices() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Market Prices</h1>
-                    <p className="text-muted-foreground text-sm mt-1">MSP-based reference ranges for planning (not live mandi feed)</p>
+                    <p className="text-muted-foreground text-sm mt-1 flex items-center gap-2">
+                        {data?.is_live_data ? (
+                            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px] px-1.5 py-0">LIVE</Badge>
+                        ) : data ? (
+                            <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px] px-1.5 py-0">FALLBACK</Badge>
+                        ) : null}
+                        {data?.data_source || "Loading..."}
+                    </p>
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
                     <Select value={state} onValueChange={setState}>
@@ -122,7 +134,7 @@ export function MarketPrices() {
                             placeholder="Search commodities..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-48 pl-10 pr-4 py-2 bg-card border rounded-lg text-sm focus:ring-2 focus:ring-primary/50"
+                            className="w-48 pl-10 pr-4 py-2 bg-card text-foreground border rounded-lg text-sm focus:ring-2 focus:ring-primary/50"
                         />
                     </div>
 
@@ -146,7 +158,14 @@ export function MarketPrices() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
                             <CardTitle className="text-lg">Commodity Price Ranges</CardTitle>
-                            <Badge variant="outline" className="text-xs">Last updated: {data.date}</Badge>
+                            <div className="flex items-center gap-2">
+                                {data.is_live_data ? (
+                                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">● Live Data</Badge>
+                                ) : (
+                                    <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">◌ MSP Reference</Badge>
+                                )}
+                                <Badge variant="outline" className="text-xs">Updated: {data.date}</Badge>
+                            </div>
                         </CardHeader>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
@@ -180,9 +199,19 @@ export function MarketPrices() {
                         </Card>
                     )}
                 </>
-            ) : (
-                <Card className="text-center"><CardContent className="py-16 text-muted-foreground flex flex-col items-center"><span className="material-symbols-outlined text-4xl mb-2">error</span><p>Failed to load market data. Click refresh to try again.</p></CardContent></Card>
-            )}
+            ) : error ? (
+                <Card className="text-center border-dashed">
+                    <CardContent className="py-16 text-muted-foreground flex flex-col items-center">
+                        <span className="material-symbols-outlined text-4xl mb-3 text-muted-foreground/50">cloud_off</span>
+                        <h3 className="text-lg font-medium text-foreground mb-1">Data Unavailable</h3>
+                        <p className="max-w-md mx-auto">{error}</p>
+                        <Button onClick={fetchMarketData} variant="outline" className="mt-6 gap-2">
+                            <span className="material-symbols-outlined text-sm">refresh</span>
+                            Retry Fetch
+                        </Button>
+                    </CardContent>
+                </Card>
+            ) : null}
         </div>
     );
 }

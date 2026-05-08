@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Building2, FileText, ExternalLink, Calendar, IndianRupee, Filter, Search, CheckCircle2, Clock, AlertCircle, Wallet, GraduationCap, Shield, Gift, RefreshCw } from "lucide-react";
+import { Building2, FileText, ExternalLink, Calendar, IndianRupee, Filter, Search, CheckCircle2, Clock, AlertCircle, Wallet, GraduationCap, Shield, Gift, RefreshCw, Newspaper } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { logger } from "@/lib/logger";
 
@@ -38,6 +38,12 @@ interface SchemesData {
         training: Scheme[];
     };
     tips: { icon: string; text: string }[];
+    live_schemes_news?: {
+        title: string;
+        description: string;
+        date: string;
+        source: string;
+    }[];
 }
 
 const STATES = ['Punjab', 'Haryana', 'Uttar Pradesh', 'Maharashtra', 'Gujarat', 'Madhya Pradesh', 'Kerala'];
@@ -92,19 +98,19 @@ export function SchemeMatcher() {
 
     const getSchemeTypeBadge = (type: string) => {
         const colors: Record<string, string> = {
-            subsidy: 'bg-green-100 text-green-700',
-            loan: 'bg-blue-100 text-blue-700',
-            insurance: 'bg-teal-100 text-teal-700',
-            grant: 'bg-yellow-100 text-yellow-700',
-            training: 'bg-orange-100 text-orange-700',
+            subsidy: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+            loan: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+            insurance: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
+            grant: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+            training: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
         };
-        return colors[type] || 'bg-gray-100 text-gray-700';
+        return colors[type] || 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
     };
 
     const getMatchScoreColor = (score: number) => {
-        if (score >= 80) return 'text-green-600';
-        if (score >= 60) return 'text-yellow-600';
-        return 'text-gray-600';
+        if (score >= 80) return 'text-green-600 dark:text-green-400';
+        if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
+        return 'text-muted-foreground';
     };
 
     const formatAmount = (amount: number | null) => {
@@ -189,44 +195,73 @@ export function SchemeMatcher() {
             {/* Stats */}
             {data && (
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <Card className="bg-gradient-to-br from-green-50 to-green-100">
+                    <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
                         <CardContent className="p-4 text-center">
-                            <div className="text-2xl font-bold text-green-700">{data.grouped.subsidy.length}</div>
-                            <div className="text-sm text-green-600">Subsidies</div>
+                            <div className="text-2xl font-bold text-green-700 dark:text-green-400">{data.grouped.subsidy.length}</div>
+                            <div className="text-sm text-green-600 dark:text-green-500">Subsidies</div>
                         </CardContent>
                     </Card>
-                    <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
+                    <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
                         <CardContent className="p-4 text-center">
-                            <div className="text-2xl font-bold text-blue-700">{data.grouped.loan.length}</div>
-                            <div className="text-sm text-blue-600">Loans</div>
+                            <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">{data.grouped.loan.length}</div>
+                            <div className="text-sm text-blue-600 dark:text-blue-500">Loans</div>
                         </CardContent>
                     </Card>
-                    <Card className="bg-gradient-to-br from-teal-50 to-teal-100">
+                    <Card className="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20">
                         <CardContent className="p-4 text-center">
-                            <div className="text-2xl font-bold text-teal-700">{data.grouped.insurance.length}</div>
-                            <div className="text-sm text-teal-600">Insurance</div>
+                            <div className="text-2xl font-bold text-teal-700 dark:text-teal-400">{data.grouped.insurance.length}</div>
+                            <div className="text-sm text-teal-600 dark:text-teal-500">Insurance</div>
                         </CardContent>
                     </Card>
-                    <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100">
+                    <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20">
                         <CardContent className="p-4 text-center">
-                            <div className="text-2xl font-bold text-yellow-700">{data.grouped.grant.length}</div>
-                            <div className="text-sm text-yellow-600">Grants</div>
+                            <div className="text-2xl font-bold text-yellow-700 dark:text-yellow-400">{data.grouped.grant.length}</div>
+                            <div className="text-sm text-yellow-600 dark:text-yellow-500">Grants</div>
                         </CardContent>
                     </Card>
-                    <Card className="bg-gradient-to-br from-orange-50 to-orange-100">
+                    <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20">
                         <CardContent className="p-4 text-center">
-                            <div className="text-2xl font-bold text-orange-700">{data.total_schemes}</div>
-                            <div className="text-sm text-orange-600">Total</div>
+                            <div className="text-2xl font-bold text-orange-700 dark:text-orange-400">{data.total_schemes}</div>
+                            <div className="text-sm text-orange-600 dark:text-orange-500">Total</div>
                         </CardContent>
                     </Card>
                 </div>
             )}
 
             {error && (
-                <Card className="border-red-200 bg-red-50">
-                    <CardContent className="p-4 flex items-center gap-2 text-red-700">
+                <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+                    <CardContent className="p-4 flex items-center gap-2 text-red-700 dark:text-red-400">
                         <AlertCircle className="h-5 w-5" />
                         {error}
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Live News & Updates */}
+            {data?.live_schemes_news && data.live_schemes_news.length > 0 && (
+                <Card className="border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-900/10">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-lg flex items-center gap-2 text-blue-800 dark:text-blue-300">
+                            <Newspaper className="h-5 w-5" />
+                            Live Government Scheme Updates
+                            <Badge variant="outline" className="ml-auto bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100 border-blue-300">Live</Badge>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {data.live_schemes_news.map((news, i) => (
+                            <div key={i} className="flex flex-col border-b last:border-0 pb-3 last:pb-0 border-blue-100 dark:border-blue-800">
+                                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">{news.title}</h4>
+                                <p className="text-sm text-blue-700 dark:text-blue-300 mb-2">{news.description}</p>
+                                <div className="flex items-center justify-between text-xs text-blue-600/80 dark:text-blue-400/80">
+                                    <span>{new Date(news.date).toLocaleDateString()}</span>
+                                    {news.source && (
+                                        <a href={news.source} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:underline">
+                                            Read More <ExternalLink className="h-3 w-3" />
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
                     </CardContent>
                 </Card>
             )}
@@ -260,7 +295,7 @@ export function SchemeMatcher() {
                                         <p className="text-sm text-muted-foreground mt-1">{scheme.description}</p>
 
                                         {scheme.benefits && (
-                                            <p className="text-sm text-green-700 mt-2 font-medium">
+                                            <p className="text-sm text-green-700 dark:text-green-400 mt-2 font-medium">
                                                 💰 {scheme.benefits}
                                             </p>
                                         )}
@@ -277,7 +312,7 @@ export function SchemeMatcher() {
 
                             {/* Expanded Details */}
                             {expandedScheme === scheme.id && (
-                                <div className="border-t bg-gray-50 p-4 space-y-4">
+                                <div className="border-t bg-muted/50 p-4 space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div>
                                             <div className="text-sm font-medium text-muted-foreground">Max Benefit</div>
@@ -318,7 +353,7 @@ export function SchemeMatcher() {
                                         <div className="text-sm font-medium text-muted-foreground mb-2">Documents Required</div>
                                         <div className="flex flex-wrap gap-2">
                                             {scheme.documents_required.map((doc, i) => (
-                                                <div key={i} className="flex items-center gap-1 text-sm bg-white px-2 py-1 rounded border">
+                                                <div key={i} className="flex items-center gap-1 text-sm bg-card px-2 py-1 rounded border">
                                                     <CheckCircle2 className="h-3 w-3 text-green-500" />
                                                     {doc}
                                                 </div>

@@ -107,14 +107,14 @@ class SoilAdviceValidationTestCase(TestCase):
     def setUp(self):
         from django.contrib.auth.models import User
         from rest_framework.test import APIClient
-        from rest_framework.authtoken.models import Token
+        from knox.models import AuthToken
 
         self.client = APIClient()
         self.user = User.objects.create_user(
             username="soiluser", password="TestPass123!"
         )
-        self.token = Token.objects.create(user=self.user)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
 
     def test_valid_soil_advice_request(self):
         """Valid soil parameters should be accepted."""

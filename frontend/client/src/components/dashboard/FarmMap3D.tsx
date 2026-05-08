@@ -39,17 +39,19 @@ const FarmPlot = ({ position, color, name, healthScore, onClick }: any) => {
       >
         {name}
       </Text>
-      <Text
-        position={[0, 1.3, 0]}
-        fontSize={0.3}
-        color={healthScore > 80 ? '#4ade80' : '#f87171'}
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.05}
-        outlineColor="black"
-      >
-        Temp: {healthScore}°C
-      </Text>
+      {healthScore !== undefined && (
+        <Text
+          position={[0, 1.3, 0]}
+          fontSize={0.3}
+          color={healthScore > 80 ? '#4ade80' : '#f87171'}
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.05}
+          outlineColor="black"
+        >
+          Temp: {healthScore}°C
+        </Text>
+      )}
     </group>
   );
 };
@@ -66,23 +68,30 @@ export const FarmMap3D: React.FC<{ fields: any[], onFieldClick: (fieldId: string
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
         <fog attach="fog" args={['#0f172a', 10, 30]} />
         
-        {/* Render dynamically passed fields or some dummy ones if empty */}
+        {/* Render dynamically passed fields — no data shown if empty */}
         {fields.length > 0 ? (
           fields.map((f, i) => (
             <FarmPlot
               key={f.id}
               position={[(i % 3) * 6 - 5, 0, Math.floor(i / 3) * 6 - 5]}
-              color={f.risk_score > 0.5 ? '#f59e0b' : '#22c55e'} // Amber if risky, green if safe
+              color={f.risk_score > 0.5 ? '#f59e0b' : '#22c55e'}
               name={f.name || `Field ${i+1}`}
-              healthScore={Math.floor(Math.random() * 30 + 10)}
+              healthScore={f.temperature}
               onClick={() => onFieldClick(f.id)}
             />
           ))
         ) : (
-          <>
-             <FarmPlot position={[-5, 0, 0]} color="#16a34a" name="Wheat Alpha" healthScore={24} onClick={() => onFieldClick("1")} />
-             <FarmPlot position={[5, 0, 0]} color="#f59e0b" name="Rice Beta" healthScore={85} onClick={() => onFieldClick("2")} />
-          </>
+          <Text
+            position={[0, 2, 0]}
+            fontSize={0.6}
+            color="#94a3b8"
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.05}
+            outlineColor="black"
+          >
+            No fields added yet
+          </Text>
         )}
 
         {/* Floor grid for depth */}

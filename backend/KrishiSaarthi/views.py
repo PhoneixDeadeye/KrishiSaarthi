@@ -137,10 +137,15 @@ class Signup(APIView):
         )
 
 
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
 class TestToken(APIView):
+    permission_classes = [IsAuthenticated]
+    
     def get(self, request) -> Response:
+        username = request.user.username if hasattr(request.user, 'username') else 'Unknown'
         return Response(
-            {"message": f"Token valid for {request.user.username}"},
+            {"message": f"Token valid for {username}"},
             status=status.HTTP_200_OK,
         )
 

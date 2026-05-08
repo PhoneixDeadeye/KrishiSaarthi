@@ -50,9 +50,7 @@ class FieldDataAPITest(TestCase):
 
     def test_get_field_data_unauthenticated(self):
         self.client.force_authenticate(user=None)
-        response = self.client.get(
-            "/api/field/data"
-        )  # Matching field/urls.py path structure usually prefixed with /api
+        response = self.client.get(reverse("fieldList"))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
@@ -84,12 +82,15 @@ class AnalyticsAPITest(TestCase):
             "ndwi_time_series": [{"date": "2023-01-01", "NDWI": 0.2}],
             "NDVI": 0.5,
             "EVI": 0.4,
+            "SAVI": 0.4,
             "rainfall_mm": 10.0,
             "temperature_K": 300.0,
+            "temperature_C": 26.85,
             "soil_moisture": 0.3,
+            "crop_type_class": 0,
         }
 
-    @patch("field.views.fetchEEData")
+    @patch("field.views.analysis.fetchEEData")
     def test_ee_analysis_view(self, mock_fetch):
         mock_fetch.return_value = self.ee_data_mock
         response = self.client.get(
@@ -98,8 +99,8 @@ class AnalyticsAPITest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["NDVI"], 0.5)
 
-    @patch("field.views.fetchEEData")
-    @patch("field.views.detect_awd_from_ndwi")
+    @patch("field.views.analysis.fetchEEData")
+    @patch("field.views.analysis.detect_awd_from_ndwi")
     def test_awd_report_view(self, mock_detect, mock_fetch):
         mock_fetch.return_value = self.ee_data_mock
         mock_detect.return_value = {"is_awd": True, "cycles_count": 2}
@@ -108,8 +109,8 @@ class AnalyticsAPITest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data["is_awd"])
 
-    @patch("field.views.fetchEEData")
-    @patch("field.views.calculate_carbon_metrics")
+    @patch("field.views.analysis.fetchEEData")
+    @patch("field.views.analysis.calculate_carbon_metrics")
     def test_carbon_credit_view(self, mock_calc, mock_fetch):
         mock_fetch.return_value = self.ee_data_mock
         mock_calc.return_value = {"carbon_credits": 10.5, "area_hectare": 1.0}
@@ -118,8 +119,8 @@ class AnalyticsAPITest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["carbon_credits"], 10.5)
 
-    @patch("field.views.fetchEEData")
-    @patch("field.views.get_health_score")
+    @patch("field.views.analysis.fetchEEData")
+    @patch("field.views.analysis.get_health_score")
     def test_health_score_view(self, mock_score, mock_fetch):
         mock_fetch.return_value = self.ee_data_mock
         mock_score.return_value = {"score": 85, "rating": "Excellent"}

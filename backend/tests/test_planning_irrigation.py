@@ -5,7 +5,7 @@ Tests planning CRUD, calendar, irrigation, and field log/alert operations.
 
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
+from knox.models import AuthToken
 from field.models import FieldData, FieldLog, FieldAlert
 import json
 
@@ -16,8 +16,8 @@ class SeasonCalendarTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username="caluser", password="testpass123")
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
 
     def test_list_calendar(self):
         """Test listing calendar events"""
@@ -60,8 +60,8 @@ class InventoryTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username="invuser", password="testpass123")
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
 
     def test_list_inventory(self):
         """Test listing inventory items"""
@@ -92,8 +92,8 @@ class LaborTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username="labuser", password="testpass123")
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
 
     def test_list_labor(self):
         """Test listing labor entries"""
@@ -133,8 +133,8 @@ class EquipmentTestCase(TestCase):
         self.user = User.objects.create_user(
             username="equipuser", password="testpass123"
         )
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
 
     def test_list_equipment(self):
         """Test listing equipment"""
@@ -159,8 +159,8 @@ class FieldLogTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username="loguser", password="testpass123")
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
         self.field = FieldData.objects.create(
             user=self.user,
             name="Log Field",
@@ -203,8 +203,8 @@ class FieldAlertTestCase(TestCase):
         self.user = User.objects.create_user(
             username="alertuser", password="testpass123"
         )
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
 
     def test_list_field_alerts(self):
         """Test listing field alerts"""
@@ -225,8 +225,8 @@ class IrrigationTestCase(TestCase):
         self.user = User.objects.create_user(
             username="irriguser", password="testpass123"
         )
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
 
     def test_irrigation_logs_list(self):
         """Test listing irrigation logs"""
@@ -252,8 +252,8 @@ class WeatherTestCase(TestCase):
         self.user = User.objects.create_user(
             username="weatheruser", password="testpass123"
         )
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
 
     def test_weather_requires_auth(self):
         """Test weather endpoint requires authentication"""
@@ -272,8 +272,8 @@ class RotationPlannerTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username="rotuser", password="testpass123")
-        self.token = Token.objects.create(user=self.user)
-        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
 
     def test_rotation_planner(self):
         """Test rotation planner returns data"""

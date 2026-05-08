@@ -311,30 +311,24 @@ class RotationPlannerView(APIView):
     def _get_crop_history(self, field, user):
         """
         Return real crop history from SeasonCalendar records for this field.
-        If no records exist, return an empty list with an explanatory note.
         """
         events = SeasonCalendar.objects.filter(field=field, user=user).order_by(
             "-start_date"
         )[:10]
         if not events.exists():
-            return {
-                "records": [],
-                "note": "No planting history found. Add calendar events to improve rotation suggestions.",
+            return []
+        
+        return [
+            {
+                "year": e.start_date.year,
+                "season": self._date_to_season(e.start_date.month),
+                "crop": e.title,
+                "activity": e.activity_type,
+                "start_date": e.start_date.isoformat(),
+                "end_date": e.end_date.isoformat(),
             }
-        return {
-            "records": [
-                {
-                    "year": e.start_date.year,
-                    "season": self._date_to_season(e.start_date.month),
-                    "crop": e.title,
-                    "activity": e.activity_type,
-                    "start_date": e.start_date.isoformat(),
-                    "end_date": e.end_date.isoformat(),
-                }
-                for e in events
-            ],
-            "note": None,
-        }
+            for e in events
+        ]
 
     @staticmethod
     def _date_to_season(month):

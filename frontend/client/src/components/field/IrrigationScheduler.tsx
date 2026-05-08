@@ -142,8 +142,8 @@ export function IrrigationScheduler() {
         return (
             <Card className="text-center">
                 <CardContent className="p-12 flex flex-col items-center">
-                    <span className="material-symbols-outlined text-5xl text-muted-foreground mb-4">water_drop</span>
-                    <p className="text-muted-foreground">Select a field to view irrigation schedule</p>
+                    <span className="material-symbols-outlined text-4xl text-primary animate-spin mb-4">progress_activity</span>
+                    <p className="text-muted-foreground">Loading irrigation data...</p>
                 </CardContent>
             </Card>
         );
@@ -372,8 +372,9 @@ export function IrrigationScheduler() {
                             })}
                         </div>
                     ) : (
-                        <div className="text-center py-8 text-muted-foreground">
-                            No schedule data available
+                        <div className="text-center py-8 text-muted-foreground flex flex-col items-center">
+                            <span className="material-symbols-outlined text-3xl animate-spin mb-2">progress_activity</span>
+                            Loading schedule...
                         </div>
                     )}
                 </CardContent>

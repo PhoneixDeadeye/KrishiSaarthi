@@ -6,7 +6,7 @@ URLs match actual urls.py configuration.
 
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
+from knox.models import AuthToken
 from field.models import FieldData
 import json
 
@@ -83,8 +83,8 @@ class FieldManagementTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username="farmer", password="farmerpass")
-        self.token = Token.objects.create(user=self.user)
-        self.auth_header = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth_header = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
 
     def test_create_field(self):
         """Test creating a new field via set_polygon"""
@@ -186,8 +186,8 @@ class ValidationTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username="test", password="test")
-        self.token = Token.objects.create(user=self.user)
-        self.auth_header = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth_header = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
 
     def test_invalid_polygon(self):
         """Test that invalid polygons are rejected"""
@@ -227,8 +227,8 @@ class FieldLogIDORTestCase(TestCase):
         self.client = Client()
         self.user_a = User.objects.create_user(username="farmer_a", password="pass")
         self.user_b = User.objects.create_user(username="farmer_b", password="pass")
-        self.token_b = Token.objects.create(user=self.user_b)
-        self.auth_b = {"HTTP_AUTHORIZATION": f"Token {self.token_b.key}"}
+        self.token_obj_b, self.token_b = AuthToken.objects.create(self.user_b)
+        self.auth_b = {"HTTP_AUTHORIZATION": f"Token {self.token_b}"}
         # Field owned by user_a
         self.field_a = FieldData.objects.create(
             user=self.user_a,

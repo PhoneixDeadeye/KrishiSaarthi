@@ -98,7 +98,8 @@ class PestReport(APIView):
 
         try:
             genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-            model = genai.GenerativeModel("gemini-2.0-flash")
+            # Use gemini-1.5-flash as it is more universally available in free tiers
+            model = genai.GenerativeModel("gemini-1.5-flash")
 
             # Load image
             img = Image.open(image_path)
@@ -133,18 +134,16 @@ class PestReport(APIView):
             return {
                 "is_plant": False,
                 "confidence": "low",
-                "detected": "Could not analyze image",
+                "detected": "Could not analyze image format",
             }
 
         except Exception as e:
-            logger.warning(
-                "Plant validation failed: %s. Proceeding with detection anyway.", e
-            )
-            # If validation fails, allow the image through (fail-open)
+            logger.warning("Plant validation failed: %s", e)
+            # If validation fails, return an error state instead of fail-open
             return {
-                "is_plant": True,
+                "is_plant": False,
                 "confidence": "unknown",
-                "detected": "validation_error",
+                "detected": f"API Validation Error: {str(e)}",
             }
 
     def post(self, request):

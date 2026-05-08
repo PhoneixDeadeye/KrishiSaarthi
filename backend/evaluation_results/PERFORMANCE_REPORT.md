@@ -1,6 +1,6 @@
 # KrishiSaarthi — Performance Metrics Report
 
-_Generated: 2026-04-03 11:47:15_
+_Generated: 2026-05-05 23:30:04_
 
 ---
 
@@ -8,35 +8,98 @@ _Generated: 2026-04-03 11:47:15_
 
 ### A.1 CNN — MobileNetV2 (Crop Disease Detection)
 
-_CNN metrics not available. Run `python scripts/train_cnn_multiclass.py` first._
+| Metric | Value |
+|--------|-------|
+| Architecture | MobileNetV2 (modified classifier) |
+| Number of Classes | 38 |
+| Total Parameters | 2,272,550 |
+| Trainable Parameters | 48,678 |
+| Training Epochs | 2 |
+| Training Time | 3047.0s |
+| Best Validation Accuracy | 89.24% |
+| **Test Accuracy** | **89.33%** |
+| Weighted Precision | 90.85% |
+| Weighted Recall | 89.33% |
+| Weighted F1-Score | 89.42% |
+| Macro F1-Score | 89.37% |
+| Avg Inference Time | 11.13ms/image |
+| Device | cpu |
+| Test Samples | 7030 |
 
+#### Per-Class Performance (Top 10 by F1)
+
+| Class | Precision | Recall | F1 | Support |
+|-------|-----------|--------|-----|---------|
+| Corn_(maize)___healthy | 100.0% | 100.0% | 100.0% | 185 |
+| Orange___Haunglongbing_(Citrus_greening) | 97.4% | 99.5% | 98.5% | 191 |
+| Corn_(maize)___Common_rust_ | 97.0% | 98.0% | 97.5% | 200 |
+| Strawberry___Leaf_scorch | 95.6% | 99.4% | 97.5% | 173 |
+| Grape___Leaf_blight_(Isariopsis_Leaf_Spot) | 100.0% | 94.4% | 97.1% | 180 |
+| Potato___Early_blight | 98.9% | 94.9% | 96.9% | 197 |
+| Squash___Powdery_mildew | 98.8% | 93.4% | 96.0% | 182 |
+| Cherry_(including_sour)___healthy | 98.9% | 92.5% | 95.6% | 187 |
+| Grape___Esca_(Black_Measles) | 97.7% | 93.4% | 95.5% | 181 |
+| Grape___Black_rot | 95.0% | 95.9% | 95.5% | 197 |
+
+#### Bottom 5 Classes (by F1)
+
+| Class | Precision | Recall | F1 | Support |
+|-------|-----------|--------|-----|---------|
+| Tomato___Septoria_leaf_spot | 68.4% | 94.1% | 79.2% | 186 |
+| Tomato___Spider_mites Two-spotted_spider_mite | 89.4% | 60.4% | 72.1% | 154 |
+| Tomato___Late_blight | 58.6% | 91.4% | 71.4% | 187 |
+| Tomato___Early_blight | 91.2% | 57.9% | 70.8% | 178 |
+| Tomato___Target_Spot | 66.7% | 73.8% | 70.1% | 195 |
+
+#### Training Curve
+
+| Epoch | Train Acc | Val Acc | Train Loss | Val Loss |
+|-------|-----------|---------|------------|----------|
+| 1 | 73.18% | 86.85% | 0.9658 | 0.4193 |
+| 2 | 79.31% | 89.24% | 0.6746 | 0.3336 |
 
 ### A.2 LSTM — Risk Prediction Model
 
 | Metric | Value |
 |--------|-------|
 | Architecture | LSTM(input=4, hidden=64, layers=2, dropout=0.1) -> Linear(1) -> Sigmoid |
-| Input Features | NDVI, rainfall_mm, temperature_C, soil_moisture |
+| Input Features | vegetation_index, rainfall_mm, temperature_C, soil_moisture |
 | Total Parameters | 51,265 |
-| Accuracy | 33.0% |
-| Precision | 0.0% |
-| Recall | 0.0% |
-| F1 Score | 0.0% |
-| AUC-ROC | 0.1858 |
-| Avg Inference | 0.839ms |
-| P95 Inference | 1.036ms |
+| Accuracy | 98.0% |
+| Precision | 98.65% |
+| Recall | 97.72% |
+| F1 Score | 98.18% |
+| AUC-ROC | 0.9987 |
+| Avg Inference | 1.107ms |
+| P95 Inference | 2.409ms |
 
-**Risk Level Distribution:** Low: 200, Medium: 0, High: 0
+**Risk Level Distribution:** Low: 1210, Medium: 34, High: 1460
 
-**Output Distribution:** mean=0.0013, std=0.0001, min=0.0012, max=0.0018
+**Output Distribution:** mean=0.5465, std=0.485, min=0.0, max=1.0
 
-#### Sample API Predictions
+#### Training Data Source
 
-| Scenario | Risk Level | Probability | Latency |
-|----------|------------|-------------|---------|
-| Healthy field (high NDVI, good moisture) | Low | 0.0092 | 6.27ms |
-| Stressed field (low NDVI, dry) | Low | 0.0023 | 0.94ms |
-| Moderate conditions | Low | 0.0061 | 0.77ms |
+| Attribute | Details |
+|-----------|---------|
+| Provider | Open-Meteo ERA5 Archive (ECMWF reanalysis) |
+| Temperature | ERA5 reanalysis 2m temperature |
+| Precipitation | ERA5 reanalysis precipitation |
+| Soil Moisture | ERA5-Land 0-7cm soil moisture |
+| Vegetation | Water balance vegetation index (FAO-56 method) |
+| Locations | 25 Indian agricultural districts |
+| Period | 2023-01-01 to 2024-12-31 |
+| Total Observations | 18,275 daily records |
+| Real Data | Yes |
+
+#### Training Details
+
+| Attribute | Value |
+|-----------|-------|
+| Epochs | 30 |
+| Training Time | 177.4s |
+| Train/Val/Test Split | 12617 / 2704 / 2704 |
+| Best Val Accuracy | 97.97% |
+| High Risk % | 54.6% |
 
 ---
 ## B. System Performance / API Benchmarks

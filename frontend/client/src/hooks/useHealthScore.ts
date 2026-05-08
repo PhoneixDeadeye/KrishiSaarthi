@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 import { HealthScoreResponse } from "@/types/field";
 import { logger } from "@/lib/logger";
 
@@ -13,39 +14,34 @@ interface UseHealthScoreReturn {
 }
 
 export function useHealthScore(): UseHealthScoreReturn {
-    const { token } = useAuth();
+    const { token, user } = useAuth();
     const { selectedField } = useField();
 
-    const [healthData, setHealthData] = useState<HealthScoreResponse | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const queryKey = useMemo(
+        () => ["healthScore", user?.id ?? "guest", selectedField?.id ?? "all"],
+        [selectedField?.id, user?.id]
+    );
 
-    const fetchHealth = useCallback(async () => {
-        if (!token) {
-            setIsLoading(false);
-            return;
-        }
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            let endpoint = '/field/healthscore';
+    const query = useQuery({
+        queryKey,
+        enabled: !!token,
+        queryFn: async () => {
+            let endpoint = "/field/healthscore";
             if (selectedField) endpoint += `?field_id=${selectedField.id}`;
-            const data = await apiFetch<HealthScoreResponse>(endpoint);
-            setHealthData(data);
-        } catch (err) {
-            logger.error("Health score fetch error:", err);
-            setError("Unable to load health data");
-            setHealthData(null);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [selectedField, token]);
+            return apiFetch<HealthScoreResponse>(endpoint, {}, { timeout: 15000, retries: 1 });
+        },
+        retry: 1,
+        staleTime: 2 * 60 * 1000,
+    });
 
-    useEffect(() => {
-        fetchHealth();
-    }, [fetchHealth]);
+    if (query.error) {
+        logger.error("Health score fetch error:", query.error);
+    }
 
-    return { healthData, isLoading, error, refetch: fetchHealth };
+    return {
+        healthData: query.data ?? null,
+        isLoading: query.isLoading || query.isFetching,
+        error: query.error ? "Unable to load health data" : null,
+        refetch: () => { void query.refetch(); },
+    };
 }

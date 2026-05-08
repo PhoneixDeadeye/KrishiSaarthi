@@ -13,7 +13,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Configure Gemini once at module level
-_gemini_api_key = os.environ.get("GEMINI_API_KEY")
+# Use django.conf.settings which is guaranteed to have run load_dotenv
+_gemini_api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", None)
+if not _gemini_api_key:
+    # Fallback: manually load .env if settings didn't populate os.environ
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(os.path.join(settings.BASE_DIR, ".env"))
+        _gemini_api_key = os.environ.get("GEMINI_API_KEY")
+    except ImportError:
+        pass
 if _gemini_api_key:
     genai.configure(api_key=_gemini_api_key)
 

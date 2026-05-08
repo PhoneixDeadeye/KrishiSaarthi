@@ -206,17 +206,31 @@ def get_transforms():
     return train_transform, val_transform
 
 
-def train_model(model, train_loader, val_loader, num_epochs, lr=0.001):
-    """Train the model and return training history."""
+def train_model(model, train_loader, val_loader, num_epochs, lr=0.001,
+                unfreeze_at=7, lr_backbone=1e-4):
+    """
+    Train the model with backbone unfreeze strategy.
+
+    Phase 1 (epochs 1..unfreeze_at): Only classifier head trains (fast convergence).
+    Phase 2 (epoch unfreeze_at+1..end): Entire network fine-tunes at lower LR.
+    """
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
 
-    history = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
+    history = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": [], "lr": []}
     best_val_acc = 0.0
 
-    for epoch in range(num_epochs):
+    for epoch in range(1, num_epochs + 1):
         epoch_start = time.time()
+
+        # Phase 2: Unfreeze backbone after N epochs
+        if epoch == unfreeze_at + 1 and unfreeze_at > 0:
+            logger.info("Epoch %d: Unfreezing backbone — LR -> %s", epoch, lr_backbone)
+            for param in model.features.parameters():
+                param.requires_grad = True
+            optimizer = optim.Adam(model.parameters(), lr=lr_backbone)
+            scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
 
         # Training phase
         model.train()
@@ -229,6 +243,7 @@ def train_model(model, train_loader, val_loader, num_epochs, lr=0.001):
             outputs = model(images)
             loss = criterion(outputs, labels)
             loss.backward()
+            nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
 
             running_loss += loss.item() * images.size(0)
@@ -236,10 +251,10 @@ def train_model(model, train_loader, val_loader, num_epochs, lr=0.001):
             total += labels.size(0)
             correct += predicted.eq(labels).sum().item()
 
-            if (batch_idx + 1) % 50 == 0:
+            if (batch_idx + 1) % 100 == 0:
                 logger.info(
-                    "  Epoch %d/%d Batch %d/%d Loss: %.4f Acc: %.2f%%",
-                    epoch + 1, num_epochs, batch_idx + 1, len(train_loader),
+                    "  [%d/%d] Batch %d/%d Loss: %.4f Acc: %.2f%%",
+                    epoch, num_epochs, batch_idx + 1, len(train_loader),
                     loss.item(), 100.0 * correct / total
                 )
 
@@ -268,10 +283,15 @@ def train_model(model, train_loader, val_loader, num_epochs, lr=0.001):
         history["val_loss"].append(val_loss)
         history["val_acc"].append(val_acc)
 
+        current_lr = optimizer.param_groups[0]["lr"]
+        history["lr"].append(current_lr)
+
         elapsed = time.time() - epoch_start
+        tag = " *BEST*" if val_acc > best_val_acc else ""
         logger.info(
-            "Epoch %d/%d [%.0fs] Train Loss: %.4f Acc: %.2f%% | Val Loss: %.4f Acc: %.2f%%",
-            epoch + 1, num_epochs, elapsed, train_loss, train_acc, val_loss, val_acc
+            "Epoch %d/%d [%.0fs] Train: %.4f/%.2f%% | Val: %.4f/%.2f%% LR=%.6f%s",
+            epoch, num_epochs, elapsed, train_loss, train_acc, val_loss, val_acc,
+            current_lr, tag
         )
 
         # Save best model
@@ -282,13 +302,12 @@ def train_model(model, train_loader, val_loader, num_epochs, lr=0.001):
                 "num_classes": 38,
                 "class_names": PLANTVILLAGE_CLASSES,
                 "val_acc": val_acc,
-                "epoch": epoch + 1,
+                "epoch": epoch,
             }, str(MODELS_DIR / "crop_disease_model_38class.pth"))
-            logger.info("  -> Saved best model (val_acc=%.2f%%)", val_acc)
 
         scheduler.step()
 
-    return history
+    return history, best_val_acc
 
 
 def evaluate_model(model, test_loader, class_names):
@@ -438,9 +457,12 @@ def main():
     # Step 4: Train
     logger.info("Starting training...")
     train_start = time.time()
-    history = train_model(model, train_loader, val_loader, args.epochs, args.lr)
+    history, best_val_acc = train_model(
+        model, train_loader, val_loader, args.epochs, args.lr,
+        unfreeze_at=args.unfreeze_after, lr_backbone=args.lr * 0.1,
+    )
     train_time = time.time() - train_start
-    logger.info("Training completed in %.1f seconds", train_time)
+    logger.info("Training completed in %.1f seconds | Best val acc: %.2f%%", train_time, best_val_acc)
 
     # Step 5: Load best model and evaluate
     best_ckpt = torch.load(str(MODELS_DIR / "crop_disease_model_38class.pth"), map_location=DEVICE, weights_only=True)

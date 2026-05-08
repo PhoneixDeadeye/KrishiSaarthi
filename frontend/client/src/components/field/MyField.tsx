@@ -58,21 +58,34 @@ export function MyField() {
         />
       </div>
 
-      {/* Floating Control Panel (Desktop: Right Side, Mobile: Bottom Sheet style) */}
-      <div className="absolute right-0 top-0 bottom-0 pointer-events-none p-4 z-10 w-full lg:w-[400px] flex flex-col justify-end lg:justify-start">
-        <div className="pointer-events-auto bg-background/95 backdrop-blur-sm border shadow-xl rounded-xl p-6 overflow-y-auto max-h-[50vh] lg:max-h-full">
-          <h1 className="text-2xl font-bold text-foreground mb-4">
-            {t("my_field")}
-          </h1>
-          <p className="text-sm text-muted-foreground mb-6">
-            Draw your field boundary on the map to get started. Select your crop details below for accurate analysis.
-          </p>
+      {/* Floating Control Panel */}
+      <div className="absolute right-0 top-0 bottom-0 pointer-events-none p-3 sm:p-4 z-10 w-full lg:w-[420px] flex flex-col justify-end lg:justify-start">
+        <div className="pointer-events-auto bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border border-border shadow-2xl rounded-2xl overflow-hidden max-h-[55vh] lg:max-h-[calc(100vh-6rem)] flex flex-col">
+          {/* Panel Header */}
+          <div className="p-5 pb-4 border-b border-border/40">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <span className="material-symbols-outlined text-primary text-xl">landscape</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">{t("my_field")}</h1>
+                <p className="text-xs text-muted-foreground">Configure field details</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Draw your field boundary on the map to get started. Select your crop details below for accurate analysis.
+            </p>
+          </div>
 
-          <div className="space-y-4">
+          {/* Form Selectors */}
+          <div className="p-5 space-y-4 overflow-y-auto flex-1">
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t("crop_type")}</label>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <span className="text-base">🌾</span>
+                {t("crop_type")}
+              </label>
               <Select value={selectedCrop} onValueChange={setSelectedCrop}>
-                <SelectTrigger data-testid="select-crop-type" className="bg-background">
+                <SelectTrigger data-testid="select-crop-type" className="bg-white/50 dark:bg-zinc-900/50 border-border h-11">
                   <SelectValue placeholder={t("select_crop")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -84,9 +97,12 @@ export function MyField() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t("soil_type")}</label>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <span className="text-base">🪨</span>
+                {t("soil_type")}
+              </label>
               <Select value={selectedSoil} onValueChange={setSelectedSoil}>
-                <SelectTrigger data-testid="select-soil-type" className="bg-background">
+                <SelectTrigger data-testid="select-soil-type" className="bg-white/50 dark:bg-zinc-900/50 border-border h-11">
                   <SelectValue placeholder={t("soil_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -98,9 +114,12 @@ export function MyField() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t("irrigation_type")}</label>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <span className="text-base">💧</span>
+                {t("irrigation_type")}
+              </label>
               <Select value={selectedIrrigation} onValueChange={setSelectedIrrigation}>
-                <SelectTrigger data-testid="select-irrigation-type" className="bg-background">
+                <SelectTrigger data-testid="select-irrigation-type" className="bg-white/50 dark:bg-zinc-900/50 border-border h-11">
                   <SelectValue placeholder={t("irrigation_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>

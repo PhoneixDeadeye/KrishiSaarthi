@@ -5,7 +5,7 @@ Tests the chat endpoint authentication, validation, and session management.
 
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
+from knox.models import AuthToken
 from chat.models import ChatSession, ChatMessage
 import json
 
@@ -39,8 +39,8 @@ class ChatValidationTestCase(TestCase):
         self.user = User.objects.create_user(
             username="chatuser", password="testpass123"
         )
-        self.token = Token.objects.create(user=self.user)
-        self.auth_headers = {"HTTP_AUTHORIZATION": f"Token {self.token.key}"}
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.auth_headers = {"HTTP_AUTHORIZATION": f"Token {self.token}"}
 
     def test_chat_missing_question(self):
         """Test that missing question returns 400"""
@@ -95,24 +95,24 @@ class ChatSessionModelTestCase(TestCase):
     def test_chat_history_not_found(self):
         """Test that non-existent session returns 404"""
         user = User.objects.create_user(username="histuser", password="testpass")
-        token = Token.objects.create(user=user)
+        token = AuthToken.objects.create(user)
         client = Client()
         response = client.get(
             "/api/chat/history/nonexistent-session",
-            HTTP_AUTHORIZATION=f"Token {token.key}",
+            HTTP_AUTHORIZATION=f"Token {token[1]}",
         )
         self.assertEqual(response.status_code, 404)
 
     def test_delete_chat_history(self):
         """Test deleting chat history"""
         user = User.objects.create_user(username="deluser", password="testpass")
-        token = Token.objects.create(user=user)
+        token = AuthToken.objects.create(user)
         session = ChatSession.objects.create(session_id="delete-me", user=user)
         ChatMessage.objects.create(session=session, role="user", text="Test")
 
         client = Client()
         response = client.delete(
-            "/api/chat/history/delete-me", HTTP_AUTHORIZATION=f"Token {token.key}"
+            "/api/chat/history/delete-me", HTTP_AUTHORIZATION=f"Token {token[1]}"
         )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(ChatSession.objects.filter(session_id="delete-me").exists())
@@ -125,8 +125,8 @@ class ChatIDORPreventionTestCase(TestCase):
         self.client = Client()
         self.user_a = User.objects.create_user(username="user_a", password="testpass")
         self.user_b = User.objects.create_user(username="user_b", password="testpass")
-        self.token_a = Token.objects.create(user=self.user_a)
-        self.token_b = Token.objects.create(user=self.user_b)
+        self.token_a = AuthToken.objects.create(self.user_a)
+        self.token_obj_b, self.token_b = AuthToken.objects.create(self.user_b)
         # Create a session owned by user_a
         self.session_a = ChatSession.objects.create(
             session_id="session-a", user=self.user_a
@@ -142,7 +142,7 @@ class ChatIDORPreventionTestCase(TestCase):
         """IDOR: User B must not see User A's chat session"""
         response = self.client.get(
             "/api/chat/history/session-a",
-            HTTP_AUTHORIZATION=f"Token {self.token_b.key}",
+            HTTP_AUTHORIZATION=f"Token {self.token_b}",
         )
         self.assertEqual(response.status_code, 404)
 
@@ -150,7 +150,7 @@ class ChatIDORPreventionTestCase(TestCase):
         """IDOR: User B must not be able to delete User A's chat session"""
         response = self.client.delete(
             "/api/chat/history/session-a",
-            HTTP_AUTHORIZATION=f"Token {self.token_b.key}",
+            HTTP_AUTHORIZATION=f"Token {self.token_b}",
         )
         self.assertEqual(response.status_code, 404)
         # Session should still exist
@@ -160,7 +160,7 @@ class ChatIDORPreventionTestCase(TestCase):
         """Positive: Owner can read their own session"""
         response = self.client.get(
             "/api/chat/history/session-a",
-            HTTP_AUTHORIZATION=f"Token {self.token_a.key}",
+            HTTP_AUTHORIZATION=f"Token {self.token_a[1]}",
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()

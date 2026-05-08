@@ -53,16 +53,16 @@ class MLEngineTestCase(TestCase):
 
     def test_compute_health_score_math(self):
         """Test health score computation weights correctly"""
-        # Perfect health: CNN=1.0, NDVI=1.0, risk=0.0
-        score = compute_health_score(1.0, 1.0, 0.0)
+        # Perfect health: CNN=1.0, NDVI=1.0, risk=0.0, weather=1.0, practice=1.0
+        score = compute_health_score(1.0, 1.0, 0.0, 1.0, 1.0)
         self.assertAlmostEqual(score, 1.0, places=2)
 
-        # Worst health: CNN=0.0, NDVI=0.0, risk=1.0
-        score = compute_health_score(0.0, 0.0, 1.0)
+        # Worst health: CNN=0.0, NDVI=0.0, risk=1.0, weather=0.0, practice=0.0
+        score = compute_health_score(0.0, 0.0, 1.0, 0.0, 0.0)
         self.assertAlmostEqual(score, 0.0, places=2)
 
-        # Neutral: CNN=0.5, NDVI=0.5, risk=0.5
-        score = compute_health_score(0.5, 0.5, 0.5)
+        # Neutral: CNN=0.5, NDVI=0.5, risk=0.5, weather=0.5, practice=0.5
+        score = compute_health_score(0.5, 0.5, 0.5, 0.5, 0.5)
         self.assertAlmostEqual(score, 0.5, places=2)
 
     def test_health_rating_ranges(self):

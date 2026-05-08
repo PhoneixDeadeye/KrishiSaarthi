@@ -20,7 +20,7 @@ class TestInsuranceClaimSerializer(TestCase):
         self.user = User.objects.create_user(
             username="testfarmer", password="testpass123"
         )
-        self.field = FieldData.objects.create(user=self.user, name="Test Field")
+        self.field = FieldData.objects.create(user=self.user, name="Test Field", polygon="[[0,0],[0,1],[1,1],[1,0],[0,0]]")
 
     def test_valid_claim_data(self):
         data = {
@@ -130,13 +130,13 @@ class TestInsuranceClaimAPI(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username="farmer1", password="testpass123")
-        self.field = FieldData.objects.create(user=self.user, name="Paddy Field")
+        self.field = FieldData.objects.create(user=self.user, name="Paddy Field", polygon="[[0,0],[0,1],[1,1],[1,0],[0,0]]")
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
     def test_create_claim_via_api(self):
         response = self.client.post(
-            "/finance/insurance/",
+            "/finance/insurance",
             {
                 "field_id": self.field.id,
                 "crop": "Rice",
@@ -153,7 +153,7 @@ class TestInsuranceClaimAPI(TestCase):
 
     def test_create_claim_missing_field(self):
         response = self.client.post(
-            "/finance/insurance/",
+            "/finance/insurance",
             {
                 "crop": "Rice",
                 "damage_type": "flood",
@@ -179,7 +179,7 @@ class TestInsuranceClaimAPI(TestCase):
             status="draft",
         )
         response = self.client.patch(
-            f"/finance/insurance/{claim.id}/", {"status": "submitted"}, format="json"
+            f"/finance/insurance/{claim.id}", {"status": "submitted"}, format="json"
         )
         assert response.status_code == 200
         claim.refresh_from_db()
@@ -197,7 +197,7 @@ class TestInsuranceClaimAPI(TestCase):
             estimated_loss=5000,
             status="draft",
         )
-        response = self.client.delete(f"/finance/insurance/{claim.id}/")
+        response = self.client.delete(f"/finance/insurance/{claim.id}")
         assert response.status_code == 204
 
     def test_cannot_delete_submitted_claim(self):
@@ -212,7 +212,7 @@ class TestInsuranceClaimAPI(TestCase):
             estimated_loss=20000,
             status="submitted",
         )
-        response = self.client.delete(f"/finance/insurance/{claim.id}/")
+        response = self.client.delete(f"/finance/insurance/{claim.id}")
         assert response.status_code == 400
 
     def test_list_claims(self):
@@ -226,7 +226,7 @@ class TestInsuranceClaimAPI(TestCase):
             area_affected_acres=5,
             estimated_loss=100000,
         )
-        response = self.client.get("/finance/insurance/")
+        response = self.client.get("/finance/insurance")
         assert response.status_code == 200
         assert len(response.data["claims"]) == 1
 
@@ -245,6 +245,6 @@ class TestInsuranceClaimAPI(TestCase):
         )
         other_client = APIClient()
         other_client.force_authenticate(user=other_user)
-        response = other_client.get("/finance/insurance/")
+        response = other_client.get("/finance/insurance")
         assert response.status_code == 200
         assert len(response.data["claims"]) == 0

@@ -8,7 +8,7 @@ from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.utils import timezone
-from rest_framework.authtoken.models import Token
+from knox.models import AuthToken
 from rest_framework.test import APIClient
 from rest_framework import status
 from unittest.mock import patch, MagicMock
@@ -81,8 +81,8 @@ class BulkMarkReadTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(username="alertbulk", password="testpass")
-        self.token = Token.objects.create(user=self.user)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
 
         from field.models import FieldData, FieldAlert
 
@@ -267,8 +267,8 @@ class PlanningDelete204TestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(username="del204user", password="testpass")
-        self.token = Token.objects.create(user=self.user)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
         from field.models import FieldData
 
         self.field = FieldData.objects.create(
@@ -408,20 +408,20 @@ class HealthScoreEdgeCasesTestCase(TestCase):
         from ml_engine.health_score import compute_health_score
 
         # Negative NDVI should be clamped to 0
-        score = compute_health_score(0.5, -0.5, 0.5)
+        score = compute_health_score(0.5, -0.5, 0.5, 0.5, 0.5)
         self.assertGreaterEqual(score, 0.0)
         self.assertLessEqual(score, 1.0)
 
     def test_all_ones(self):
         from ml_engine.health_score import compute_health_score
 
-        score = compute_health_score(1.0, 1.0, 0.0)
+        score = compute_health_score(1.0, 1.0, 0.0, 1.0, 1.0)
         self.assertAlmostEqual(score, 1.0, places=2)
 
     def test_all_zeros(self):
         from ml_engine.health_score import compute_health_score
 
-        score = compute_health_score(0.0, 0.0, 1.0)
+        score = compute_health_score(0.0, 0.0, 1.0, 0.0, 0.0)
         self.assertAlmostEqual(score, 0.0, places=2)
 
 
@@ -596,8 +596,8 @@ class SchemesViewNoAutoSeedTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(username="schemuser", password="testpass")
-        self.token = Token.objects.create(user=self.user)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
 
     def test_empty_schemes_returns_setup_hint(self):
         from finance.models import GovernmentScheme
@@ -607,6 +607,5 @@ class SchemesViewNoAutoSeedTestCase(TestCase):
         response = self.client.get("/finance/schemes")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        # Should either have a setup_required hint or empty list
-        total = data.get("total_schemes", len(data.get("schemes", [])))
-        self.assertEqual(total, 0)
+        # Should now return dynamically fetched items or fallback SAMPLE_SCHEMES
+        self.assertTrue(len(data.get("schemes", [])) > 0)

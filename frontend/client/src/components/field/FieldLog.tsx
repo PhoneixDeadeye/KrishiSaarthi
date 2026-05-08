@@ -178,7 +178,7 @@ export function FieldLog() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">edit_calendar</span>
-            {t("field_log")}
+            Event Log Calendar
           </h1>
           <p className="text-muted-foreground text-sm mt-1">Track your farm activities</p>
         </div>
@@ -220,19 +220,35 @@ export function FieldLog() {
         {/* Alerts Sidebar */}
         <div className="space-y-4">
           <Card>
-            <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4 border-b">
-              <span className="material-symbols-outlined text-amber-500">warning</span>
-              <CardTitle className="text-lg">Alerts</CardTitle>
+            <CardHeader className="flex flex-row items-center gap-3 space-y-0 pb-4 border-b">
+              <div className="size-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                <span className="material-symbols-outlined text-amber-500 text-lg">warning</span>
+              </div>
+              <div>
+                <CardTitle className="text-base">Alerts</CardTitle>
+                <p className="text-xs text-muted-foreground">{alerts.length} pending</p>
+              </div>
             </CardHeader>
             <CardContent className="p-4 max-h-80 overflow-y-auto">
               {alerts.length === 0 ? (
-                <p className="text-muted-foreground text-sm text-center py-8">No pending alerts</p>
+                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                  <div className="size-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                    <span className="material-symbols-outlined text-2xl opacity-40">check_circle</span>
+                  </div>
+                  <p className="text-sm font-medium">All clear!</p>
+                  <p className="text-xs mt-0.5 opacity-60">No pending alerts</p>
+                </div>
               ) : (
                 <div className="space-y-3">
                   {alerts.slice(0, 5).map(alert => (
-                    <div key={alert.id} className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                      <p className="text-sm font-medium text-red-600 dark:text-red-400">{alert.message}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{alert.date}</p>
+                    <div key={alert.id} className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex gap-3 items-start">
+                      <div className="size-6 rounded-full bg-red-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="material-symbols-outlined text-red-500 text-sm">priority_high</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-red-600 dark:text-red-400">{alert.message}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{alert.date}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -242,16 +258,30 @@ export function FieldLog() {
 
           {/* Quick Stats */}
           <Card>
+            <CardHeader className="flex flex-row items-center gap-3 space-y-0 pb-3 border-b">
+              <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <span className="material-symbols-outlined text-primary text-lg">monitoring</span>
+              </div>
+              <div>
+                <CardTitle className="text-base">This Month</CardTitle>
+                <p className="text-xs text-muted-foreground">Activity summary</p>
+              </div>
+            </CardHeader>
             <CardContent className="p-4">
-              <h4 className="font-medium text-sm mb-3">This Month</h4>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 {Object.entries(activityConfig).slice(0, 4).map(([type, config]) => {
-                  const count = logs.filter(l => l.activity === type).length;
+                  const now = new Date();
+                  const count = logs.filter(l => {
+                    const d = new Date(l.date);
+                    return l.activity === type && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                  }).length;
                   return (
-                    <div key={type} className="p-2 rounded-lg bg-muted/50 text-center">
-                      <span className={cn("material-symbols-outlined text-lg", config.color)}>{config.icon}</span>
-                      <p className="text-lg font-bold">{count}</p>
-                      <p className="text-[10px] text-muted-foreground">{type}</p>
+                    <div key={type} className="p-3 rounded-xl bg-muted/30 border border-border/40 text-center space-y-1.5 hover:bg-muted/50 transition-colors">
+                      <div className={cn("size-9 rounded-lg mx-auto flex items-center justify-center", config.bg)}>
+                        <span className={cn("material-symbols-outlined text-lg", config.color)}>{config.icon}</span>
+                      </div>
+                      <p className="text-xl font-bold tabular-nums">{count}</p>
+                      <p className="text-[11px] text-muted-foreground font-medium">{type}</p>
                     </div>
                   );
                 })}
@@ -304,7 +334,7 @@ export function FieldLog() {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    className="flex-1 p-3 border rounded-lg bg-background text-sm"
+                    className="flex-1 p-3 border rounded-lg bg-background text-foreground text-sm"
                     placeholder={getDetailsPlaceholder()}
                     value={details}
                     onChange={(e) => setDetails(e.target.value)}

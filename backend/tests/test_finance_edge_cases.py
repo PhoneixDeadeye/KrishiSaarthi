@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from rest_framework.test import APIClient
 from rest_framework import status
-from rest_framework.authtoken.models import Token
+from knox.models import AuthToken
 from django.contrib.auth.models import User
 from finance.models import Season, CostEntry, Revenue
 from field.models import FieldData
@@ -120,8 +120,8 @@ class DeleteResponseCodeTestCase(TestCase):
         self.user = User.objects.create_user(
             username="deleteuser", password="TestPass123!"
         )
-        self.token = Token.objects.create(user=self.user)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        self.token_obj, self.token = AuthToken.objects.create(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
         self.field, self.season = _make_season(self.user)
 
     def test_cost_delete_returns_204(self):
