@@ -1,0 +1,369 @@
+{
+  "model_info": {
+    "architecture": "LSTM(input=4, hidden=64, layers=2, dropout=0.1) -> Linear(1) -> Sigmoid",
+    "input_features": [
+      "vegetation_index",
+      "rainfall_mm",
+      "temperature_C",
+      "soil_moisture"
+    ],
+    "output": "Risk probability [0,1]",
+    "total_params": 51265,
+    "trainable_params": 51265,
+    "hidden_size": 64,
+    "num_layers": 2,
+    "dropout": 0.1,
+    "scaler_type": "StandardScaler"
+  },
+  "data_source": {
+    "provider": "Open-Meteo ERA5 Archive (ECMWF reanalysis)",
+    "temperature": "ERA5 reanalysis 2m temperature",
+    "precipitation": "ERA5 reanalysis precipitation",
+    "soil_moisture": "ERA5-Land 0-7cm soil moisture",
+    "vegetation": "Water balance vegetation index (FAO-56 method)",
+    "locations": 25,
+    "location_names": [
+      "Ludhiana_Punjab",
+      "Amritsar_Punjab",
+      "Patiala_Punjab",
+      "Karnal_Haryana",
+      "Hisar_Haryana",
+      "Lucknow_UP",
+      "Prayagraj_UP",
+      "Varanasi_UP",
+      "Patna_Bihar",
+      "Bhopal_MP",
+      "Indore_MP",
+      "Jabalpur_MP",
+      "Nagpur_MH",
+      "Pune_MH",
+      "Nashik_MH",
+      "Warangal_TS",
+      "Guntur_AP",
+      "Thanjavur_TN",
+      "Coimbatore_TN",
+      "Bardhaman_WB",
+      "Jaipur_RJ",
+      "Kota_RJ",
+      "Ahmedabad_GJ",
+      "Belgaum_KA",
+      "Raipur_CG"
+    ],
+    "period": "2023-01-01 to 2024-12-31",
+    "total_daily_observations": 18275,
+    "is_real_data": true,
+    "is_mock_data": false
+  },
+  "training": {
+    "epochs": 30,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "seq_length": 10,
+    "training_time_seconds": 79.5,
+    "best_val_acc": 97.86,
+    "train_samples": 12617,
+    "val_samples": 2704,
+    "test_samples": 2704,
+    "total_samples": 18025,
+    "class_distribution": {
+      "high_risk_pct": 54.6,
+      "low_risk_pct": 45.4
+    },
+    "history": {
+      "train_loss": [
+        0.2625,
+        0.1363,
+        0.1014,
+        0.0864,
+        0.0768,
+        0.071,
+        0.0662,
+        0.0619,
+        0.0613,
+        0.0595,
+        0.0558,
+        0.0531,
+        0.0525,
+        0.0508,
+        0.0492,
+        0.0465,
+        0.0474,
+        0.0467,
+        0.0449,
+        0.0442,
+        0.0434,
+        0.0431,
+        0.0435,
+        0.044,
+        0.0376,
+        0.0359,
+        0.0355,
+        0.0347,
+        0.0357,
+        0.0345
+      ],
+      "val_loss": [
+        0.176,
+        0.1296,
+        0.0958,
+        0.0793,
+        0.078,
+        0.0723,
+        0.0648,
+        0.0679,
+        0.0634,
+        0.0597,
+        0.0694,
+        0.0575,
+        0.0567,
+        0.0578,
+        0.0553,
+        0.06,
+        0.0592,
+        0.0552,
+        0.0604,
+        0.0597,
+        0.0569,
+        0.0591,
+        0.0661,
+        0.0609,
+        0.0519,
+        0.0547,
+        0.0525,
+        0.0561,
+        0.0546,
+        0.0553
+      ],
+      "train_acc": [
+        89.4,
+        94.34,
+        95.79,
+        96.46,
+        96.68,
+        96.95,
+        97.15,
+        97.29,
+        97.31,
+        97.34,
+        97.55,
+        97.5,
+        97.57,
+        97.75,
+        97.84,
+        97.87,
+        97.85,
+        97.89,
+        98.02,
+        98.06,
+        97.96,
+        98.11,
+        97.93,
+        98.0,
+        98.33,
+        98.36,
+        98.42,
+        98.49,
+        98.43,
+        98.45
+      ],
+      "val_acc": [
+        92.71,
+        94.56,
+        96.12,
+        96.86,
+        97.0,
+        96.86,
+        97.3,
+        97.23,
+        97.41,
+        97.52,
+        97.34,
+        97.56,
+        97.71,
+        97.49,
+        97.63,
+        97.34,
+        97.63,
+        97.45,
+        97.19,
+        97.71,
+        97.37,
+        97.45,
+        97.37,
+        97.19,
+        97.78,
+        97.67,
+        97.86,
+        97.67,
+        97.6,
+        97.82
+      ]
+    }
+  },
+  "prediction_metrics": {
+    "accuracy": 98.04,
+    "precision": 98.52,
+    "recall": 97.92,
+    "f1_score": 98.22,
+    "auc_roc": 0.9986,
+    "confusion_matrix": [
+      [
+        1190,
+        22
+      ],
+      [
+        31,
+        1461
+      ]
+    ],
+    "probability_distribution": {
+      "mean": 0.5461,
+      "std": 0.485,
+      "min": 0.0,
+      "max": 1.0,
+      "median": 0.9715
+    },
+    "risk_level_counts": {
+      "low": 1211,
+      "medium": 39,
+      "high": 1454
+    },
+    "total_samples": 2704
+  },
+  "inference_latency": {
+    "avg_ms": 1.298,
+    "min_ms": 0.374,
+    "max_ms": 11.415,
+    "p95_ms": 3.26,
+    "p99_ms": 7.432,
+    "total_inferences": 150
+  },
+  "device": "cpu",
+  "location_details": [
+    {
+      "name": "Ludhiana_Punjab",
+      "sequences": 721,
+      "risk_ratio": 0.5589459084604715
+    },
+    {
+      "name": "Amritsar_Punjab",
+      "sequences": 721,
+      "risk_ratio": 0.49514563106796117
+    },
+    {
+      "name": "Patiala_Punjab",
+      "sequences": 721,
+      "risk_ratio": 0.5728155339805825
+    },
+    {
+      "name": "Karnal_Haryana",
+      "sequences": 721,
+      "risk_ratio": 0.5589459084604715
+    },
+    {
+      "name": "Hisar_Haryana",
+      "sequences": 721,
+      "risk_ratio": 0.6754507628294036
+    },
+    {
+      "name": "Lucknow_UP",
+      "sequences": 721,
+      "risk_ratio": 0.5672676837725381
+    },
+    {
+      "name": "Prayagraj_UP",
+      "sequences": 721,
+      "risk_ratio": 0.565880721220527
+    },
+    {
+      "name": "Varanasi_UP",
+      "sequences": 721,
+      "risk_ratio": 0.5589459084604715
+    },
+    {
+      "name": "Patna_Bihar",
+      "sequences": 721,
+      "risk_ratio": 0.6047156726768377
+    },
+    {
+      "name": "Bhopal_MP",
+      "sequences": 721,
+      "risk_ratio": 0.5700416088765603
+    },
+    {
+      "name": "Indore_MP",
+      "sequences": 721,
+      "risk_ratio": 0.59500693481276
+    },
+    {
+      "name": "Jabalpur_MP",
+      "sequences": 721,
+      "risk_ratio": 0.550624133148405
+    },
+    {
+      "name": "Nagpur_MH",
+      "sequences": 721,
+      "risk_ratio": 0.5631067961165048
+    },
+    {
+      "name": "Pune_MH",
+      "sequences": 721,
+      "risk_ratio": 0.5533980582524272
+    },
+    {
+      "name": "Nashik_MH",
+      "sequences": 721,
+      "risk_ratio": 0.5742024965325936
+    },
+    {
+      "name": "Warangal_TS",
+      "sequences": 721,
+      "risk_ratio": 0.47018030513176146
+    },
+    {
+      "name": "Guntur_AP",
+      "sequences": 721,
+      "risk_ratio": 0.37309292649098474
+    },
+    {
+      "name": "Thanjavur_TN",
+      "sequences": 721,
+      "risk_ratio": 0.3883495145631068
+    },
+    {
+      "name": "Coimbatore_TN",
+      "sequences": 721,
+      "risk_ratio": 0.37447988904299584
+    },
+    {
+      "name": "Bardhaman_WB",
+      "sequences": 721,
+      "risk_ratio": 0.44382801664355065
+    },
+    {
+      "name": "Jaipur_RJ",
+      "sequences": 721,
+      "risk_ratio": 0.6837725381414702
+    },
+    {
+      "name": "Kota_RJ",
+      "sequences": 721,
+      "risk_ratio": 0.6171983356449375
+    },
+    {
+      "name": "Ahmedabad_GJ",
+      "sequences": 721,
+      "risk_ratio": 0.6851595006934813
+    },
+    {
+      "name": "Belgaum_KA",
+      "sequences": 721,
+      "risk_ratio": 0.5006934812760055
+    },
+    {
+      "name": "Raipur_CG",
+      "sequences": 721,
+      "risk_ratio": 0.5561719833564494
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+
+============================================================
+LSTM EVALUATION RESULTS
+============================================================
+Architecture:       LSTM(input=4, hidden=64, layers=2, dropout=0.1) -> Linear(1) -> Sigmoid
+Parameters:         51,265
+Accuracy:           33.0%
+Precision:          0.0%
+Recall:             0.0%
+F1 Score:           0.0%
+AUC-ROC:            0.1858
+Avg Inference:      0.839ms
+P95 Inference:      1.036ms
+============================================================
+
+API Test Results:
+  Healthy field (high NDVI, good moisture): risk=Low (prob=0.0092) [6.27ms]
+  Stressed field (low NDVI, dry): risk=Low (prob=0.0023) [0.94ms]
+  Moderate conditions: risk=Low (prob=0.0061) [0.77ms]

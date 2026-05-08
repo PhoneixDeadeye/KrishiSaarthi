@@ -1,19 +1,13 @@
 """
 Market Prices views for KrishiSaarthi.
 
-TRANSPARENCY NOTE:
-This module provides MSP (Minimum Support Price) reference data published by the
-Government of India, combined with estimated price ranges based on historical
-crop economics. It does NOT connect to a live mandi API.
-
-The MSP values are sourced from the Commission for Agricultural Costs and Prices
-(CACP) for the 2025-26 marketing season. Estimated market ranges are derived from
-typical mandi spreads around MSP for each commodity.
-
-A live data source (e.g., data.gov.in eNAM API) should replace the estimates
-when deployed to production.
+Strategy: Try live data.gov.in API first → fallback to MSP-based estimates.
+The response always includes a `data_source` field so the frontend can show
+whether the user is seeing live mandi data or reference estimates.
 """
+
 import logging
+from collections import defaultdict
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -21,114 +15,131 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.utils import timezone
 
+from ..services.live_data import fetch_live_mandi_prices, fetch_live_market_prices
+
 logger = logging.getLogger(__name__)
 
 
-# MSP values from CACP 2025-26 and typical market range multipliers.
-# These are REAL government-published floor prices.
-MSP_DATA = {
-    'Rice': {'msp': 2183, 'typical_low': 0.96, 'typical_high': 1.30},
-    'Wheat': {'msp': 2125, 'typical_low': 0.95, 'typical_high': 1.15},
-    'Cotton': {'msp': 6620, 'typical_low': 0.85, 'typical_high': 1.15},
-    'Sugarcane': {'msp': 315, 'typical_low': 0.95, 'typical_high': 1.25},
-    'Maize': {'msp': 1962, 'typical_low': 0.90, 'typical_high': 1.15},
-    'Soybean': {'msp': 4600, 'typical_low': 0.88, 'typical_high': 1.15},
-    'Groundnut': {'msp': 5850, 'typical_low': 0.90, 'typical_high': 1.12},
-    'Pulses': {'msp': 6600, 'typical_low': 0.92, 'typical_high': 1.10},
-    'Potato': {'msp': None, 'typical_low': 800, 'typical_high': 2000},
-    'Onion': {'msp': None, 'typical_low': 600, 'typical_high': 3500},
-    'Tomato': {'msp': None, 'typical_low': 500, 'typical_high': 4000},
-}
+
+
+
+def _build_live_prices(records, crop=None):
+    """
+    Aggregate live mandi records into per-crop price cards.
+    Multiple mandi entries for the same crop are merged (min of mins, max of maxes).
+    """
+    grouped = defaultdict(lambda: {"mins": [], "maxes": [], "modals": []})
+    for rec in records:
+        name = rec["crop"]
+        grouped[name]["mins"].append(rec["min_price"])
+        grouped[name]["maxes"].append(rec["max_price"])
+        grouped[name]["modals"].append(rec["modal_price"])
+
+    cards = []
+    for crop_name, vals in grouped.items():
+        low = min(vals["mins"])
+        high = max(vals["maxes"])
+        # We no longer have static MSP_DATA to look up. 
+        # Only using live APMC data.
+        msp = None
+        cards.append({
+            "crop": crop_name,
+            "msp": msp,
+            "estimated_range": {"low": low, "high": high},
+            "unit": "quintal",
+        })
+    return cards
 
 
 class MarketPricesView(APIView):
     """
-    GET: Returns MSP reference data and estimated market price ranges.
-    Clearly marked as reference/estimated — not live mandi data.
+    GET: Returns market price data.
+    Tries live data.gov.in API first, falls back to MSP-based estimates.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        crop = request.query_params.get('crop', None)
-        state = request.query_params.get('state', None)
+        crop = request.query_params.get("crop", None)
+        state = request.query_params.get("state", None)
 
         try:
-            if crop and crop in MSP_DATA:
-                crops_to_show = [crop]
-            else:
-                crops_to_show = list(MSP_DATA.keys())
+            # ---------- Try live API ----------
+            live_records = fetch_live_mandi_prices(crop=crop, state=state)
 
-            price_cards = []
-            for crop_name in crops_to_show:
-                info = MSP_DATA[crop_name]
-                msp = info['msp']
-                if msp:
-                    estimated_low = int(msp * info['typical_low'])
-                    estimated_high = int(msp * info['typical_high'])
-                else:
-                    estimated_low = info['typical_low']
-                    estimated_high = info['typical_high']
-
-                price_cards.append({
-                    'crop': crop_name,
-                    'msp': msp,
-                    'estimated_range': {
-                        'low': estimated_low,
-                        'high': estimated_high,
-                    },
-                    'unit': 'quintal',
+            if live_records:
+                price_cards = _build_live_prices(live_records, crop)
+                data_source = "data.gov.in (Live Mandi Data)"
+                is_live = True
+                disclaimer = (
+                    "Prices shown are live mandi arrival data from data.gov.in. "
+                    "Cached for up to 1 hour. Always verify at your local APMC."
+                )
+                logger.info("Serving LIVE market prices (%d cards)", len(price_cards))
+                
+                return Response({
+                    "date": timezone.now().date().isoformat(),
+                    "state": state,
+                    "data_source": data_source,
+                    "is_live_data": is_live,
+                    "disclaimer": disclaimer,
+                    "prices": price_cards,
+                    "live_news": fetch_live_market_prices(crop, state) if crop else None,
+                    "tips": self._get_tips(crop),
                 })
-
-            return Response({
-                'date': timezone.now().date().isoformat(),
-                'state': state,
-                'data_source': 'CACP MSP 2025-26 + historical range estimates',
-                'is_live_data': False,
-                'disclaimer': (
-                    'MSP values are official Government of India rates. '
-                    'Market price ranges are estimates based on historical spreads '
-                    'and do not reflect real-time mandi prices. Always verify at '
-                    'your local APMC mandi before selling.'
-                ),
-                'prices': price_cards,
-                'tips': self._get_tips(crop),
-            })
+            else:
+                return Response({
+                    "error": "Live market data unavailable at this moment."
+                }, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
             logger.error("Error in market prices: %s", e)
             return Response(
-                {'error': 'Failed to load market price data'},
+                {"error": "Failed to load market price data"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
     def _get_tips(self, crop):
-        """Static, genuinely useful market tips."""
-        tips = [
-            {
-                'type': 'info',
-                'icon': '📈',
-                'text': 'Check prices at multiple mandis before selling for best rates.',
-            },
-            {
-                'type': 'tip',
-                'icon': '💡',
-                'text': 'Government procurement centers offer MSP — check your local APMC.',
-            },
-            {
-                'type': 'timing',
-                'icon': '⏰',
-                'text': 'Prices typically peak 2-3 months after harvest when supply reduces.',
-            },
-        ]
+        """Fetch custom market tips using Gemini"""
+        import os
+        import json
+        import re
+        import logging
+        import google.generativeai as genai
+        
+        
+        fallback_tips = []
+        
         if crop:
-            info = MSP_DATA.get(crop, {})
-            if info.get('msp'):
-                tips.insert(0, {
-                    'type': 'msp',
-                    'icon': '🏛️',
-                    'text': (
-                        f'MSP for {crop}: ₹{info["msp"]}/quintal (2025-26). '
-                        f'Sell at government centres if market price is lower.'
-                    ),
-                })
-        return tips
+            try:
+                api_key = os.environ.get("GEMINI_API_KEY")
+                if api_key:
+                    genai.configure(api_key=api_key)
+                    model = genai.GenerativeModel("gemini-1.5-flash")
+                    
+                    prompt = f"""
+                    You are an agricultural market expert in India. Give 2-3 dynamic, real-world actionable tips for selling '{crop}' right now. 
+                    Consider seasonal timing, market trends, and where to sell. 
+
+                    Respond correctly formatted in this exact JSON array structure (no markdown tags, no extra words):
+                    [
+                      {{ "type": "timing", "icon": "⏰", "text": "Short actionable tip max 120 chars." }}
+                    ]
+
+                    Valid types: "info", "tip", "msp", "timing". Valid icons: 📈, 💡, 🏛️, ⏰, etc.
+                    """
+                    
+                    response = model.generate_content(prompt)
+                    text = response.text.replace("```json", "").replace("```", "").strip()
+                    
+                    match = re.search(r"\[.*\]", text, re.DOTALL)
+                    if match:
+                        ai_tips = json.loads(match.group(0))
+                        valid_tips = [t for t in ai_tips if isinstance(t, dict) and "type" in t and "icon" in t and "text" in t]
+                        if valid_tips:
+                            return valid_tips
+            except Exception as e:
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Failed to generate dynamic tips with Gemini: {e}")
+
+        return fallback_tips

@@ -1,0 +1,4 @@
+2026-04-03 11:27:52,595 [INFO] ============================================================
+2026-04-03 11:27:52,595 [INFO] Yield Prediction Validation
+2026-04-03 11:27:52,595 [INFO] ============================================================
+2026-04-03 11:27:52,598 [INFO] Results saved to C:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\backend\evaluation_results\yield_validation.json

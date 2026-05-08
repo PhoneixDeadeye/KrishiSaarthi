@@ -1,0 +1,13 @@
+2026-04-03 11:37:14,260 [INFO] ============================================================
+2026-04-03 11:37:14,260 [INFO] PlantVillage 38-Class CNN Training
+2026-04-03 11:37:14,260 [INFO] ============================================================
+2026-04-03 11:37:14,260 [INFO] Device: cpu
+2026-04-03 11:37:14,260 [INFO] Epochs: 5, Batch Size: 32, LR: 0.001
+2026-04-03 11:37:14,260 [INFO] Downloading PlantVillage dataset...
+2026-04-03 11:37:14,262 [WARNING] kagglehub download failed: No module named 'kagglehub'
+2026-04-03 11:37:14,262 [WARNING] opendatasets download failed: No module named 'opendatasets'
+2026-04-03 11:47:14,411 [WARNING] Kaggle CLI download failed: Command '['kaggle', 'datasets', 'download', '-d', 'vipoooool/new-plant-diseases-dataset', '--unzip', '-p', "C:\\Users\\agarw\\OneDrive\\Desktop\\Rohan\\Crop (Capstone Project '26)\\backend\\datasets"]' timed out after 600 seconds
+2026-04-03 11:47:14,411 [ERROR] Could not download PlantVillage automatically.
+Please download manually from:
+  https://www.kaggle.com/datasets/vipoooool/new-plant-diseases-dataset
+Extract and pass --dataset-path pointing to the 'train' folder containing 38 class subdirectories.

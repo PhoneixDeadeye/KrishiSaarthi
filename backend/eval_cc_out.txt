@@ -1,0 +1,21 @@
+
+======================================================================
+AWD DETECTION RESULTS
+======================================================================
+Pattern                         AWD?  Cycles  DryRatio  WaterSav%
+----------------------------------------------------------------------
+Strong AWD (3 cycles)            Yes       3     0.417      20.4%
+Weak AWD (1 cycle)               Yes       1     0.167      14.2%
+No AWD (always wet)               No       0     0.000       0.0%
+No AWD (always dry)               No       0     1.000       0.0%
+
+==========================================================================================
+CARBON CREDIT OUTPUTS (Section D)
+==========================================================================================
+Field                                Area   WaterSaved  CO2e(t)  Credits        INR
+------------------------------------------------------------------------------------------
+Small rice paddy (Telangana)         1.5ha       6300m3    2.228    2.228 Rs    2773
+Large rice field (Punjab)            5.0ha      21000m3    8.663    8.663 Rs   10786
+Non-AWD field (continuously flooded)  2.0ha          0m3    0.000    0.000 Rs       0
+
+Formula: carbon_credits x 15 USD x 83 INR/USD = INR value

@@ -13,7 +13,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Configure Gemini once at module level
-_gemini_api_key = os.environ.get('GEMINI_API_KEY')
+# Use django.conf.settings which is guaranteed to have run load_dotenv
+_gemini_api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", None)
+if not _gemini_api_key:
+    # Fallback: manually load .env if settings didn't populate os.environ
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(os.path.join(settings.BASE_DIR, ".env"))
+        _gemini_api_key = os.environ.get("GEMINI_API_KEY")
+    except ImportError:
+        pass
 if _gemini_api_key:
     genai.configure(api_key=_gemini_api_key)
 
@@ -31,22 +40,29 @@ class ChatView(APIView):
     def post(self, request):
         if not _gemini_api_key:
             # Lazy re-check at request time in case env was set after import
-            api_key = os.environ.get('GEMINI_API_KEY')
+            api_key = os.environ.get("GEMINI_API_KEY")
             if api_key:
                 genai.configure(api_key=api_key)
             else:
-                return Response({'error': 'Chat service not configured'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+                return Response(
+                    {"error": "Chat service not configured"},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
 
-        question = request.data.get('question', '').strip()
-        session_id = request.data.get('sessionId')
-        clear_history = request.data.get('clearHistory', False)
+        question = request.data.get("question", "").strip()
+        session_id = request.data.get("sessionId")
+        clear_history = request.data.get("clearHistory", False)
 
         if not question:
-            return Response({'error': 'Missing question'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Missing question"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         if len(question) > MAX_QUESTION_LENGTH:
             return Response(
-                {'error': f'Question too long. Maximum {MAX_QUESTION_LENGTH} characters.'},
+                {
+                    "error": f"Question too long. Maximum {MAX_QUESTION_LENGTH} characters."
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -54,43 +70,51 @@ class ChatView(APIView):
         if not session_id:
             session_count = ChatSession.objects.filter(user=request.user).count()
             if session_count >= MAX_SESSIONS_PER_USER:
-                oldest = ChatSession.objects.filter(user=request.user).order_by('created_at').first()
+                oldest = (
+                    ChatSession.objects.filter(user=request.user)
+                    .order_by("created_at")
+                    .first()
+                )
                 if oldest:
                     oldest.delete()
             session_id = f"session_{uuid.uuid4().hex[:16]}"
 
         session, created = ChatSession.objects.get_or_create(
-            session_id=session_id,
-            defaults={'user': request.user}
+            session_id=session_id, defaults={"user": request.user}
         )
 
         # Ensure session belongs to this user (prevents IDOR)
         if session.user and session.user != request.user:
-            return Response({'error': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Session not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         # Backfill user on legacy sessions that have user=None
         if session.user is None:
             session.user = request.user
-            session.save(update_fields=['user'])
+            session.save(update_fields=["user"])
 
         # Clear history if requested
         if clear_history:
             session.messages.all().delete()
 
         # Build History for Gemini
-        # Use a subquery-based approach to avoid Python-side reversal  
+        # Use a subquery-based approach to avoid Python-side reversal
         db_history = list(
-            ChatMessage.objects.filter(session=session)
-            .order_by('-timestamp')[:MAX_CONTEXT_MESSAGES]
+            ChatMessage.objects.filter(session=session).order_by("-timestamp")[
+                :MAX_CONTEXT_MESSAGES
+            ]
         )
         db_history.reverse()  # Reverse the small list in memory (max 20 items)
 
         chat_history = []
         for msg in db_history:
-            chat_history.append({
-                "role": "model" if msg.role == "model" else "user",
-                "parts": [msg.text],
-            })
+            chat_history.append(
+                {
+                    "role": "model" if msg.role == "model" else "user",
+                    "parts": [msg.text],
+                }
+            )
 
         # System Instruction
         system_instruction = """You are an agricultural assistant chatbot helping farmers and professionals.
@@ -107,8 +131,7 @@ Goal: Improve farm productivity, sustainability, and farmer success with actiona
 
         try:
             model = genai.GenerativeModel(
-                model_name="gemini-2.5-flash",
-                system_instruction=system_instruction
+                model_name="gemini-2.5-flash", system_instruction=system_instruction
             )
 
             chat = model.start_chat(history=chat_history)
@@ -117,18 +140,25 @@ Goal: Improve farm productivity, sustainability, and farmer success with actiona
             reply_text = response.text
 
             # Save Messages to DB
-            ChatMessage.objects.create(session=session, role='user', text=question)
-            ChatMessage.objects.create(session=session, role='model', text=reply_text)
+            ChatMessage.objects.create(session=session, role="user", text=question)
+            ChatMessage.objects.create(session=session, role="model", text=reply_text)
 
-            return Response({
-                'reply': reply_text,
-                'sessionId': session.session_id,
-                'conversationLength': len(db_history) + 2  # Avoid extra COUNT query
-            })
+            return Response(
+                {
+                    "reply": reply_text,
+                    "sessionId": session.session_id,
+                    "conversationLength": len(db_history)
+                    + 2,  # Avoid extra COUNT query
+                }
+            )
 
         except Exception as e:
             logger.error("Gemini Error: %s", e, exc_info=True)
-            return Response({'error': 'Chat service temporarily unavailable'}, status=status.HTTP_502_BAD_GATEWAY)
+            return Response(
+                {"error": "Chat service temporarily unavailable"},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
 
 class ChatHistoryView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -139,12 +169,16 @@ class ChatHistoryView(APIView):
             serializer = ChatSessionSerializer(session)
             return Response(serializer.data)
         except ChatSession.DoesNotExist:
-            return Response({'error': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Session not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
     def delete(self, request, session_id):
         try:
             session = ChatSession.objects.get(session_id=session_id, user=request.user)
             session.delete()
-            return Response({'message': 'Conversation history cleared'})
+            return Response({"message": "Conversation history cleared"})
         except ChatSession.DoesNotExist:
-            return Response({'error': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Session not found"}, status=status.HTTP_404_NOT_FOUND
+            )

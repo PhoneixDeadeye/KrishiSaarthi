@@ -124,6 +124,11 @@ export function EEData() {
             </div>
             <p className="text-sm">{data.error}</p>
             {data.details && <p className="text-xs mt-1 opacity-75">{data.details}</p>}
+            {data.ee_status === "circuit_open" && (
+              <div className="mt-3 text-[10px] font-bold text-red-700 bg-red-100 px-2 py-1 rounded inline-block border border-red-200">
+                CIRCUIT BREAKER ACTIVE - SATELLITE API BLOCKED
+              </div>
+            )}
           </div>
         ) : data ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">

@@ -4,6 +4,7 @@ Authentication views for KrishiSaarthi.
 Provides login, signup, token test, logout, and password-reset flows.
 All public endpoints are rate-limited to prevent brute-force attacks.
 """
+
 from __future__ import annotations
 
 import logging
@@ -33,6 +34,7 @@ logger = logging.getLogger(__name__)
 class LoginRateThrottle(AnonRateThrottle):
     """Strict rate limit on login to mitigate brute-force.
     Rate is configured via REST_FRAMEWORK['DEFAULT_THROTTLE_RATES']['login']."""
+
     scope = "login"
 
 
@@ -67,14 +69,17 @@ class Login(APIView):
             )
 
         from knox.models import AuthToken
+
         instance, token = AuthToken.objects.create(user)
         serializer = UserSerializer(instance=user)
         logger.info("User %s logged in successfully", username)
-        return Response({
-            "token": token, 
-            "expiry": instance.expiry.isoformat() if instance.expiry else None,
-            "user": serializer.data
-        })
+        return Response(
+            {
+                "token": token,
+                "expiry": instance.expiry.isoformat() if instance.expiry else None,
+                "user": serializer.data,
+            }
+        )
 
 
 class Signup(APIView):
@@ -103,13 +108,14 @@ class Signup(APIView):
             )
 
         from knox.models import AuthToken
+
         instance, token = AuthToken.objects.create(user)
         logger.info("New user registered: %s", user.username)
         return Response(
             {
-                "token": token, 
+                "token": token,
                 "expiry": instance.expiry.isoformat() if instance.expiry else None,
-                "user": UserSerializer(instance=user).data
+                "user": UserSerializer(instance=user).data,
             },
             status=status.HTTP_201_CREATED,
         )
@@ -131,10 +137,15 @@ class Signup(APIView):
         )
 
 
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
 class TestToken(APIView):
+    permission_classes = [IsAuthenticated]
+    
     def get(self, request) -> Response:
+        username = request.user.username if hasattr(request.user, 'username') else 'Unknown'
         return Response(
-            {"message": f"Token valid for {request.user.username}"},
+            {"message": f"Token valid for {username}"},
             status=status.HTTP_200_OK,
         )
 
@@ -146,7 +157,9 @@ class Logout(APIView):
         except AttributeError:
             pass
         except Exception:
-            logger.warning("Unexpected error during logout for user %s", request.user.username)
+            logger.warning(
+                "Unexpected error during logout for user %s", request.user.username
+            )
         return Response({"success": "Logged out"}, status=status.HTTP_200_OK)
 
 
@@ -261,7 +274,9 @@ class VerifyEmail(APIView):
             )
 
         try:
-            payload = signing.loads(token, max_age=60 * 60 * 24, salt="email-verification")
+            payload = signing.loads(
+                token, max_age=60 * 60 * 24, salt="email-verification"
+            )
             user = User.objects.get(id=payload.get("uid"))
         except (signing.BadSignature, signing.SignatureExpired, User.DoesNotExist):
             return Response(
@@ -273,7 +288,9 @@ class VerifyEmail(APIView):
             user.is_active = True
             user.save(update_fields=["is_active"])
 
-        return Response({"message": "Email verified successfully."}, status=status.HTTP_200_OK)
+        return Response(
+            {"message": "Email verified successfully."}, status=status.HTTP_200_OK
+        )
 
 
 class ResendVerification(APIView):
@@ -295,7 +312,9 @@ class ResendVerification(APIView):
             )
 
         # Enumeration-safe response.
-        success_msg = {"message": "If an account exists, a verification email has been sent."}
+        success_msg = {
+            "message": "If an account exists, a verification email has been sent."
+        }
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
@@ -314,8 +333,7 @@ class ResendVerification(APIView):
             send_mail(
                 subject="Verify your KrishiSaarthi account",
                 message=(
-                    "Please verify your email by opening this link:\n"
-                    f"{verify_link}"
+                    "Please verify your email by opening this link:\n" f"{verify_link}"
                 ),
                 from_email="noreply@krishisaarthi.com",
                 recipient_list=[user.email],

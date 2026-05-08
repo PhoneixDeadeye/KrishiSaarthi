@@ -7,6 +7,7 @@ interface HealthGaugeProps {
     title: string;
     accentColor?: string;
     className?: string;
+    indicators?: { label: string; icon: string }[];
 }
 
 export function HealthGauge({
@@ -15,6 +16,7 @@ export function HealthGauge({
     title,
     accentColor = "text-primary",
     className,
+    indicators,
 }: HealthGaugeProps) {
     return (
         <Card className={cn("h-full", className)}>
@@ -64,20 +66,18 @@ export function HealthGauge({
                             {rating}
                         </span>
                     </div>
-                    <div className="space-y-1 mt-2">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span className="material-symbols-outlined text-base">
-                                water_drop
-                            </span>
-                            <span>Soil Moisture: Optimal</span>
+                    {indicators && indicators.length > 0 && (
+                        <div className="space-y-1 mt-2">
+                            {indicators.map((ind, idx) => (
+                                <div key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <span className="material-symbols-outlined text-base">
+                                        {ind.icon}
+                                    </span>
+                                    <span>{ind.label}</span>
+                                </div>
+                            ))}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span className="material-symbols-outlined text-base">
-                                bug_report
-                            </span>
-                            <span>Pests: None Detected</span>
-                        </div>
-                    </div>
+                    )}
                 </div>
             </CardContent>
         </Card>

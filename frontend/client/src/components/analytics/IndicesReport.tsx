@@ -103,26 +103,27 @@ export function IndicesReport() {
             </CardHeader>
             <CardContent className="p-6 space-y-6 flex-1">
                 {/* NDWI Chart */}
-                <div className="h-48 bg-gradient-to-br from-primary/5 to-transparent rounded-lg p-4 relative border border-primary/10">
-                    <div>
-                        <h4 className="font-medium text-primary">NDWI Trend Analysis</h4>
+                <div className="h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-lg p-6 relative border border-primary/10 flex flex-col">
+                    <div className="mb-4">
+                        <h4 className="font-bold text-lg text-primary">NDWI Trend Analysis</h4>
                         <p className="text-sm text-muted-foreground">{total_observations} observations</p>
                     </div>
-                    <div className="absolute bottom-4 left-4 right-4 h-24 flex items-end gap-2">
+                    <div className="flex-1 flex items-end gap-2 min-h-0">
                         {ndwiBars.map((val, i) => (
                             <div
                                 key={i}
-                                className="flex-1 bg-primary/60 rounded-t-sm hover:bg-primary transition-colors cursor-pointer group relative"
-                                style={{ height: `${Math.max(10, val * 100)}%` }}
+                                className="flex-1 bg-primary/70 hover:bg-primary transition-all duration-200 cursor-pointer group relative rounded-t-md"
+                                style={{ height: `${Math.max(15, val * 100)}%`, minHeight: '15px' }}
+                                title={`NDWI: ${val.toFixed(2)}`}
                             >
-                                <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-xs px-2 py-1 rounded shadow-sm whitespace-nowrap z-10 transition-opacity">
-                                    NDWI: {val.toFixed(2)}
+                                <div className="opacity-0 group-hover:opacity-100 absolute -top-9 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-xs px-2 py-1.5 rounded shadow-md whitespace-nowrap z-10 transition-opacity pointer-events-none">
+                                    NDWI: {val.toFixed(3)}
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <div className="absolute top-4 right-4 text-sm font-medium text-primary bg-background/50 px-2 py-1 rounded backdrop-blur-sm">
-                        Avg: {avgNdwi.toFixed(2)}
+                    <div className="text-right text-sm font-bold text-primary mt-4 bg-primary/10 px-3 py-2 rounded-md">
+                        Avg: {avgNdwi.toFixed(3)}
                     </div>
                 </div>
 

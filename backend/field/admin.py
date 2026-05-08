@@ -1,4 +1,5 @@
 """Admin configuration for the field app."""
+
 from django.contrib import admin
 from .models import FieldData, Pest, FieldLog, FieldAlert, IrrigationLog
 

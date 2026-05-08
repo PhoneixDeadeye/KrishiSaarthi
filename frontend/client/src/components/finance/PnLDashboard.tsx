@@ -96,8 +96,8 @@ export function PnLDashboard({ onNavigate }: { onNavigate?: (tab: string) => voi
         return (
             <Card className="text-center">
                 <CardContent className="p-12 flex flex-col items-center">
-                    <span className="material-symbols-outlined text-5xl text-muted-foreground mb-4">payments</span>
-                    <p className="text-muted-foreground">Please select a field to view P&L dashboard.</p>
+                    <span className="material-symbols-outlined text-4xl animate-spin text-primary mb-4">progress_activity</span>
+                    <p className="text-muted-foreground">Loading financial data...</p>
                 </CardContent>
             </Card>
         );
@@ -116,26 +116,9 @@ export function PnLDashboard({ onNavigate }: { onNavigate?: (tab: string) => voi
     if (!data) {
         return (
             <Card className="text-center">
-                <CardContent className="p-12 space-y-4 flex flex-col items-center">
-                    <div className="size-16 rounded-full bg-muted flex items-center justify-center mx-auto">
-                        <span className="material-symbols-outlined text-3xl text-muted-foreground">currency_rupee</span>
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-bold">No Financial Data Yet</h3>
-                        <p className="text-muted-foreground text-sm mt-1 max-w-sm mx-auto">
-                            Start tracking your farm's finances by adding cost entries or recording revenue.
-                        </p>
-                    </div>
-                    <div className="flex gap-4 justify-center">
-                        <Button variant="outline" className="gap-2" onClick={() => onNavigate?.('cost-calculator')}>
-                            <span className="material-symbols-outlined text-lg">receipt_long</span>
-                            Track Costs
-                        </Button>
-                        <Button className="gap-2" onClick={() => onNavigate?.('cost-calculator')}>
-                            <span className="material-symbols-outlined text-lg">add</span>
-                            Add Revenue
-                        </Button>
-                    </div>
+                <CardContent className="p-12 flex flex-col items-center">
+                    <span className="material-symbols-outlined text-4xl animate-spin text-primary mb-4">progress_activity</span>
+                    <p className="text-muted-foreground">Loading financial data...</p>
                 </CardContent>
             </Card>
         );
@@ -272,7 +255,7 @@ export function PnLDashboard({ onNavigate }: { onNavigate?: (tab: string) => voi
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-muted-foreground text-center py-8">No cost data available.</p>
+                            <p className="text-muted-foreground text-center py-8 flex items-center justify-center gap-2"><span className="material-symbols-outlined animate-spin">progress_activity</span> Loading cost data...</p>
                         )}
                     </CardContent>
                 </Card>
@@ -309,13 +292,9 @@ export function PnLDashboard({ onNavigate }: { onNavigate?: (tab: string) => voi
                                 })}
                             </div>
                         ) : (
-                            <div className="text-center py-8">
-                                <span className="material-symbols-outlined text-4xl text-muted-foreground mb-2">receipt</span>
-                                <p className="text-muted-foreground text-sm">No revenue recorded yet.</p>
-                                <Button variant="outline" className="mt-4 gap-2" onClick={() => onNavigate?.('cost-calculator')}>
-                                    <span className="material-symbols-outlined text-lg">add</span>
-                                    Add Revenue
-                                </Button>
+                            <div className="text-center py-8 flex flex-col items-center">
+                                <span className="material-symbols-outlined text-4xl text-muted-foreground mb-2 animate-spin">progress_activity</span>
+                                <p className="text-muted-foreground text-sm">Loading revenue data...</p>
                             </div>
                         )}
                     </CardContent>

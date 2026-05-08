@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useAuth } from "./AuthContext";
-import { API_BASE_URL } from "@/lib/api";
+import { apiDelete, apiGet } from "@/lib/api";
 import { FieldPolygon } from "@/types/field";
 import { logger } from "@/lib/logger";
 
@@ -28,42 +28,33 @@ export const FieldProvider = ({ children }: { children: ReactNode }) => {
     const { token } = useAuth();
     const [fields, setFields] = useState<Field[]>([]);
     const [selectedField, setSelectedField] = useState<Field | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     // Fetch fields from backend
     const refreshFields = async () => {
         if (!token) {
             setFields([]);
             setSelectedField(null);
+            setLoading(false);
             return;
         }
 
         setLoading(true);
         try {
-            const res = await fetch(`${API_BASE_URL}/field/data`, {
-                headers: {
-                    Authorization: `Token ${token}`,
-                },
-            });
+            const data = await apiGet<Field[]>("/field/data");
+            setFields(data);
 
-            if (res.ok) {
-                const data = await res.json();
-                setFields(data);
-
-                // Select first field by default if none selected or if selected is not in list
-                if (data.length > 0) {
-                    // If we have a selected field, check if it still exists
-                    if (selectedField) {
-                        const exists = data.find((f: Field) => f.id === selectedField.id);
-                        if (!exists) setSelectedField(data[0]);
-                    } else {
-                        setSelectedField(data[0]);
-                    }
+            // Select first field by default if none selected or if selected is not in list
+            if (data.length > 0) {
+                // If we have a selected field, check if it still exists
+                if (selectedField) {
+                    const exists = data.find((f: Field) => f.id === selectedField.id);
+                    if (!exists) setSelectedField(data[0]);
                 } else {
-                    setSelectedField(null);
+                    setSelectedField(data[0]);
                 }
             } else {
-                logger.error("Failed to fetch fields");
+                setSelectedField(null);
             }
         } catch (error) {
             logger.error("Error fetching fields:", error);
@@ -77,25 +68,16 @@ export const FieldProvider = ({ children }: { children: ReactNode }) => {
         if (!token) return false;
 
         try {
-            const res = await fetch(`${API_BASE_URL}/field/data/${fieldId}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Token ${token}`,
-                },
-            });
+            await apiDelete(`/field/data/${fieldId}`);
 
-            if (res.ok || res.status === 204) {
-                // If deleted field was selected, clear selection
-                if (selectedField?.id === fieldId) {
-                    setSelectedField(null);
-                }
-                // Refresh the fields list
-                await refreshFields();
-                return true;
-            } else {
-                logger.error("Failed to delete field");
-                return false;
+            // If deleted field was selected, clear selection
+            if (selectedField?.id === fieldId) {
+                setSelectedField(null);
             }
+
+            // Refresh the fields list
+            await refreshFields();
+            return true;
         } catch (error) {
             logger.error("Error deleting field:", error);
             return false;

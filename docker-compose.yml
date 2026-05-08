@@ -10,22 +10,43 @@ services:
       - "8000:8000"
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DEBUG=${DEBUG:-False}
+      - DEBUG=${DEBUG:-True}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
-      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost}
-      - DATABASE_URL=${DATABASE_URL:-}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:5173,http://localhost:80}
+      - DATABASE_URL=${DATABASE_URL:-postgres://${POSTGRES_USER:-krishiuser}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-krishisaarthi}}
+      - REDIS_URL=redis://redis:6379/0
     volumes:
-      - ./backend/media:/app/media
-      - ./backend/logs:/app/logs
-      - ./backend/ml_models:/app/ml_models
-      - ./backend/db.sqlite3:/app/db.sqlite3
+      - ./backend:/app
     depends_on:
       - db
+      - redis
     restart: unless-stopped
     networks:
       - krishisaarthi-network
+
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: krishisaarthi-celery-worker
+    command: celery -A KrishiSaarthi worker -l info --concurrency=2
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL:-postgres://${POSTGRES_USER:-krishiuser}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-krishisaarthi}}
+      - REDIS_URL=redis://redis:6379/0
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+      - backend
+    networks:
+      - krishisaarthi-network
+    restart: unless-stopped
 
   frontend:
     build:
@@ -33,9 +54,12 @@ services:
       dockerfile: Dockerfile
     container_name: krishisaarthi-frontend
     ports:
-      - "80:80"
+      - "5173:80"
     environment:
       - VITE_API_BASE_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - backend
     restart: unless-stopped
@@ -51,15 +75,21 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    # ports:  # Do not expose to host in development — access via docker network
-    #   - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - krishisaarthi-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: krishisaarthi-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
     restart: unless-stopped
     networks:
       - krishisaarthi-network
 
 volumes:
   postgres_data:
-
-networks:
-  krishisaarthi-network:
-    driver: bridge
+  redis_data:

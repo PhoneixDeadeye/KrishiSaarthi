@@ -1,6 +1,7 @@
 """
 Tests for the encryption module (config.encryption).
 """
+
 import pytest
 from unittest.mock import patch
 from config.encryption import encrypt_value, decrypt_value, EncryptedCharField

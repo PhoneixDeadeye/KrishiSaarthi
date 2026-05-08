@@ -47,15 +47,15 @@ export default function ForgotPassword() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-4">
-            <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+        <div className="min-h-screen flex items-center justify-center bg-background p-4">
+            <Card className="w-full max-w-md shadow-2xl border bg-card backdrop-blur-sm">
                 <CardHeader className="text-center space-y-4">
                     <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
                         <Sprout className="w-8 h-8 text-white" />
                     </div>
                     <div>
-                        <CardTitle className="text-2xl font-bold text-gray-800">Forgot Password</CardTitle>
-                        <CardDescription className="text-gray-600">
+                        <CardTitle className="text-2xl font-bold text-foreground">Forgot Password</CardTitle>
+                        <CardDescription className="text-muted-foreground">
                             Enter your email to receive reset instructions
                         </CardDescription>
                     </div>
@@ -64,7 +64,7 @@ export default function ForgotPassword() {
                 <CardContent>
                     {isSubmitted ? (
                         <div className="text-center space-y-4">
-                            <div className="p-4 bg-green-50 text-green-700 rounded-lg">
+                            <div className="p-4 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg">
                                 If an account exists for <strong>{email}</strong>, you will receive an email with instructions shortly.
                             </div>
                             <Button
@@ -78,7 +78,7 @@ export default function ForgotPassword() {
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Email Address</label>
+                                <label className="text-sm font-medium text-foreground">Email Address</label>
                                 <Input
                                     type="email"
                                     placeholder="Enter your email"
@@ -108,7 +108,7 @@ export default function ForgotPassword() {
                 </CardContent>
 
                 <CardFooter className="justify-center border-t pt-4">
-                    <Link href="/login" className="flex items-center text-sm text-gray-600 hover:text-gray-900">
+                    <Link href="/login" className="flex items-center text-sm text-muted-foreground hover:text-foreground">
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Back to Login
                     </Link>

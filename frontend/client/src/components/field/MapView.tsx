@@ -129,6 +129,10 @@ export default function MapView({
     }
   }, [externalMapType]);
 
+  const toggleMapType = () => {
+    setMapType((current) => (current === "street" ? "satellite" : "street"));
+  };
+
   // Geolocation states
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [locationRequested, setLocationRequested] = useState(false);
@@ -343,37 +347,59 @@ export default function MapView({
   return (
     <div className="mapview-container">
       <div className="toolbar">
-        <button
-          className="btn btn-green-700"
-          onClick={startDrawing}
-          disabled={isDrawing}
-        >
-          Start
-        </button>
-        <button
-          className="btn btn-green-600"
-          onClick={undoLastPoint}
-          disabled={!isDrawing || farmPolygon.length === 0}
-        >
-          Undo
-        </button>
-        <button
-          className="btn btn-green-500"
-          onClick={finishDrawing}
-          disabled={!isDrawing || farmPolygon.length < 3}
-        >
-          Finish
-        </button>
-        <button className="btn btn-green-800" onClick={clearFarm}>
-          Clear
-        </button>
-        <button
-          className="btn btn-blue-600"
-          onClick={requestLocation}
-          title="Center map at your location"
-        >
-          📍 My Location
-        </button>
+        <div className="toolbar-group toolbar-group-left">
+          <button
+            className="btn btn-blue-600"
+            onClick={toggleMapType}
+            title="Switch between satellite and street view"
+          >
+            {mapType === "street" ? "Satellite" : "Street"}
+          </button>
+          <button
+            className="btn btn-blue-600"
+            onClick={() => setMapType("ndvi")}
+            title="Show NDVI layer"
+          >
+            NDVI Layer
+          </button>
+        </div>
+
+        <div className="toolbar-group toolbar-group-center">
+          <button
+            className="btn btn-green-700"
+            onClick={startDrawing}
+            disabled={isDrawing}
+          >
+            Start
+          </button>
+          <button
+            className="btn btn-green-600"
+            onClick={undoLastPoint}
+            disabled={!isDrawing || farmPolygon.length === 0}
+          >
+            Undo
+          </button>
+          <button
+            className="btn btn-green-500"
+            onClick={finishDrawing}
+            disabled={!isDrawing || farmPolygon.length < 3}
+          >
+            Finish
+          </button>
+          <button className="btn btn-green-800" onClick={clearFarm}>
+            Clear
+          </button>
+        </div>
+
+        <div className="toolbar-group toolbar-group-right">
+          <button
+            className="btn btn-blue-600"
+            onClick={requestLocation}
+            title="Center map at your location"
+          >
+            📍 My Location
+          </button>
+        </div>
       </div>
 
       <div className="map-container">
@@ -446,7 +472,7 @@ export default function MapView({
                 type="text"
                 value={fieldName}
                 onChange={(e) => setFieldName(e.target.value)}
-                className="p-2 border rounded text-black"
+                className="p-2 border rounded text-foreground bg-background"
                 placeholder="Field Name"
               />
               <button

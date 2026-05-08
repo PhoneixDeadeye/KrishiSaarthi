@@ -311,6 +311,8 @@ AgriSmart/
 
 ## 📡 API Reference
 
+> **Note on Endpoints:** 91 total path() registrations exist; 63 after deduplication of versioned /api/v1/ aliases; 45 unique functional endpoints after removing auth and health-probe routes from the field/finance/planning domain count.
+
 ### Authentication
 
 All protected endpoints require token authentication:

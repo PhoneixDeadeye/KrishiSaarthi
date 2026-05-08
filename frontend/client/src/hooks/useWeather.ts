@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useField } from "@/context/FieldContext";
 import { apiFetch } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 import { logger } from "@/lib/logger";
 
 export interface WeatherData {
@@ -28,29 +29,25 @@ interface UseWeatherReturn {
 }
 
 export function useWeather(): UseWeatherReturn {
-    const { token } = useAuth();
+    const { token, user } = useAuth();
     const { selectedField } = useField();
 
-    const [weather, setWeather] = useState<WeatherData | null>(null);
-    const [forecast, setForecast] = useState<ForecastEntry[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const queryKey = useMemo(
+        () => ["weather", user?.id ?? "guest", selectedField?.id ?? "all"],
+        [selectedField?.id, user?.id]
+    );
 
-    const fetchWeather = useCallback(async () => {
-        if (!token) {
-            setIsLoading(false);
-            return;
-        }
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            let coordEndpoint = '/field/coord';
+    const query = useQuery({
+        queryKey,
+        enabled: !!token,
+        queryFn: async () => {
+            let coordEndpoint = "/field/coord";
             if (selectedField) coordEndpoint += `?field_id=${selectedField.id}`;
-            const coordData = await apiFetch<any>(coordEndpoint);
+
+            const coordData = await apiFetch<any>(coordEndpoint, {}, { timeout: 10000, retries: 1 });
             const coord = coordData?.coord || coordData?.location || null;
-            let lon: number | undefined, lat: number | undefined;
+            let lon: number | undefined;
+            let lat: number | undefined;
 
             if (Array.isArray(coord)) {
                 [lon, lat] = coord;
@@ -60,34 +57,35 @@ export function useWeather(): UseWeatherReturn {
             }
 
             if (lat === undefined || lon === undefined) {
-                setWeather(null);
-                setIsLoading(false);
-                return;
+                return { weather: null, forecast: [] as ForecastEntry[] };
             }
 
-            const weatherData = await apiFetch<any>(`/field/weather?lat=${lat}&lon=${lon}`);
+            const weatherData = await apiFetch<any>(`/field/weather?lat=${lat}&lon=${lon}`, {}, { timeout: 10000, retries: 1 });
 
-            setWeather({
-                temp: Math.round(weatherData.current.main.temp),
-                condition: weatherData.current.weather[0].main,
-                humidity: weatherData.current.main.humidity,
-                wind: Math.round(weatherData.current.wind.speed * 3.6),
-                icon: weatherData.current.weather[0].icon,
-            });
+            return {
+                weather: {
+                    temp: Math.round(weatherData.current.main.temp),
+                    condition: weatherData.current.weather[0].main,
+                    humidity: weatherData.current.main.humidity,
+                    wind: Math.round(weatherData.current.wind.speed * 3.6),
+                    icon: weatherData.current.weather[0].icon,
+                } as WeatherData,
+                forecast: weatherData.forecast?.slice(0, 8) || [],
+            };
+        },
+        retry: 1,
+        staleTime: 2 * 60 * 1000,
+    });
 
-            setForecast(weatherData.forecast?.slice(0, 8) || []);
-        } catch (err) {
-            logger.error("Weather fetch error:", err);
-            setError("Unable to load weather data");
-            setWeather(null);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [selectedField, token]);
+    if (query.error) {
+        logger.error("Weather fetch error:", query.error);
+    }
 
-    useEffect(() => {
-        fetchWeather();
-    }, [fetchWeather]);
-
-    return { weather, forecast, isLoading, error, refetch: fetchWeather };
+    return {
+        weather: query.data?.weather ?? null,
+        forecast: query.data?.forecast ?? [],
+        isLoading: query.isLoading || query.isFetching,
+        error: query.error ? "Unable to load weather data" : null,
+        refetch: () => { void query.refetch(); },
+    };
 }

@@ -25,6 +25,7 @@ export interface EEDataResponse {
     ndwi_time_series: NDWITimeSeriesPoint[] | null;
     error?: string;
     details?: string;
+    ee_status?: string;
 }
 
 export interface CarbonCreditResponse {

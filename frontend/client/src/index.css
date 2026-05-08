@@ -83,7 +83,7 @@
   --destructive: hsl(0, 72%, 51%);
   --destructive-foreground: hsl(0, 0%, 100%);
   --border: hsl(150, 15%, 18%);
-  --input: hsl(150, 15%, 12%);
+  --input: hsl(150, 15%, 20%);
   --ring: hsl(146, 95%, 52%);
   --sidebar-background: hsl(150, 25%, 8%);
   --sidebar-foreground: hsl(140, 10%, 85%);
@@ -104,6 +104,103 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+
+  /* Global form element text visibility fix */
+  input,
+  textarea,
+  select {
+    color: var(--foreground);
+    caret-color: var(--foreground);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  /* Ensure autofill doesn't override text color */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--foreground);
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
+
+/* 
+ * Dark mode form element overrides.
+ * bg-muted/50 opacity modifier doesn't work with full hsl() CSS variables,
+ * so we need explicit dark mode overrides outside @layer base (higher specificity).
+ */
+.dark input,
+.dark textarea,
+.dark select {
+  color: hsl(140, 10%, 92%) !important;
+  caret-color: hsl(140, 10%, 92%) !important;
+  background-color: var(--input) !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: hsl(140, 10%, 55%) !important;
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark textarea:-webkit-autofill,
+.dark textarea:-webkit-autofill:hover,
+.dark textarea:-webkit-autofill:focus,
+.dark select:-webkit-autofill,
+.dark select:-webkit-autofill:hover,
+.dark select:-webkit-autofill:focus {
+  -webkit-text-fill-color: hsl(140, 10%, 92%) !important;
+  box-shadow: 0 0 0px 1000px hsl(150, 15%, 12%) inset !important;
+}
+
+/*
+ * Global dark mode text visibility safety net.
+ * Catches any remaining hardcoded text-gray-600/700/800/900 classes
+ * that become invisible on dark backgrounds.
+ */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: var(--foreground);
+}
+
+.dark label {
+  color: var(--foreground);
+}
+
+.dark p, .dark span, .dark div {
+  /* Only apply when no explicit text color class is set via Tailwind dark: prefix */
+}
+
+/* Force minimum contrast for common hardcoded gray text in dark mode */
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700 {
+  color: hsl(140, 10%, 90%) !important;
+}
+
+.dark .text-gray-600,
+.dark .text-gray-500 {
+  color: hsl(140, 10%, 65%) !important;
+}
+
+/* Fix hardcoded light backgrounds that break dark mode */
+.dark .bg-gray-50,
+.dark .bg-gray-100 {
+  background-color: hsl(150, 15%, 15%) !important;
+}
+
+.dark .bg-white {
+  background-color: var(--card) !important;
 }
 
 .gradient-bg {

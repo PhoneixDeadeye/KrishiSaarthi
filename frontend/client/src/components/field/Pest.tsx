@@ -108,23 +108,23 @@ export function Pest() {
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-foreground">
           <span className="material-symbols-outlined text-red-500">pest_control</span>
           Pest Detection
         </h1>
-        <p className="text-muted-foreground text-sm mt-1">AI-powered pest detection and risk analysis</p>
+        <p className="text-sm mt-1 text-slate-300 dark:text-slate-400">AI-powered pest detection and risk analysis</p>
       </div>
 
       {/* Detection + Prediction Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pest Detection */}
         <Card>
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4 border-b">
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4 border-b border-border/70">
             <span className="material-symbols-outlined text-primary">photo_camera</span>
-            <CardTitle className="text-lg">Scan Crop</CardTitle>
+            <CardTitle className="text-lg text-foreground">Scan Crop</CardTitle>
           </CardHeader>
           <CardContent className="p-5">
-            <div className="p-6 bg-primary/5 rounded-lg border border-dashed border-primary/20 text-center space-y-4">
+            <div className="p-6 bg-zinc-950/60 rounded-lg border border-dashed border-primary/25 text-center space-y-4">
               {/* Previews */}
               {previews.length > 0 && (
                 <div className="flex flex-wrap gap-2 justify-center">
@@ -135,14 +135,14 @@ export function Pest() {
               )}
 
               {/* Upload Button */}
-              <label className="cursor-pointer inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
+              <label className="cursor-pointer inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors font-semibold shadow-sm shadow-primary/20">
                 <span className="material-symbols-outlined text-lg">add_photo_alternate</span>
                 Select Photos
                 <input type="file" accept="image/*" multiple onChange={handleFilesChange} className="hidden" />
               </label>
 
               {/* Scan Button */}
-              <Button onClick={handleUpload} disabled={uploading || selectedFiles.length === 0} className="w-full gap-2">
+              <Button onClick={handleUpload} disabled={uploading || selectedFiles.length === 0} className="w-full gap-2 bg-emerald-500 text-emerald-950 hover:bg-emerald-400 font-semibold shadow-sm shadow-emerald-500/20">
                 {uploading ? (
                   <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
                 ) : (
@@ -154,16 +154,16 @@ export function Pest() {
               {/* Detection Result */}
               {detectionResult && (
                 <div className={cn(
-                  "p-4 rounded-lg text-left",
+                  "p-4 rounded-lg text-left border",
                   detectionResult.error ? "bg-red-500/10" :
                     detectionResult.class === "Healthy" ? "bg-primary/10" : "bg-amber-500/10"
                 )}>
-                  <p className="text-sm font-medium mb-1">Detection Result</p>
+                  <p className="text-sm font-semibold mb-1 text-foreground">Detection Result</p>
                   {detectionResult.error ? (
                     <div className="space-y-1">
-                      <p className="text-sm text-red-600 font-medium">{detectionResult.error}</p>
+                      <p className="text-sm text-red-400 font-medium">{detectionResult.error}</p>
                       {detectionResult.detected && (
-                        <p className="text-xs text-muted-foreground">Detected: {detectionResult.detected}</p>
+                        <p className="text-xs text-slate-300">Detected: {detectionResult.detected}</p>
                       )}
                     </div>
                   ) : (
@@ -190,9 +190,9 @@ export function Pest() {
 
         {/* Pest Prediction */}
         <Card>
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4 border-b">
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4 border-b border-border/70">
             <span className="material-symbols-outlined text-blue-500">analytics</span>
-            <CardTitle className="text-lg">Pest Prediction</CardTitle>
+            <CardTitle className="text-lg text-foreground">Pest Prediction</CardTitle>
           </CardHeader>
           <CardContent className="p-5">
             <div className="p-6 bg-blue-500/5 rounded-lg">
@@ -233,9 +233,10 @@ export function Pest() {
                   </div>
                 </div>
               ) : (
-                <div className="text-center text-muted-foreground text-sm py-8">
-                  <span className="material-symbols-outlined text-3xl mb-2">pin_drop</span>
-                  <p>Save your field location in "My Field" to get pest predictions</p>
+                <div className="text-center text-slate-300 text-sm py-8 flex flex-col items-center">
+                  <span className="material-symbols-outlined text-3xl mb-2 opacity-40">analytics</span>
+                  <p className="text-foreground">No prediction data available</p>
+                  <p className="text-xs mt-1 text-slate-300">Add a field to get AI-powered pest risk analysis</p>
                 </div>
               )}
             </div>
@@ -245,9 +246,9 @@ export function Pest() {
 
       {/* History Section */}
       <Card>
-        <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4 border-b">
+        <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4 border-b border-border/70">
           <span className="material-symbols-outlined text-teal-500">history</span>
-          <CardTitle className="text-lg">Recent Scans</CardTitle>
+          <CardTitle className="text-lg text-foreground">Recent Scans</CardTitle>
         </CardHeader>
         <CardContent className="p-5">
           {historyLoading ? (
@@ -270,9 +271,10 @@ export function Pest() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <span className="material-symbols-outlined text-3xl mb-2">photo_library</span>
-              <p className="text-sm">No historical scans found</p>
+            <div className="text-center py-8 text-slate-300 flex flex-col items-center">
+              <span className="material-symbols-outlined text-3xl mb-2 opacity-40">photo_camera</span>
+              <p className="text-sm text-foreground">No scans yet</p>
+              <p className="text-xs mt-1 text-slate-300">Upload a crop photo above to detect pests and diseases</p>
             </div>
           )}
         </CardContent>

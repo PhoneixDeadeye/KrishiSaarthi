@@ -181,7 +181,7 @@ export default function ChatBot() {
                   <div
                     className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm ${message.isUser
                       ? 'bg-primary text-primary-foreground rounded-br-none'
-                      : 'bg-white text-foreground border rounded-bl-none'
+                      : 'bg-card text-foreground border rounded-bl-none'
                       }`}
                   >
                     {message.text}
@@ -194,7 +194,7 @@ export default function ChatBot() {
 
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-white border rounded-2xl rounded-bl-none px-4 py-3 shadow-sm">
+                  <div className="bg-card border rounded-2xl rounded-bl-none px-4 py-3 shadow-sm">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
                       <div className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
@@ -227,7 +227,7 @@ export default function ChatBot() {
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="h-10 text-xs rounded-md border bg-background px-2 w-[80px]"
+                  className="h-10 text-xs rounded-md border bg-background text-foreground px-2 w-[80px]"
                 >
                   <option value="en-US">EN</option>
                   <option value="hi-IN">हिंदी</option>

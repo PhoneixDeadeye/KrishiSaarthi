@@ -57,13 +57,10 @@ export function YieldPrediction() {
 
     if (!selectedField) {
         return (
-            <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
-                    <span className="material-symbols-outlined text-3xl text-muted-foreground">target</span>
-                </div>
-                <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">No Field Selected</h3>
-                    <p className="text-muted-foreground max-w-sm">Select a field from the sidebar to view its yield prediction and analysis.</p>
+            <div className="flex items-center justify-center h-[50vh]">
+                <div className="flex flex-col items-center gap-3">
+                    <span className="material-symbols-outlined text-3xl animate-spin text-primary">progress_activity</span>
+                    <p className="text-sm text-muted-foreground">Loading field data...</p>
                 </div>
             </div>
         );
@@ -264,29 +261,40 @@ export function YieldPrediction() {
                                 <div className="h-[300px] w-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart data={prediction.ndvi.time_series} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#4b5563" opacity={0.4} />
                                             <XAxis
                                                 dataKey="date"
-                                                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                                                tick={{ fontSize: 12, fill: '#9ca3af' }}
                                                 tickLine={false}
                                                 axisLine={false}
                                                 tickFormatter={(value, index) => index % 2 === 0 ? `W${index + 1}` : ''}
                                             />
                                             <YAxis
                                                 domain={[0, 1]}
-                                                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                                                tick={{ fontSize: 12, fill: '#9ca3af' }}
                                                 tickLine={false}
                                                 axisLine={false}
                                             />
                                             <Tooltip
-                                                cursor={{ fill: 'hsl(var(--muted)/0.2)' }}
-                                                contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px' }}
-                                                labelStyle={{ color: 'hsl(var(--foreground))' }}
+                                                cursor={{ fill: 'rgba(34, 197, 94, 0.1)' }}
+                                                contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', borderRadius: '8px', border: '1px solid #374151' }}
+                                                labelStyle={{ color: '#fff' }}
+                                                formatter={(value: any) => [value.toFixed(3), 'NDVI']}
                                             />
-                                            <Bar dataKey="ndvi" radius={[4, 4, 0, 0]}>
-                                                {prediction.ndvi.time_series.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={`hsl(var(--primary) / ${0.3 + (entry.ndvi * 0.7)})`} />
-                                                ))}
+                                            <Bar dataKey="ndvi" radius={[6, 6, 2, 2]}>
+                                                {prediction.ndvi.time_series.map((entry, index) => {
+                                                    // Green gradient: low NDVI = lighter, high NDVI = darker/more vibrant
+                                                    const ndviValue = entry.ndvi || 0;
+                                                    let color = '#22c55e'; // Default bright green
+                                                    
+                                                    if (ndviValue < 0.2) color = '#86efac'; // Light green
+                                                    else if (ndviValue < 0.4) color = '#4ade80'; // Medium-light green
+                                                    else if (ndviValue < 0.6) color = '#22c55e'; // Bright green
+                                                    else if (ndviValue < 0.8) color = '#16a34a'; // Dark green
+                                                    else color = '#15803d'; // Very dark green
+                                                    
+                                                    return <Cell key={`cell-${index}`} fill={color} />;
+                                                })}
                                             </Bar>
                                         </BarChart>
                                     </ResponsiveContainer>

@@ -4,9 +4,11 @@ from .validators import validate_polygon
 
 
 class FieldData(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='fields')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="fields")
     name = models.CharField(max_length=100, default="My Field")
-    cropType = models.CharField(max_length=32, db_column='cropType')  # kept for backwards-compat
+    cropType = models.CharField(
+        max_length=32, db_column="cropType"
+    )  # kept for backwards-compat
     crop_type = None  # alias handled via property below
     polygon = models.JSONField(validators=[validate_polygon])
     created_at = models.DateTimeField(auto_now_add=True)
@@ -17,37 +19,46 @@ class FieldData(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=["user", "created_at"]),
         ]
 
 
 class Pest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     field = models.ForeignKey(
-        FieldData, on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='pest_reports',
-        help_text='The field this pest report is associated with',
+        FieldData,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="pest_reports",
+        help_text="The field this pest report is associated with",
     )
     image = models.ImageField(upload_to="pest/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.uploaded_at.strftime('%Y-%m-%d %H:%M:%S')}"
+        return (
+            f"{self.user.username} - {self.uploaded_at.strftime('%Y-%m-%d %H:%M:%S')}"
+        )
 
 
 ACTIVITY_CHOICES = [
-    ('watering', 'Watering'),
-    ('fertilizer', 'Fertilizer'),
-    ('sowing', 'Sowing'),
-    ('pesticide', 'Pesticide'),
-    ('harvest', 'Harvest'),
-    ('other', 'Other'),
+    ("watering", "Watering"),
+    ("fertilizer", "Fertilizer"),
+    ("sowing", "Sowing"),
+    ("pesticide", "Pesticide"),
+    ("harvest", "Harvest"),
+    ("other", "Other"),
 ]
+
 
 class FieldLog(models.Model):
     """Model for storing farm calendar/log entries"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='field_logs')
-    field = models.ForeignKey(FieldData, on_delete=models.CASCADE, related_name='logs', null=True, blank=True)
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="field_logs")
+    field = models.ForeignKey(
+        FieldData, on_delete=models.CASCADE, related_name="logs", null=True, blank=True
+    )
     date = models.DateField(db_index=True)
     activity = models.CharField(max_length=20, choices=ACTIVITY_CHOICES)
     details = models.TextField()
@@ -55,9 +66,9 @@ class FieldLog(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-date', '-created_at']
+        ordering = ["-date", "-created_at"]
         indexes = [
-            models.Index(fields=['user', 'field', '-date']),
+            models.Index(fields=["user", "field", "-date"]),
         ]
 
     def __str__(self):
@@ -66,18 +77,29 @@ class FieldLog(models.Model):
 
 class FieldAlert(models.Model):
     """Model for storing automated field alerts"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='field_alerts')
-    field = models.ForeignKey(FieldData, on_delete=models.CASCADE, related_name='alerts', null=True, blank=True)
-    log = models.ForeignKey(FieldLog, on_delete=models.CASCADE, related_name='alerts', null=True, blank=True)
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="field_alerts"
+    )
+    field = models.ForeignKey(
+        FieldData,
+        on_delete=models.CASCADE,
+        related_name="alerts",
+        null=True,
+        blank=True,
+    )
+    log = models.ForeignKey(
+        FieldLog, on_delete=models.CASCADE, related_name="alerts", null=True, blank=True
+    )
     date = models.DateField(db_index=True)
     message = models.CharField(max_length=255)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-date', '-created_at']
+        ordering = ["-date", "-created_at"]
         indexes = [
-            models.Index(fields=['user', 'is_read', '-date']),
+            models.Index(fields=["user", "is_read", "-date"]),
         ]
 
     def __str__(self):
@@ -86,29 +108,64 @@ class FieldAlert(models.Model):
 
 class IrrigationSource(models.TextChoices):
     """Sources of irrigation water"""
-    CANAL = 'canal', 'Canal'
-    BOREWELL = 'borewell', 'Borewell'
-    RAIN = 'rain', 'Rain'
-    DRIP = 'drip', 'Drip System'
-    SPRINKLER = 'sprinkler', 'Sprinkler'
-    OTHER = 'other', 'Other'
+
+    CANAL = "canal", "Canal"
+    BOREWELL = "borewell", "Borewell"
+    RAIN = "rain", "Rain"
+    DRIP = "drip", "Drip System"
+    SPRINKLER = "sprinkler", "Sprinkler"
+    OTHER = "other", "Other"
 
 
 class IrrigationLog(models.Model):
     """Log of actual irrigation events"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='irrigation_logs')
-    field = models.ForeignKey(FieldData, on_delete=models.CASCADE, related_name='irrigation_logs')
-    
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="irrigation_logs"
+    )
+    field = models.ForeignKey(
+        FieldData, on_delete=models.CASCADE, related_name="irrigation_logs"
+    )
+
     date = models.DateField(db_index=True)
-    water_amount = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)  # liters or mm
+    water_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, null=True, blank=True
+    )  # liters or mm
     duration_minutes = models.PositiveIntegerField(null=True, blank=True)
-    source = models.CharField(max_length=20, choices=IrrigationSource.choices, default=IrrigationSource.OTHER)
+    source = models.CharField(
+        max_length=20, choices=IrrigationSource.choices, default=IrrigationSource.OTHER
+    )
     notes = models.TextField(blank=True)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
-        ordering = ['-date', '-created_at']
-    
+        ordering = ["-date", "-created_at"]
+
     def __str__(self):
         return f"{self.field.name} - {self.date} ({self.source})"
+
+
+import uuid
+class CropHealthScan(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="health_scans")
+    field = models.ForeignKey(
+        FieldData, on_delete=models.CASCADE, related_name="health_scans"
+    )
+    image_path = models.ImageField(upload_to="ml_scans/")
+    detected_disease = models.CharField(max_length=100, blank=True, null=True)
+    confidence_score = models.FloatField(blank=True, null=True)
+    recommendation = models.TextField(blank=True, null=True)
+    severity = models.CharField(max_length=20, default="LOW")
+    
+    scanned_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-scanned_at"]
+        indexes = [
+            models.Index(fields=["user", "field", "-scanned_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.field.name} - {self.detected_disease} ({self.confidence_score})"

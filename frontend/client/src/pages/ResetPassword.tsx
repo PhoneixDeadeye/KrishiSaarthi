@@ -68,15 +68,15 @@ export default function ResetPassword() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-4">
-            <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+        <div className="min-h-screen flex items-center justify-center bg-background p-4">
+            <Card className="w-full max-w-md shadow-2xl border bg-card backdrop-blur-sm">
                 <CardHeader className="text-center space-y-4">
                     <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
                         <Sprout className="w-8 h-8 text-white" />
                     </div>
                     <div>
-                        <CardTitle className="text-2xl font-bold text-gray-800">Set New Password</CardTitle>
-                        <CardDescription className="text-gray-600">
+                        <CardTitle className="text-2xl font-bold text-foreground">Set New Password</CardTitle>
+                        <CardDescription className="text-muted-foreground">
                             Create a strong password for your account
                         </CardDescription>
                     </div>
@@ -88,7 +88,7 @@ export default function ResetPassword() {
                             <div className="flex flex-col items-center justify-center text-green-600 space-y-2">
                                 <CheckCircle className="w-16 h-16" />
                                 <h3 className="text-xl font-semibold">Password Reset Complete!</h3>
-                                <p className="text-sm text-gray-600">You can now sign in with your new password.</p>
+                                <p className="text-sm text-muted-foreground">You can now sign in with your new password.</p>
                             </div>
                             <Button
                                 className="w-full h-11 bg-gradient-to-r from-green-500 to-emerald-600 text-white"
@@ -100,7 +100,7 @@ export default function ResetPassword() {
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">New Password</label>
+                                <label className="text-sm font-medium text-foreground">New Password</label>
                                 <div className="relative">
                                     <Input
                                         type={showPassword ? "text" : "password"}
@@ -113,7 +113,7 @@ export default function ResetPassword() {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                                     >
                                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
@@ -121,7 +121,7 @@ export default function ResetPassword() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Confirm Password</label>
+                                <label className="text-sm font-medium text-foreground">Confirm Password</label>
                                 <Input
                                     type={showPassword ? "text" : "password"}
                                     placeholder="••••••••"

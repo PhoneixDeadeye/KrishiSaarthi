@@ -18,6 +18,18 @@ jobs:
       run:
         working-directory: backend
     services:
+      postgres:
+        image: postgres:15
+        ports: [5432:5432]
+        env:
+          POSTGRES_DB: krishisaarthi_test
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
       redis:
         image: redis:7-alpine
         ports: [6379:6379]
@@ -36,29 +48,38 @@ jobs:
           cache-dependency-path: backend/requirements.txt
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install pytest-django pytest-cov httpx django-rest-knox django-fernet-fields
 
       - name: Run Django checks
         env:
           DJANGO_SECRET_KEY: ci-test-secret-key-not-for-production
           DEBUG: "True"
           REDIS_URL: redis://localhost:6379/0
-        run: python manage.py check --deploy 2>&1 || true
+          FERNET_KEY: ci-test-fernet-key-not-for-production
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/krishisaarthi_test
+        run: python manage.py check --deploy 2>&1
 
       - name: Run migrations check
         env:
           DJANGO_SECRET_KEY: ci-test-secret-key-not-for-production
           DEBUG: "True"
-        run: python manage.py migrate --check --dry-run 2>&1 || true
+          FERNET_KEY: ci-test-fernet-key-not-for-production
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/krishisaarthi_test
+        run: python manage.py migrate --check --dry-run 2>&1
 
       - name: Run tests
         env:
           DJANGO_SECRET_KEY: ci-test-secret-key-not-for-production
           DEBUG: "True"
           REDIS_URL: redis://localhost:6379/0
-          DATABASE_URL: ""
+          FERNET_KEY: ci-test-fernet-key-not-for-production
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/krishisaarthi_test
+          GEMINI_API_KEY: ci-fake-key
+          OPENWEATHER_API_KEY: ci-fake-key
         run: |
-          pytest tests/ -v --tb=short --no-header -q 2>&1 || true
+          pytest tests/ -v --cov=. 2>&1
 
   # ─── Frontend Build & Lint ────────────────────────────────────────────────
   frontend:

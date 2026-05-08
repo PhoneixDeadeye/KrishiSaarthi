@@ -143,10 +143,8 @@ export function DataAnalytics() {
         <div className="lg:col-span-2 space-y-6">
           <IndicesReport />
 
-          {/* Carbon Credit + Tree Count */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Carbon Credits */}
-            <Card className="overflow-hidden flex flex-col h-full">
+          {/* Carbon Credits */}
+            <Card className="overflow-hidden flex flex-col">
               <CardHeader className="border-b px-6 py-4">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary">
@@ -170,21 +168,28 @@ export function DataAnalytics() {
                     <p className="text-sm">Save field location to see credits</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     <div className="text-center">
-                      <div className="text-4xl font-extrabold text-primary">
+                      <div className="text-5xl font-extrabold text-primary">
                         {ccData?.carbon_credits?.toFixed(2)}
                       </div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-muted-foreground font-medium">
                         {t("credits_earned")}
                       </div>
+                      {ccData?.carbon_credits === 0 && awdData?.awd_detected === false && (
+                        <div className="mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                          <p className="text-xs text-amber-700 dark:text-amber-400">
+                            💡 Enable AWD (Alternate Wetting & Drying) to earn carbon credits
+                          </p>
+                        </div>
+                      )}
                     </div>
                     <div className="space-y-3 text-sm border-t pt-4">
                       <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">
                           {t("area_hectare")}
                         </span>
-                        <span className="font-medium bg-secondary px-2 py-0.5 rounded">
+                        <span className="font-bold bg-primary/10 text-primary px-3 py-1.5 rounded-lg">
                           {ccData?.area_hectare?.toFixed(2)} ha
                         </span>
                       </div>
@@ -192,7 +197,7 @@ export function DataAnalytics() {
                         <span className="text-muted-foreground">
                           {t("methane_reduction")}
                         </span>
-                        <span className="font-medium bg-secondary px-2 py-0.5 rounded">
+                        <span className="font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-lg">
                           {(ccData?.methane_reduction_kg / 1000).toFixed(1)}{" "}
                           tCO₂e
                         </span>
@@ -201,50 +206,23 @@ export function DataAnalytics() {
                         <span className="text-muted-foreground">
                           {t("water_saving")}
                         </span>
-                        <span className="font-medium bg-secondary px-2 py-0.5 rounded">
+                        <span className="font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-lg">
                           {ccData?.water_saved_cubic_m?.toFixed(1)} m³
                         </span>
                       </div>
                     </div>
-                    <div className="p-3 bg-primary/10 rounded-lg text-center mt-4 border border-primary/20">
-                      <p className="text-sm font-bold text-primary">
-                        Est. Value: ₹{ccData?.estimated_value_inr?.toLocaleString()}
-                      </p>
-                    </div>
+                    {ccData?.estimated_value_inr !== undefined && ccData.estimated_value_inr > 0 && (
+                      <div className="p-4 bg-primary/10 rounded-lg text-center border border-primary/20">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Est. Value</p>
+                        <p className="text-2xl font-bold text-primary mt-1">
+                          ₹{ccData.estimated_value_inr?.toLocaleString('en-IN', {maximumFractionDigits: 0})}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
             </Card>
-
-            {/* Tree Count */}
-            <Card className="overflow-hidden flex flex-col h-full">
-              <CardHeader className="border-b px-6 py-4">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">
-                    forest
-                  </span>
-                  <CardTitle>{t("tree_count")}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6 flex-1 flex flex-col justify-center">
-                <div className="text-center space-y-4">
-                  <div className="size-24 bg-primary/10 rounded-full mx-auto flex items-center justify-center border-4 border-background shadow-inner">
-                    <span className="material-symbols-outlined text-4xl text-primary">
-                      forest
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Tree canopy detection is not yet available for your field.
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      This feature uses satellite imagery to count trees. Coming soon.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
 
           {/* AWD Water Management Card */}
           <Card className="overflow-hidden">
@@ -326,7 +304,7 @@ export function DataAnalytics() {
                   <input
                     type="text"
                     placeholder="Search location"
-                    className="w-full pl-9 pr-3 py-2 border rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full pl-9 pr-3 py-2 border rounded-md text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     onKeyDown={(e) => {

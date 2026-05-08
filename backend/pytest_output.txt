@@ -1,0 +1,696 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.3.4, pluggy-1.6.0
+django: version: 5.2.12, settings: KrishiSaarthi.settings (from env)
+rootdir: C:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\backend
+configfile: pytest.ini
+plugins: anyio-4.12.1, hypothesis-6.92.9, locust-2.43.3, asyncio-1.1.0, django-4.9.0, typeguard-4.4.4
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 222 items
+
+field\tests.py .FFFFF.....                                               [  4%]
+tests\test_api.py ...............                                        [ 11%]
+tests\test_auth_flows.py ...................                             [ 20%]
+tests\test_chat.py ............                                          [ 25%]
+tests\test_finance.py ..................                                 [ 33%]
+tests\test_finance_crud.py ...........                                   [ 38%]
+tests\test_finance_edge_cases.py ........                                [ 42%]
+tests\test_improvements.py ................................              [ 56%]
+tests\test_insurance_serializer.py FFFFFFFFFFFFFF                        [ 63%]
+tests\test_ml_engine.py .......                                          [ 66%]
+tests\test_planning_edge_cases.py ..........                             [ 70%]
+tests\test_planning_irrigation.py .....................                  [ 80%]
+tests\test_security.py .........                                         [ 84%]
+tests\test_tasks.py .........                                            [ 88%]
+tests\test_utils.py ...                                                  [ 89%]
+tests\test_validators.py ..............                                  [ 95%]
+tests\test_encryption.py .........                                       [100%]
+
+================================== FAILURES ===================================
+____________ FieldDataAPITest.test_get_field_data_unauthenticated _____________
+field\tests.py:56: in test_get_field_data_unauthenticated
+    self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+E   AssertionError: 404 != 401
+---------------------------- Captured stderr call -----------------------------
+INFO 2026-03-28 01:38:06,043 Request: {"request_id": "69f47e24-9722-4484-8271-fb8d3cf6ba15", "method": "GET", "path": "/api/field/data", "user": "AnonymousUser", "ip": "127.0.0.1"}
+WARNING 2026-03-28 01:38:07,588 Response: {"request_id": "69f47e24-9722-4484-8271-fb8d3cf6ba15", "method": "GET", "path": "/api/field/data", "status": 404, "duration_ms": 1545.01, "user": "AnonymousUser"}
+____________________ AnalyticsAPITest.test_awd_report_view ____________________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1375: in patched
+    with self.decoration_helper(patched,
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1357: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py:517: in enter_context
+    result = _enter(cm)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1446: in __enter__
+    original, local = self.get_original()
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1419: in get_original
+    raise AttributeError(
+E   AttributeError: <module 'field.views' from "C:\\Users\\agarw\\OneDrive\\Desktop\\Rohan\\Crop (Capstone Project '26)\\backend\\field\\views\\__init__.py"> does not have the attribute 'detect_awd_from_ndwi'
+__________________ AnalyticsAPITest.test_carbon_credit_view ___________________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1375: in patched
+    with self.decoration_helper(patched,
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1357: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py:517: in enter_context
+    result = _enter(cm)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1446: in __enter__
+    original, local = self.get_original()
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1419: in get_original
+    raise AttributeError(
+E   AttributeError: <module 'field.views' from "C:\\Users\\agarw\\OneDrive\\Desktop\\Rohan\\Crop (Capstone Project '26)\\backend\\field\\views\\__init__.py"> does not have the attribute 'calculate_carbon_metrics'
+___________________ AnalyticsAPITest.test_ee_analysis_view ____________________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1375: in patched
+    with self.decoration_helper(patched,
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1357: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py:517: in enter_context
+    result = _enter(cm)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1446: in __enter__
+    original, local = self.get_original()
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1419: in get_original
+    raise AttributeError(
+E   AttributeError: <module 'field.views' from "C:\\Users\\agarw\\OneDrive\\Desktop\\Rohan\\Crop (Capstone Project '26)\\backend\\field\\views\\__init__.py"> does not have the attribute 'fetchEEData'
+___________________ AnalyticsAPITest.test_health_score_view ___________________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1375: in patched
+    with self.decoration_helper(patched,
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1357: in decoration_helper
+    arg = exit_stack.enter_context(patching)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py:517: in enter_context
+    result = _enter(cm)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1446: in __enter__
+    original, local = self.get_original()
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1419: in get_original
+    raise AttributeError(
+E   AttributeError: <module 'field.views' from "C:\\Users\\agarw\\OneDrive\\Desktop\\Rohan\\Crop (Capstone Project '26)\\backend\\field\\views\\__init__.py"> does not have the attribute 'get_health_score'
+__________ TestInsuranceClaimSerializer.test_field_id_alias_accepted __________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:23: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Test Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+_____________ TestInsuranceClaimSerializer.test_invalid_area_zero _____________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:23: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Test Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+______ TestInsuranceClaimSerializer.test_invalid_estimated_loss_negative ______
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:23: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Test Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+_________ TestInsuranceClaimSerializer.test_invalid_ifsc_code_format __________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:23: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Test Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+____________ TestInsuranceClaimSerializer.test_masked_bank_account ____________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:23: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Test Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+_____________ TestInsuranceClaimSerializer.test_valid_claim_data ______________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:23: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Test Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+______________ TestInsuranceClaimSerializer.test_valid_ifsc_code ______________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:23: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Test Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+__________ TestInsuranceClaimAPI.test_cannot_delete_submitted_claim ___________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:133: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Paddy Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+____________ TestInsuranceClaimAPI.test_create_claim_missing_field ____________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:133: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Paddy Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+_______________ TestInsuranceClaimAPI.test_create_claim_via_api _______________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:133: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Paddy Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+________________ TestInsuranceClaimAPI.test_delete_draft_claim ________________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:133: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Paddy Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+___________________ TestInsuranceClaimAPI.test_list_claims ____________________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:133: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Paddy Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+___________ TestInsuranceClaimAPI.test_other_user_cannot_see_claims ___________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:133: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Paddy Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+________________ TestInsuranceClaimAPI.test_submit_draft_claim ________________
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+
+The above exception was the direct cause of the following exception:
+tests\test_insurance_serializer.py:133: in setUp
+    self.field = FieldData.objects.create(user=self.user, name="Paddy Field")
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\compiler.py:1882: in execute_sql
+    cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+C:\Users\agarw\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\backends\sqlite3\base.py:360: in execute
+    return super().execute(query, params)
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: field_fielddata.polygon
+============================== warnings summary ===============================
+planning\models.py:102
+  C:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\backend\planning\models.py:102: RemovedInDjango60Warning: CheckConstraint.check is deprecated in favor of `.condition`.
+    models.CheckConstraint(
+
+planning\models.py:276
+  C:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\backend\planning\models.py:276: RemovedInDjango60Warning: CheckConstraint.check is deprecated in favor of `.condition`.
+    models.CheckConstraint(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED field/tests.py::FieldDataAPITest::test_get_field_data_unauthenticated
+FAILED field/tests.py::AnalyticsAPITest::test_awd_report_view - AttributeErro...
+FAILED field/tests.py::AnalyticsAPITest::test_carbon_credit_view - AttributeE...
+FAILED field/tests.py::AnalyticsAPITest::test_ee_analysis_view - AttributeErr...
+FAILED field/tests.py::AnalyticsAPITest::test_health_score_view - AttributeEr...
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimSerializer::test_field_id_alias_accepted
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimSerializer::test_invalid_area_zero
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimSerializer::test_invalid_estimated_loss_negative
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimSerializer::test_invalid_ifsc_code_format
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimSerializer::test_masked_bank_account
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimSerializer::test_valid_claim_data
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimSerializer::test_valid_ifsc_code
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimAPI::test_cannot_delete_submitted_claim
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimAPI::test_create_claim_missing_field
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimAPI::test_create_claim_via_api
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimAPI::test_delete_draft_claim
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimAPI::test_list_claims
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimAPI::test_other_user_cannot_see_claims
+FAILED tests/test_insurance_serializer.py::TestInsuranceClaimAPI::test_submit_draft_claim
+=========== 19 failed, 203 passed, 2 warnings in 171.75s (0:02:51) ============

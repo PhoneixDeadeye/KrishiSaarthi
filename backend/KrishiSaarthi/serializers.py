@@ -8,14 +8,19 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         required=True,
-        validators=[UniqueValidator(queryset=User.objects.all(), message="A user with this email already exists.")],
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message="A user with this email already exists.",
+            )
+        ],
     )
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'email']
+        fields = ["id", "username", "password", "email"]
         extra_kwargs = {
-            'password': {'write_only': True, 'min_length': 8},
+            "password": {"write_only": True, "min_length": 8},
         }
 
     def validate_password(self, value):
@@ -29,8 +34,8 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Create user with properly hashed password."""
         user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data.get('email', ''),
-            password=validated_data['password'],
+            username=validated_data["username"],
+            email=validated_data.get("email", ""),
+            password=validated_data["password"],
         )
         return user

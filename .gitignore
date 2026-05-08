@@ -107,3 +107,9 @@ docker-compose.override.yml
 *.key
 *.crt
 service-account.json
+# Ignore large datasets and generated reports
+backend/datasets/
+"Capstone Report/"
+Final_Report.*
+capstone_report.md
+generate_report.py

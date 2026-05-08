@@ -1,0 +1,26 @@
+2026-04-03 11:26:05,543 [INFO] ============================================================
+2026-04-03 11:26:05,543 [INFO] Health Score Validation
+2026-04-03 11:26:05,543 [INFO] ============================================================
+2026-04-03 11:26:05,546 [INFO] Results saved to C:\Users\agarw\OneDrive\Desktop\Rohan\Crop (Capstone Project '26)\backend\evaluation_results\health_score_validation.json
+
+==========================================================================================
+HEALTH SCORE SOURCE COMPARISON (Section C)
+==========================================================================================
+Input Type                           CNN?   Score Rating       Source
+------------------------------------------------------------------------------------------
+Crop image + NDVI + LSTM              Yes    0.80 Good         CNN + NDVI + LSTM blend
+NDVI + LSTM only                       No    0.64 Good         NDVI estimate (no image)
+NDVI only (no LSTM, no image)          No    0.56 Fair         NDVI-only fallback
+Image + NDVI (no LSTM)                Yes    0.70 Good         CNN + NDVI (no risk data)
+All data - stressed field             Yes    0.30 Poor         CNN + NDVI + LSTM blend
+
+Score Tests:
+Description                                Score Rating      
+--------------------------------------------------------------
+Healthy crop, low risk                    0.8430 Excellent   
+Good crop, medium risk                    0.7405 Good        
+Stressed crop, high risk                  0.3970 Poor        
+Severely stressed, very high risk         0.1975 Critical    
+Neutral/uncertain all inputs              0.5350 Fair        
+Optimal conditions                        0.9150 Excellent   
+Critical conditions                       0.1050 Critical    
